@@ -27,19 +27,21 @@ const AppContainer = styled.div`
   overflow: hidden;
 `;
 
-const TopNav = styled.nav`
+const TopNav = styled.nav<{ adminMode: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   height: 56px;
-  background-color: ${({ theme }) => (theme as any).colorSurfaceBright};
+  background-color: ${({ theme, adminMode }) => 
+    adminMode ? 'rgb(74, 0, 57)' : (theme as any).colorSurfaceBright};
   border-bottom: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant};
   display: flex;
   align-items: center;
   padding: 0;
-  z-index: 999999;
+  z-index: 100;
   gap: ${({ theme }) => (theme as any).space500};
+  transition: background-color 200ms ease;
 `;
 
 const LeftSection = styled.div`
@@ -58,29 +60,30 @@ const LogoContainer = styled.div`
 `;
 
 const Logo = styled.img`
-  height: 16px;
-  width: auto;
+  width: 127px;
+  height: auto;
   display: block;
   cursor: pointer;
   padding: ${({ theme }) => (theme as any).space200};
   margin: -${({ theme }) => (theme as any).space200};
-  border-radius: ${({ theme }) => (theme as any).shapeCornerM};
+  border-radius: ${({ theme }) => (theme as any).shapeCornerLg};
   transition: background-color 150ms ease;
 
   &:hover {
-    background-color: ${({ theme }) => (theme as any).colorSurfaceDim};
+    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'hover')};
   }
 
   &:active {
-    background-color: ${({ theme }) => (theme as any).colorSurfaceContainerHighest};
+    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'active')};
   }
 `;
 
-const VerticalDivider = styled.div`
+const VerticalDivider = styled.div<{ adminMode?: boolean }>`
   width: 1px;
   height: 24px;
-  background-color: ${({ theme }) => (theme as any).colorOnSurface};
-  opacity: 0.2;
+  background-color: ${({ theme, adminMode }) => 
+    adminMode ? 'white' : (theme as any).colorOnSurface};
+  opacity: ${({ adminMode }) => (adminMode ? 0.3 : 0.2)};
 `;
 
 const RightSection = styled.div`
@@ -91,17 +94,18 @@ const RightSection = styled.div`
   height: 100%;
 `;
 
-const SearchBar = styled.div`
+const SearchBar = styled.div<{ adminMode?: boolean }>`
   flex: 1;
   max-width: 600px;
-  background-color: ${({ theme }) => (theme as any).colorSurfaceContainerHighest};
+  background-color: ${({ theme, adminMode }) => 
+    adminMode ? 'rgba(255, 255, 255, 0.2)' : (theme as any).colorSurfaceContainerHighest};
   opacity: 0.75;
   border-radius: ${({ theme }) => (theme as any).shapeCornerLg};
   padding: ${({ theme }) => (theme as any).space200} ${({ theme }) => (theme as any).space300};
   display: flex;
   align-items: center;
   gap: ${({ theme }) => (theme as any).space200};
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, background-color 200ms ease;
 
   &:focus-within {
     opacity: 1;
@@ -112,11 +116,13 @@ const SearchBar = styled.div`
     background: transparent;
     border: none;
     ${({ theme }) => (theme as any).typestyleV2BodyMedium};
-    color: ${({ theme }) => (theme as any).colorOnSurface};
+    color: ${({ adminMode }) => 
+      adminMode ? 'white' : (({ theme }) => (theme as any).colorOnSurface)};
     padding: 0;
 
     &::placeholder {
-      color: ${({ theme }) => (theme as any).colorOnSurface};
+      color: ${({ adminMode }) => 
+        adminMode ? 'white' : (({ theme }) => (theme as any).colorOnSurface)};
     }
 
     &:focus {
@@ -131,13 +137,24 @@ const ActionsContainer = styled.div`
   padding: 0 ${({ theme }) => (theme as any).space400};
 `;
 
-const TopNavActions = styled.div`
+const TopNavActions = styled.div<{ adminMode?: boolean }>`
   display: flex;
   align-items: center;
 
   button {
     position: relative;
   }
+
+  ${({ adminMode }) =>
+    adminMode &&
+    `
+    button svg,
+    button i,
+    button [class*="Icon"] {
+      color: white !important;
+      fill: white !important;
+    }
+  `}
 `;
 
 const NotificationBadge = styled.div`
@@ -167,37 +184,43 @@ const ProfileSection = styled.div`
   align-items: center;
   gap: ${({ theme }) => (theme as any).space300};
   padding: ${({ theme }) => (theme as any).space200};
-  border-radius: ${({ theme }) => (theme as any).shapeCornerL};
+  border-radius: ${({ theme }) => (theme as any).shapeCornerLg};
   cursor: pointer;
   transition: background-color 150ms ease;
 
   &:hover {
-    background-color: ${({ theme }) => (theme as any).colorSurfaceDim};
+    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'hover')};
   }
 
   &:active {
-    background-color: ${({ theme }) => (theme as any).colorSurfaceContainerHighest};
+    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'active')};
   }
 `;
 
-const CompanyName = styled.div`
+const CompanyName = styled.div<{ adminMode?: boolean }>`
   ${({ theme }) => (theme as any).typestyleV2BodyLargeEmphasized};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
+  color: ${({ theme, adminMode }) => 
+    adminMode ? 'white' : (theme as any).colorOnSurface};
   white-space: nowrap;
+  transition: color 200ms ease;
 `;
 
-const UserAvatar = styled.div`
+const UserAvatar = styled.div<{ adminMode?: boolean }>`
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: ${({ theme }) => (theme as any).colorPrimary};
-  color: ${({ theme }) => (theme as any).colorOnPrimary};
-  border: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant};
+  background-color: ${({ theme, adminMode }) => 
+    adminMode ? 'white' : (theme as any).colorPrimary};
+  color: ${({ adminMode }) => 
+    adminMode ? 'rgb(74, 0, 57)' : (({ theme }) => (theme as any).colorOnPrimary)};
+  border: 1px solid ${({ adminMode }) => 
+    adminMode ? 'white' : (({ theme }) => (theme as any).colorOutlineVariant)};
   display: flex;
   align-items: center;
   justify-content: center;
   ${({ theme }) => (theme as any).typestyleLabelMedium600};
   flex-shrink: 0;
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
 `;
 
 const Sidebar = styled.aside<{ isCollapsed: boolean }>`
@@ -211,7 +234,7 @@ const Sidebar = styled.aside<{ isCollapsed: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  z-index: 90;
+  z-index: 50;
   overflow-y: auto;
   overflow-x: hidden;
   transition: width 200ms ease;
@@ -373,11 +396,18 @@ const PageHeaderContainer = styled.div`
 `;
 
 const PageHeaderWrapper = styled.div`
-  padding: ${({ theme }) => (theme as any).space400} ${({ theme }) => (theme as any).space1400} 0;
+  padding-left: ${({ theme }) => (theme as any).space1400};
+  padding-right: ${({ theme }) => (theme as any).space1400};
 
-  /* Remove bottom margin from Page.Header */
+  /* Adjust spacing on Page.Header content */
   & > div {
     margin-bottom: 0 !important;
+  }
+
+  /* Target the inner Content component */
+  & div[class*="Content"] {
+    margin-top: ${({ theme }) => (theme as any).space1000} !important;     /* 40px */
+    margin-bottom: ${({ theme }) => (theme as any).space200} !important;   /* 8px */
   }
 `;
 
@@ -389,6 +419,13 @@ const PageHeaderActions = styled.div`
 
 const TabsWrapper = styled.div`
   padding: 0 ${({ theme }) => (theme as any).space1400};
+
+  /* Remove box shadow from tabs */
+  & > div,
+  & div[class*="StyledScroll"],
+  & div[class*="StyledTabContainer"] {
+    box-shadow: none !important;
+  }
 `;
 
 const PageContent = styled.div`
@@ -480,25 +517,29 @@ const AppShellDemo: React.FC = () => {
   return (
     <AppContainer theme={theme}>
       {/* Top Navigation */}
-      <TopNav theme={theme}>
+      <TopNav theme={theme} adminMode={adminMode}>
         <LeftSection theme={theme}>
           <LogoContainer theme={theme}>
             <Logo
-              src={currentMode === 'dark' ? RipplingLogoWhite : RipplingLogoBlack}
+              src={adminMode || currentMode === 'dark' ? RipplingLogoWhite : RipplingLogoBlack}
               alt="Rippling"
             />
           </LogoContainer>
-          <VerticalDivider theme={theme} />
+          <VerticalDivider theme={theme} adminMode={adminMode} />
         </LeftSection>
 
         <RightSection theme={theme}>
-          <SearchBar theme={theme}>
-            <Icon type={Icon.TYPES.SEARCH_OUTLINE} size={20} color={theme.colorOnSurface} />
+          <SearchBar theme={theme} adminMode={adminMode}>
+            <Icon 
+              type={Icon.TYPES.SEARCH_OUTLINE} 
+              size={20} 
+              color={adminMode ? 'white' : theme.colorOnSurface} 
+            />
             <input id="global-search" type="text" placeholder="Search or jump to..." />
           </SearchBar>
 
           <ActionsContainer theme={theme}>
-            <TopNavActions theme={theme}>
+            <TopNavActions theme={theme} adminMode={adminMode}>
               <Button.Icon
                 icon={Icon.TYPES.HELP_OUTLINE}
                 aria-label="Help"
@@ -547,29 +588,34 @@ const AppShellDemo: React.FC = () => {
             </TopNavActions>
 
             <ProfileDivider theme={theme}>
-              <VerticalDivider theme={theme} />
+              <VerticalDivider theme={theme} adminMode={adminMode} />
             </ProfileDivider>
 
             <Dropdown
               list={[
                 {
-                  label: currentThemeName === 'berry' ? '✓ Berry Theme' : 'Berry Theme',
+                  label: currentThemeName === 'berry' ? 'Berry Theme ✓' : 'Berry Theme',
                   value: 'berry',
                 },
                 {
-                  label:
-                    currentThemeName === 'plum' ? '✓ Plum Theme (Legacy)' : 'Plum Theme (Legacy)',
+                  label: currentThemeName === 'plum' ? 'Plum Theme (Legacy) ✓' : 'Plum Theme (Legacy)',
                   value: 'plum',
                 },
                 {
-                  label: currentMode === 'light' ? '✓ Light Mode' : 'Light Mode',
+                  isSeparator: true,
+                },
+                {
+                  label: currentMode === 'light' ? 'Light Mode ✓' : 'Light Mode',
                   leftIconType: Icon.TYPES.SUN_OUTLINE,
                   value: 'light',
                 },
                 {
-                  label: currentMode === 'dark' ? '✓ Dark Mode' : 'Dark Mode',
+                  label: currentMode === 'dark' ? 'Dark Mode ✓' : 'Dark Mode',
                   leftIconType: Icon.TYPES.OVERNIGHT_OUTLINE,
                   value: 'dark',
+                },
+                {
+                  isSeparator: true,
                 },
                 {
                   label: adminMode ? 'Turn off Admin Mode' : 'Turn on Admin Mode',
@@ -577,6 +623,7 @@ const AppShellDemo: React.FC = () => {
                   value: 'admin',
                 },
               ]}
+              maxHeight={400}
               onChange={value => {
                 if (value === 'admin') {
                   setAdminMode(!adminMode);
@@ -592,9 +639,13 @@ const AppShellDemo: React.FC = () => {
               shouldAutoClose
             >
               <ProfileSection theme={theme} style={{ cursor: 'pointer' }}>
-                <CompanyName theme={theme}>Acme, Inc.</CompanyName>
-                <UserAvatar theme={theme}>A</UserAvatar>
-                <Icon type={Icon.TYPES.CHEVRON_DOWN} size={16} color={theme.colorOnSurface} />
+                <CompanyName theme={theme} adminMode={adminMode}>Acme, Inc.</CompanyName>
+                <UserAvatar theme={theme} adminMode={adminMode}>A</UserAvatar>
+                <Icon 
+                  type={Icon.TYPES.CHEVRON_DOWN} 
+                  size={16} 
+                  color={adminMode ? 'white' : theme.colorOnSurface} 
+                />
               </ProfileSection>
             </Dropdown>
           </ActionsContainer>
