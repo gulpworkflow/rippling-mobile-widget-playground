@@ -1,8 +1,3 @@
-// EDITOR NOTE: Editors are disabled due to package incompatibility issues.
-// See EDITOR_ISSUE_ANALYSIS.md for details.
-// Use ~/htdocs/pebble/playground for editor functionality.
-
-// import type { inline as Inline } from '@css-inline/css-inline-wasm';
 import { initI18nTranslations } from '@rippling/lib-i18n';
 import Button from '@rippling/pebble/Button';
 import Drawer from '@rippling/pebble/Drawer';
@@ -17,19 +12,10 @@ import {
   THEME_CONFIGS,
 } from '@rippling/pebble/theme';
 import resources from '@rippling/pebble/translations/locales/en-US/one-ui.json';
-import { debounce } from 'lodash';
 import React, { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import ReactJson from 'react-json-view';
-import ReactShadow from 'react-shadow';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-// import {
-//   DocumentEditor,
-//   InlineEditor,
-//   RichTextEditor,
-// } from '@rippling/editor';
 import GlobalStyle from '@rippling/pebble/GlobalStyle';
-import { SAMPLE_VARIABLES } from './__mock__/mockVariables';
 import Icon from '@rippling/pebble/Icon';
 import ModalDemo from './demos/modal-demo';
 import AnimationsDemo from './demos/animations-demo';
@@ -39,19 +25,6 @@ import AppShellDemo from './demos/app-shell-demo';
 import IndexPage from './demos/index-page';
 import GettingStartedPage from './demos/getting-started-page';
 import DocViewerPage from './demos/doc-viewer-page';
-
-// async function getCSSInliner(): Promise<typeof Inline> {
-//   const [{ initWasm, inline }, { default: wasmUrl }] = await Promise.all([
-//     import('@css-inline/css-inline-wasm'),
-//     import(
-//       // @ts-expect-error using url-loader in import syntax because we need to load the wasm file as url
-//       '@css-inline/css-inline-wasm/index_bg.wasm?url'
-//     ),
-//   ]);
-//   return initWasm(fetch(wasmUrl)).then(
-//     () => (html, options) => inline(html, { ...options, loadRemoteStylesheets: false }), // loadRemoteStylesheets is not supported with WASM version
-//   );
-// }
 
 // Initialize @rippling/ui package
 oneUiService.init({} as any);
@@ -173,10 +146,6 @@ const Playground = (props: { className?: string }) => {
   const [json, setJson] = React.useState({});
   const [isDemoSwitcherOpen, setIsDemoSwitcherOpen] = React.useState(false);
   const [isTopBarVisible, setIsTopBarVisible] = React.useState(true);
-
-  // React.useEffect(() => {
-  //   getCSSInliner().then(setInlineCSS);
-  // }, []);
 
   React.useEffect(() => {
     storeStates({
