@@ -168,7 +168,7 @@ const GettingStartedPage: React.FC = () => {
           <Section theme={theme}>
             <SectionTitle theme={theme}>Quick Start for Designers</SectionTitle>
             <Paragraph theme={theme}>
-              Follow these steps to start creating your own demos:
+              You don't need to be an engineer to use this playground. Here's how to get started:
             </Paragraph>
             <OrderedList theme={theme}>
               <li>
@@ -176,22 +176,23 @@ const GettingStartedPage: React.FC = () => {
                 to see examples of what's possible with Pebble components.
               </li>
               <li>
-                <strong>Check the documentation</strong> - The <code>docs/</code> folder contains
-                comprehensive guides on components, tokens, and patterns. Always start there!
+                <strong>Open Cursor</strong> - This playground works with Cursor's AI assistant. Open the chat with <code>Cmd+L</code> (Mac) or <code>Ctrl+L</code> (Windows).
               </li>
               <li>
-                <strong>Create a new demo file</strong> - Use the command: <code>yarn create-demo</code> 
-                to scaffold a new demo with the correct structure.
+                <strong>Describe what you want</strong> - Tell Cursor what you want to build in plain English. Be specific about the components and layout you need.
               </li>
               <li>
-                <strong>Reference component docs</strong> - Before coding, check 
-                <code>docs/COMPONENT_CATALOG.md</code> for quick API references and common gotchas.
+                <strong>Let AI build it</strong> - Cursor will create the files, write the code, and wire everything up. You'll see your demo appear on the homepage.
               </li>
               <li>
-                <strong>Use design tokens</strong> - Never hardcode colors, spacing, or typography.
-                Always use theme tokens from <code>useTheme()</code> hook.
+                <strong>Iterate</strong> - Ask Cursor to make changes: "Make that button larger" or "Use a card layout instead" or "Add a search bar at the top."
               </li>
             </OrderedList>
+            <Callout theme={theme}>
+              <p>
+                <strong>💡 New to AI coding?</strong> Don't worry! You're not writing code—you're describing what you want in natural language. Cursor handles the technical details, and you review the results. Think of it as working with a really fast, really patient engineer.
+              </p>
+            </Callout>
           </Section>
 
           <Section theme={theme}>
@@ -208,50 +209,72 @@ const GettingStartedPage: React.FC = () => {
           <Section theme={theme}>
             <SectionTitle theme={theme}>Creating Your First Demo</SectionTitle>
             <Paragraph theme={theme}>
-              Here's a simple example to get you started:
+              The easiest way to create a new demo is by using Cursor's AI chat. You don't need to run terminal commands or manually create files—just describe what you want to build.
             </Paragraph>
-            <CodeBlock theme={theme}>{`import React from 'react';
-import styled from '@emotion/styled';
-import { useTheme } from '@rippling/pebble/theme';
-import Button from '@rippling/pebble/Button';
+            
+            <Paragraph theme={theme}>
+              <strong>Step 1: Open Cursor's chat</strong> (Cmd+L or Ctrl+L)
+            </Paragraph>
+            
+            <Paragraph theme={theme}>
+              <strong>Step 2: Use this prompt format:</strong>
+            </Paragraph>
+            
+            <CodeBlock theme={theme}>{`Create a new demo called "[Your Demo Name]" by copying app-shell-demo.tsx.
 
-const MyDemo: React.FC = () => {
-  const { theme } = useTheme();
-  
-  return (
-    <Container theme={theme}>
-      <Button appearance={Button.APPEARANCES.PRIMARY}>
-        Hello Pebble!
-      </Button>
-    </Container>
-  );
-};
+Show [describe what you want to build].
 
-const Container = styled.div\`
-  padding: \${({ theme }) => (theme as any).space600};
-  background-color: \${({ theme }) => (theme as any).colorSurface};
-\`;
+Use Pebble components.`}</CodeBlock>
 
-export default MyDemo;`}</CodeBlock>
+            <Paragraph theme={theme}>
+              <strong>Example prompts:</strong>
+            </Paragraph>
+            
+            <UnorderedList theme={theme}>
+              <li>
+                <em>"Create a new demo called 'Employee Directory' by copying app-shell-demo.tsx. Show a list of employees with avatars, names, and job titles. Use Pebble components."</em>
+              </li>
+              <li>
+                <em>"Create a new demo called 'Settings Panel' by copying app-shell-demo.tsx. Show a form with toggle switches, text inputs, and a save button. Use Pebble components."</em>
+              </li>
+              <li>
+                <em>"Create a new demo called 'Task Manager' by copying app-shell-demo.tsx. Show a list of tasks with checkboxes and delete buttons. Use Pebble components."</em>
+              </li>
+            </UnorderedList>
+
+            <Paragraph theme={theme}>
+              <strong>What Cursor does automatically:</strong>
+            </Paragraph>
+            
+            <OrderedList theme={theme}>
+              <li>Creates a new file in <code>src/demos/your-demo-name.tsx</code></li>
+              <li>Copies the app shell structure (navigation, sidebar, content area)</li>
+              <li>Wires it up in <code>src/main.tsx</code> with routes and demo switcher</li>
+              <li>Adds a card to the homepage in <code>src/demos/index-page.tsx</code></li>
+              <li>Uses proper Pebble components and design tokens</li>
+            </OrderedList>
+
+            <Callout theme={theme}>
+              <p>
+                <strong>💡 Why start with app-shell-demo?</strong> It includes Rippling's standard app layout (navigation bar, sidebar, content area) so your prototypes look production-ready from the start. You can customize or remove any parts you don't need.
+              </p>
+            </Callout>
+
+            <Paragraph theme={theme}>
+              After Cursor creates your demo, visit <code>http://localhost:4201</code> and you'll see it listed on the homepage. Click it to view and start iterating!
+            </Paragraph>
           </Section>
 
           <Section theme={theme}>
-            <SectionTitle theme={theme}>Best Practices</SectionTitle>
+            <SectionTitle theme={theme}>Tips for Better Results</SectionTitle>
             <UnorderedList theme={theme}>
-              <li>Always import and use the <code>useTheme()</code> hook for accessing theme tokens</li>
-              <li>Use Pebble components instead of building from scratch</li>
-              <li>Check component APIs in the docs before using - they might differ from expectations</li>
-              <li>Test your demo in both light and dark modes</li>
-              <li>Keep demos focused on a single concept or pattern</li>
+              <li><strong>Be specific:</strong> Instead of "a form," say "a form with text inputs for name and email, and a submit button"</li>
+              <li><strong>Reference components:</strong> Mention Pebble component names when you know them: "Use Card.Layout for the container"</li>
+              <li><strong>Test both themes:</strong> Toggle between light and dark mode to ensure your demo looks good in both</li>
+              <li><strong>Iterate incrementally:</strong> Start simple, then ask for refinements one at a time</li>
+              <li><strong>Ask questions:</strong> If you're unsure, ask Cursor: "What Pebble components should I use for a settings form?"</li>
             </UnorderedList>
           </Section>
-
-          <Callout theme={theme}>
-            <p>
-              <strong>💡 Pro Tip:</strong> Use <code>Cmd+K</code> (Mac) or <code>Ctrl+K</code> (Windows)
-              to toggle the top bar visibility in demos for a cleaner preview.
-            </p>
-          </Callout>
 
           <Section theme={theme}>
             <SectionTitle theme={theme}>Need Help?</SectionTitle>
