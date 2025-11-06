@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import Button from '@rippling/pebble/Button';
 import Drawer from '@rippling/pebble/Drawer';
-import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme, StyledTheme } from '../utils/theme';
 
 const ModalDemo = () => {
-  const { theme } = useTheme();
+  const { theme } = usePebbleTheme();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
 

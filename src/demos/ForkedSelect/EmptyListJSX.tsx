@@ -3,7 +3,7 @@ import { isEmpty } from 'lodash';
 import styled from '@emotion/styled';
 import Spinner from '@rippling/pebble/Spinner';
 import Text from '@rippling/pebble/Text';
-import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme, StyledTheme } from '../../utils/theme';
 import Icon from '@rippling/pebble/Icon';
 
 // types
@@ -34,7 +34,7 @@ const SearchQueryWrapper = styled.div`
 const SpinnerWrapper = styled.div``;
 
 export function EmptyListJSX({ placeholder, isLoading, searchQuery }: EmptyListJSXProps) {
-  const { theme } = useTheme();
+  const { theme } = usePebbleTheme();
   if (isLoading) {
     return (
       <Container data-testid="empty-list-placeholder">

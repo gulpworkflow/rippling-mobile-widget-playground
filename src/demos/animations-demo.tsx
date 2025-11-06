@@ -10,7 +10,7 @@ import Dropdown from '@rippling/pebble/Dropdown';
 import Select from '@rippling/pebble/Inputs/Select';
 import ForkedSelect from './ForkedSelect'; // Our forked Select with rotating caret
 import AnimatedForkedSelect from './AnimatedForkedSelect'; // Forked Select with animations
-import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme, StyledTheme } from '../utils/theme';
 import { DURATION, EASING, SCALE, enteringMixins } from '../utils/animation-constants';
 import AnimatedSelect from './AnimatedSelect';
 import AnimatedDropdown from './AnimatedDropdown';
@@ -142,7 +142,7 @@ const ImprovedSelectWrapper = styled.div`
 `;
 
 const AnimationsDemo = () => {
-  const { theme } = useTheme();
+  const { theme } = usePebbleTheme();
 
   // State for each component demo
   const [isModalBeforeOpen, setIsModalBeforeOpen] = useState(false);

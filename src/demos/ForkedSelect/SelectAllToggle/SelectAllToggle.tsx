@@ -8,7 +8,7 @@ import { useUniqueId } from '@rippling/pebble/hooks';
 import type { CheckboxProps } from '@rippling/pebble/Inputs/Checkbox';
 import Checkbox from '@rippling/pebble/Inputs/Checkbox';
 import Text from '@rippling/pebble/Text';
-import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme, StyledTheme } from '../../../utils/theme';
 
 /** styles * */
 const StyledSwitchContainer = Styled.div`
@@ -62,7 +62,7 @@ const SelectAllToggle = (props: SelectAllToggleProps) => {
     type = TOGGLE_TYPES.SWITCH,
   } = props;
 
-  const { theme } = useTheme();
+  const { theme } = usePebbleTheme();
   const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select.selectAllToggle' });
   const switchLabel = t('switchLabel');
 

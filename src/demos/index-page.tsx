@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme, StyledTheme } from '../utils/theme';
 import { useNavigate } from 'react-router-dom';
 import Icon from '@rippling/pebble/Icon';
 import Card from '@rippling/pebble/Card';
@@ -57,8 +57,8 @@ const DEMO_CARDS: DemoCard[] = [
 
 const PageContainer = styled.div`
   min-height: 100vh;
-  background-color: ${({ theme }) => (theme as any).colorSurface};
-  padding: ${({ theme }) => (theme as any).space1600} ${({ theme }) => (theme as any).space800};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
+  padding: ${({ theme }) => (theme as StyledTheme).space1600} ${({ theme }) => (theme as StyledTheme).space800};
 `;
 
 const ContentWrapper = styled.div`
@@ -67,36 +67,36 @@ const ContentWrapper = styled.div`
 `;
 
 const Header = styled.div`
-  margin-bottom: ${({ theme }) => (theme as any).space1000};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space1000};
 `;
 
 const GreetingRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as any).space200};
-  margin-bottom: ${({ theme }) => (theme as any).space400};
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
 `;
 
 const GreetingText = styled.div`
-  ${({ theme }) => (theme as any).typestyleV2TitleLarge};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   opacity: 0.7;
 `;
 
 const Title = styled.h1`
-  ${({ theme }) => (theme as any).typestyleV2DisplayMedium};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
-  margin: 0 0 ${({ theme }) => (theme as any).space400} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2DisplayMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space400} 0;
 `;
 
 const Description = styled.div`
-  ${({ theme }) => (theme as any).typestyleV2BodyLarge};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   max-width: 800px;
   line-height: 1.6;
   
   a {
-    color: ${({ theme }) => (theme as any).colorPrimary};
+    color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
     text-decoration: none;
     
     &:hover {
@@ -106,45 +106,45 @@ const Description = styled.div`
 `;
 
 const SectionLabel = styled.h2`
-  ${({ theme }) => (theme as any).typestyleV2LabelLarge};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
-  margin: 0 0 ${({ theme }) => (theme as any).space400} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space400} 0;
 `;
 
 const SectionLabelCount = styled.span`
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
 `;
 
 const GuidesSection = styled.section`
-  margin-top: ${({ theme }) => (theme as any).space1200};
-  padding-top: ${({ theme }) => (theme as any).space1000};
-  border-top: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant};
+  margin-top: ${({ theme }) => (theme as StyledTheme).space1200};
+  padding-top: ${({ theme }) => (theme as StyledTheme).space1000};
+  border-top: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
 `;
 
 const GuidesTitle = styled.h2`
-  ${({ theme }) => (theme as any).typestyleV2TitleLarge};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
-  margin: 0 0 ${({ theme }) => (theme as any).space800} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space800} 0;
 `;
 
 const GuidesDescription = styled.p`
-  ${({ theme }) => (theme as any).typestyleV2BodyLarge};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
-  margin: 0 0 ${({ theme }) => (theme as any).space600} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
   max-width: 800px;
 `;
 
 const CodePath = styled.code`
-  ${({ theme }) => (theme as any).typestyleV2CodeSmall};
-  background-color: ${({ theme }) => (theme as any).colorSurfaceContainerLow};
-  padding: ${({ theme }) => (theme as any).space100} ${({ theme }) => (theme as any).space200};
-  border-radius: ${({ theme }) => (theme as any).shapeCornerM};
-  color: ${({ theme }) => (theme as any).colorPrimary};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2CodeSmall};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+  padding: ${({ theme }) => (theme as StyledTheme).space100} ${({ theme }) => (theme as StyledTheme).space200};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerM};
+  color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
 `;
 
 const ResourceLink = styled.a`
-  ${({ theme }) => (theme as any).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as any).colorPrimary};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
   text-decoration: none;
   cursor: pointer;
   
@@ -156,37 +156,37 @@ const ResourceLink = styled.a`
 const TableSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => (theme as any).space300};
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
 `;
 
 const TableHeader = styled.div`
   display: flex;
   flex-direction: row;
   align-items: baseline;
-  gap: ${({ theme }) => (theme as any).space200};
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
 `;
 
 const TableTitle = styled.h3`
-  ${({ theme }) => (theme as any).typestyleV2TitleSmall};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleSmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   margin: 0;
 `;
 
 const TableSeparator = styled.span`
-  ${({ theme }) => (theme as any).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
 `;
 
 const TableDescription = styled.span`
-  ${({ theme }) => (theme as any).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   margin: 0;
 `;
 
 const DemoGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: ${({ theme }) => (theme as any).space600};
+  gap: ${({ theme }) => (theme as StyledTheme).space600};
 `;
 
 const DemoCardWrapper = styled.div`
@@ -211,23 +211,23 @@ const CardContent = styled.div`
 const CardIcon = styled.div`
   width: 48px;
   height: 48px;
-  border-radius: ${({ theme }) => (theme as any).shapeCornerFull};
-  background-color: ${({ theme }) => (theme as any).colorPrimaryContainer};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorPrimaryContainer};
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: ${({ theme }) => (theme as any).space400};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
 `;
 
 const CardTitle = styled.h2`
-  ${({ theme }) => (theme as any).typestyleV2TitleLarge};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
-  margin: 0 0 ${({ theme }) => (theme as any).space200} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space200} 0;
 `;
 
 const CardDescription = styled.p`
-  ${({ theme }) => (theme as any).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   margin: 0;
   line-height: 1.5;
 `;
@@ -238,16 +238,16 @@ const AddCardWrapper = styled.div`
 
 const AddCardContent = styled.div`
   background-color: transparent;
-  border: 2px dashed ${({ theme }) => (theme as any).colorOutlineVariant};
-  border-radius: ${({ theme }) => (theme as any).shapeCorner3xl};
+  border: 2px dashed ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner3xl};
   padding: 44px 24px;
   display: flex;
   flex-direction: column;
   transition: border-color 150ms ease, background-color 150ms ease;
   
   &:hover {
-    border-color: ${({ theme }) => (theme as any).colorOutline};
-    background-color: ${({ theme }) => (theme as any).colorSurfaceContainerLow};
+    border-color: ${({ theme }) => (theme as StyledTheme).colorOutline};
+    background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
   }
 `;
 
@@ -257,19 +257,19 @@ const AddCardIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto ${({ theme }) => (theme as any).space400};
+  margin: 0 auto ${({ theme }) => (theme as StyledTheme).space400};
 `;
 
 const AddCardTitle = styled.h2`
-  ${({ theme }) => (theme as any).typestyleV2TitleMedium};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
-  margin: 0 0 ${({ theme }) => (theme as any).space200} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space200} 0;
   text-align: center;
 `;
 
 const AddCardDescription = styled.p`
-  ${({ theme }) => (theme as any).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   margin: 0;
   line-height: 1.5;
   text-align: center;
@@ -278,7 +278,7 @@ const AddCardDescription = styled.p`
 const DrawerContent = styled.div``;
 
 const InstructionSection = styled.div`
-  margin-bottom: ${({ theme }) => (theme as any).space800};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space800};
   
   &:last-child {
     margin-bottom: 0;
@@ -286,37 +286,37 @@ const InstructionSection = styled.div`
 `;
 
 const InstructionTitle = styled.h3`
-  ${({ theme }) => (theme as any).typestyleV2TitleMedium};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
-  margin: 0 0 ${({ theme }) => (theme as any).space400} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space400} 0;
 `;
 
 const InstructionText = styled.p`
-  ${({ theme }) => (theme as any).typestyleV2BodyLarge};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
-  margin: 0 0 ${({ theme }) => (theme as any).space300} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space300} 0;
   line-height: 1.6;
 `;
 
 const CodeSnippet = styled.code`
-  ${({ theme }) => (theme as any).typestyleV2CodeMedium};
-  background-color: ${({ theme }) => (theme as any).colorSurfaceContainerLow};
-  padding: ${({ theme }) => (theme as any).space200} ${({ theme }) => (theme as any).space300};
-  border-radius: ${({ theme }) => (theme as any).shapeCornerM};
-  color: ${({ theme }) => (theme as any).colorPrimary};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2CodeMedium};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space300};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerM};
+  color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
   display: inline-block;
-  margin: ${({ theme }) => (theme as any).space200} 0;
+  margin: ${({ theme }) => (theme as StyledTheme).space200} 0;
 `;
 
 const StepNumber = styled.span`
-  ${({ theme }) => (theme as any).typestyleV2LabelLarge};
-  color: ${({ theme }) => (theme as any).colorPrimary};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
   font-weight: 600;
-  margin-right: ${({ theme }) => (theme as any).space200};
+  margin-right: ${({ theme }) => (theme as StyledTheme).space200};
 `;
 
 const IndexPage: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme } = usePebbleTheme();
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { useTheme, useThemeSettings, getStateColor } from '@rippling/pebble/theme';
+import { useThemeSettings, getStateColor } from '@rippling/pebble/theme';
+import { usePebbleTheme, StyledTheme } from '../utils/theme';
 import Icon from '@rippling/pebble/Icon';
 import Button from '@rippling/pebble/Button';
 import Tabs from '@rippling/pebble/Tabs';
@@ -23,7 +24,7 @@ import RipplingLogoWhite from '../assets/rippling-logo-white.svg';
 const AppContainer = styled.div`
   display: flex;
   height: 100vh;
-  background-color: ${({ theme }) => (theme as any).colorSurface};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
   overflow: hidden;
 `;
 
@@ -33,14 +34,14 @@ const TopNav = styled.nav<{ adminMode: boolean }>`
   left: 0;
   right: 0;
   height: 56px;
-  background-color: ${({ theme, adminMode }) => 
-    adminMode ? 'rgb(74, 0, 57)' : (theme as any).colorSurfaceBright};
-  border-bottom: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant};
+  background-color: ${({ theme, adminMode }) =>
+    adminMode ? 'rgb(74, 0, 57)' : (theme as StyledTheme).colorSurfaceBright};
+  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   display: flex;
   align-items: center;
   padding: 0;
   z-index: 100;
-  gap: ${({ theme }) => (theme as any).space500};
+  gap: ${({ theme }) => (theme as StyledTheme).space500};
   transition: background-color 200ms ease;
 `;
 
@@ -53,9 +54,9 @@ const LeftSection = styled.div`
 const LogoContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as any).space400};
+  gap: ${({ theme }) => (theme as StyledTheme).space400};
   height: 56px;
-  padding: 0 ${({ theme }) => (theme as any).space400};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space400};
   flex: 1;
 `;
 
@@ -64,25 +65,27 @@ const Logo = styled.img`
   height: auto;
   display: block;
   cursor: pointer;
-  padding: ${({ theme }) => (theme as any).space200};
-  margin: -${({ theme }) => (theme as any).space200};
-  border-radius: ${({ theme }) => (theme as any).shapeCornerLg};
+  padding: ${({ theme }) => (theme as StyledTheme).space200};
+  margin: -${({ theme }) => (theme as StyledTheme).space200};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   transition: background-color 150ms ease;
 
   &:hover {
-    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'hover')};
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'hover')};
   }
 
   &:active {
-    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'active')};
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'active')};
   }
 `;
 
 const VerticalDivider = styled.div<{ adminMode?: boolean }>`
   width: 1px;
   height: 24px;
-  background-color: ${({ theme, adminMode }) => 
-    adminMode ? 'white' : (theme as any).colorOnSurface};
+  background-color: ${({ theme, adminMode }) =>
+    adminMode ? 'white' : (theme as StyledTheme).colorOnSurface};
   opacity: ${({ adminMode }) => (adminMode ? 0.3 : 0.2)};
 `;
 
@@ -97,15 +100,18 @@ const RightSection = styled.div`
 const SearchBar = styled.div<{ adminMode?: boolean }>`
   flex: 1;
   max-width: 600px;
-  background-color: ${({ theme, adminMode }) => 
-    adminMode ? 'rgba(255, 255, 255, 0.2)' : (theme as any).colorSurfaceContainerHighest};
+  background-color: ${({ theme, adminMode }) =>
+    adminMode ? 'rgba(255, 255, 255, 0.2)' : (theme as StyledTheme).colorSurfaceContainerHighest};
   opacity: 0.75;
-  border-radius: ${({ theme }) => (theme as any).shapeCornerLg};
-  padding: ${({ theme }) => (theme as any).space200} ${({ theme }) => (theme as any).space300};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  padding: ${({ theme }) =>
+    `${(theme as StyledTheme).space200} ${(theme as StyledTheme).space300}`};
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as any).space200};
-  transition: opacity 0.15s ease, background-color 200ms ease;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+  transition:
+    opacity 0.15s ease,
+    background-color 200ms ease;
 
   &:focus-within {
     opacity: 1;
@@ -115,14 +121,14 @@ const SearchBar = styled.div<{ adminMode?: boolean }>`
     flex: 1;
     background: transparent;
     border: none;
-    ${({ theme }) => (theme as any).typestyleV2BodyMedium};
-    color: ${({ adminMode }) => 
-      adminMode ? 'white' : (({ theme }) => (theme as any).colorOnSurface)};
+    ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+    color: ${({ adminMode }) =>
+      adminMode ? 'white' : ({ theme }) => (theme as StyledTheme).colorOnSurface};
     padding: 0;
 
     &::placeholder {
-      color: ${({ adminMode }) => 
-        adminMode ? 'white' : (({ theme }) => (theme as any).colorOnSurface)};
+      color: ${({ adminMode }) =>
+        adminMode ? 'white' : ({ theme }) => (theme as StyledTheme).colorOnSurface};
     }
 
     &:focus {
@@ -134,7 +140,7 @@ const SearchBar = styled.div<{ adminMode?: boolean }>`
 const ActionsContainer = styled.div`
   display: flex;
   align-items: center;
-  padding: 0 ${({ theme }) => (theme as any).space400};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space400};
 `;
 
 const TopNavActions = styled.div<{ adminMode?: boolean }>`
@@ -163,9 +169,9 @@ const NotificationBadge = styled.div`
   right: 6px;
   width: 16px;
   height: 16px;
-  background-color: ${({ theme }) => (theme as any).colorError};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorError};
   border-radius: 50%;
-  border: 2px solid ${({ theme }) => (theme as any).colorSurfaceBright};
+  border: 2px solid ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   font-size: 10px;
   font-weight: 600;
   color: white;
@@ -176,31 +182,33 @@ const NotificationBadge = styled.div`
 `;
 
 const ProfileDivider = styled.div`
-  padding: 0 ${({ theme }) => (theme as any).space300} 0 ${({ theme }) => (theme as any).space400};
+  padding: ${({ theme }) =>
+    `0 ${(theme as StyledTheme).space300} 0 ${(theme as StyledTheme).space400}`};
 `;
 
 const ProfileSection = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as any).space300};
-  padding: ${({ theme }) => (theme as any).space200};
-  border-radius: ${({ theme }) => (theme as any).shapeCornerLg};
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  padding: ${({ theme }) => (theme as StyledTheme).space200};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   cursor: pointer;
   transition: background-color 150ms ease;
 
   &:hover {
-    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'hover')};
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'hover')};
   }
 
   &:active {
-    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'active')};
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'active')};
   }
 `;
 
 const CompanyName = styled.div<{ adminMode?: boolean }>`
-  ${({ theme }) => (theme as any).typestyleV2BodyLargeEmphasized};
-  color: ${({ theme, adminMode }) => 
-    adminMode ? 'white' : (theme as any).colorOnSurface};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
+  color: ${({ theme, adminMode }) => (adminMode ? 'white' : (theme as StyledTheme).colorOnSurface)};
   white-space: nowrap;
   transition: color 200ms ease;
 `;
@@ -209,18 +217,22 @@ const UserAvatar = styled.div<{ adminMode?: boolean }>`
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: ${({ theme, adminMode }) => 
-    adminMode ? 'white' : (theme as any).colorPrimary};
-  color: ${({ adminMode }) => 
-    adminMode ? 'rgb(74, 0, 57)' : (({ theme }) => (theme as any).colorOnPrimary)};
-  border: 1px solid ${({ adminMode }) => 
-    adminMode ? 'white' : (({ theme }) => (theme as any).colorOutlineVariant)};
+  background-color: ${({ theme, adminMode }) =>
+    adminMode ? 'white' : (theme as StyledTheme).colorPrimary};
+  color: ${({ adminMode }) =>
+    adminMode ? 'rgb(74, 0, 57)' : ({ theme }) => (theme as StyledTheme).colorOnPrimary};
+  border: 1px solid
+    ${({ adminMode }) =>
+      adminMode ? 'white' : ({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   display: flex;
   align-items: center;
   justify-content: center;
-  ${({ theme }) => (theme as any).typestyleLabelMedium600};
+  ${({ theme }) => (theme as StyledTheme).typestyleLabelMedium600};
   flex-shrink: 0;
-  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease;
 `;
 
 const Sidebar = styled.aside<{ isCollapsed: boolean }>`
@@ -229,8 +241,8 @@ const Sidebar = styled.aside<{ isCollapsed: boolean }>`
   top: 56px;
   bottom: 0;
   width: ${({ isCollapsed }) => (isCollapsed ? '60px' : '266px')};
-  background-color: ${({ theme }) => (theme as any).colorSurfaceBright};
-  border-right: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border-right: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -249,25 +261,27 @@ const Sidebar = styled.aside<{ isCollapsed: boolean }>`
   }
 
   &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => (theme as any).colorOutlineVariant};
+    background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
     border-radius: 3px;
   }
 `;
 
 const NavSection = styled.div`
-  padding: ${({ theme }) => (theme as any).space250} ${({ theme }) => (theme as any).space200} 0;
+  padding: ${({ theme }) =>
+    `${(theme as StyledTheme).space250} ${(theme as StyledTheme).space200} 0`};
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => (theme as any).space50};
+  gap: ${({ theme }) => (theme as StyledTheme).space50};
 `;
 
 const NavSectionLabel = styled.div<{ isCollapsed: boolean }>`
-  ${({ theme }) => (theme as any).typestyleLabelMedium700};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
-  padding: 0 ${({ theme }) => (theme as any).space200} ${({ theme }) => (theme as any).space100};
+  ${({ theme }) => (theme as StyledTheme).typestyleLabelMedium700};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  padding: ${({ theme }) =>
+    `0 ${(theme as StyledTheme).space200} ${(theme as StyledTheme).space100}`};
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  border-top: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant};
+  border-top: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   height: 31px;
   display: flex;
   align-items: flex-end;
@@ -282,29 +296,31 @@ const NavItem = styled.button`
   height: 40px;
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as any).space100};
-  padding-right: ${({ theme }) => (theme as any).space200};
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+  padding-right: ${({ theme }) => (theme as StyledTheme).space200};
   background: none;
   border: none;
-  border-radius: ${({ theme }) => (theme as any).shapeCornerLg};
-  ${({ theme }) => (theme as any).typestyleV2BodyLarge};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   text-align: left;
   cursor: pointer;
   transition: all 0.1s ease-in-out 0s;
   overflow: hidden;
 
   &:hover {
-    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'hover')};
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'hover')};
   }
 
   &:active {
-    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'active')};
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'active')};
   }
 `;
 
 const NavItemIcon = styled.div`
-  padding: ${({ theme }) => (theme as any).space200};
+  padding: ${({ theme }) => (theme as StyledTheme).space200};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,11 +337,11 @@ const NavItemText = styled.div<{ isCollapsed: boolean }>`
 `;
 
 const NavDivider = styled.div`
-  height: ${({ theme }) => (theme as any).space600};
+  height: ${({ theme }) => (theme as StyledTheme).space600};
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 ${({ theme }) => (theme as any).space50};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space50};
   width: 100%;
   flex-shrink: 0;
 `;
@@ -333,12 +349,12 @@ const NavDivider = styled.div`
 const NavDividerLine = styled.div`
   flex: 1;
   height: 1px;
-  background-color: ${({ theme }) => (theme as any).colorOutlineVariant};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
 `;
 
 const PlatformFooter = styled.div`
-  background-color: ${({ theme }) => (theme as any).colorSurfaceBright};
-  padding: 0 0 ${({ theme }) => (theme as any).space200};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space200};
 `;
 
 const CollapseButton = styled.button<{ isCollapsed: boolean }>`
@@ -346,25 +362,27 @@ const CollapseButton = styled.button<{ isCollapsed: boolean }>`
   height: 40px;
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as any).space100};
-  padding-right: ${({ theme }) => (theme as any).space250};
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+  padding-right: ${({ theme }) => (theme as StyledTheme).space250};
   padding-left: 0;
   background: none;
   border: none;
-  border-top: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant};
-  border-radius: ${({ theme }) => (theme as any).shapeCornerLg};
-  ${({ theme }) => (theme as any).typestyleV2BodyLarge};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
+  border-top: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   cursor: pointer;
   transition: all 0.1s ease-in-out 0s;
-  margin-top: ${({ theme }) => (theme as any).space200};
+  margin-top: ${({ theme }) => (theme as StyledTheme).space200};
 
   &:hover {
-    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'hover')};
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'hover')};
   }
 
   &:active {
-    background-color: ${({ theme }) => getStateColor((theme as any).colorSurfaceBright, 'active')};
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'active')};
   }
 `;
 
@@ -388,16 +406,16 @@ const PageContentContainer = styled.div`
 `;
 
 const PageHeaderContainer = styled.div`
-  background-color: ${({ theme }) => (theme as any).colorSurfaceBright};
-  border-bottom: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   padding: 0;
   display: flex;
   flex-direction: column;
 `;
 
 const PageHeaderWrapper = styled.div`
-  padding-left: ${({ theme }) => (theme as any).space1400};
-  padding-right: ${({ theme }) => (theme as any).space1400};
+  padding-left: ${({ theme }) => (theme as StyledTheme).space1400};
+  padding-right: ${({ theme }) => (theme as StyledTheme).space1400};
 
   /* Adjust spacing on Page.Header content */
   & > div {
@@ -405,42 +423,43 @@ const PageHeaderWrapper = styled.div`
   }
 
   /* Target the inner Content component */
-  & div[class*="Content"] {
-    margin-top: ${({ theme }) => (theme as any).space1000} !important;     /* 40px */
-    margin-bottom: ${({ theme }) => (theme as any).space200} !important;   /* 8px */
+  & div[class*='Content'] {
+    margin-top: ${({ theme }) => (theme as StyledTheme).space1000} !important; /* 40px */
+    margin-bottom: ${({ theme }) => (theme as StyledTheme).space200} !important; /* 8px */
   }
 `;
 
 const PageHeaderActions = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as any).space300};
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
 `;
 
 const TabsWrapper = styled.div`
-  padding: 0 ${({ theme }) => (theme as any).space1400};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space1400};
 
   /* Remove box shadow from tabs */
   & > div,
-  & div[class*="StyledScroll"],
-  & div[class*="StyledTabContainer"] {
+  & div[class*='StyledScroll'],
+  & div[class*='StyledTabContainer'] {
     box-shadow: none !important;
   }
 `;
 
 const PageContent = styled.div`
-  background-color: ${({ theme }) => (theme as any).colorSurface};
-  padding: ${({ theme }) => (theme as any).space800} ${({ theme }) => (theme as any).space1400};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
+  padding: ${({ theme }) =>
+    `${(theme as StyledTheme).space800} ${(theme as StyledTheme).space1400}`};
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => (theme as any).space600};
+  gap: ${({ theme }) => (theme as StyledTheme).space600};
   flex: 1;
 `;
 
 const ContentSlot = styled.div`
   background-color: rgba(205, 74, 53, 0.24);
-  border-radius: ${({ theme }) => (theme as any).shapeCornerM};
-  padding: ${({ theme }) => (theme as any).space800} ${({ theme }) => (theme as any).space800};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerM};
+  padding: ${({ theme }) => (theme as StyledTheme).space800};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -456,13 +475,13 @@ const SlotText = styled.div`
   text-align: center;
 
   & > p:first-of-type {
-    ${({ theme }) => (theme as any).typestyleV2BodyMedium};
+    ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
     font-weight: 535;
     margin: 0;
   }
 
   & > p:last-of-type {
-    ${({ theme }) => (theme as any).typestyleV2BodyMedium};
+    ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
     font-weight: 430;
     margin: 0;
   }
@@ -476,9 +495,7 @@ interface NavItemData {
 }
 
 const AppShellDemo: React.FC = () => {
-  const { theme: rawTheme, mode: currentMode, name: currentThemeName } = useTheme();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const theme = rawTheme as any;
+  const { theme, mode: currentMode, name: currentThemeName } = usePebbleTheme();
   const { changeTheme, changeMode } = useThemeSettings();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState(3); // Default to "Settings" tab
@@ -530,10 +547,10 @@ const AppShellDemo: React.FC = () => {
 
         <RightSection theme={theme}>
           <SearchBar theme={theme} adminMode={adminMode}>
-            <Icon 
-              type={Icon.TYPES.SEARCH_OUTLINE} 
-              size={20} 
-              color={adminMode ? 'white' : theme.colorOnSurface} 
+            <Icon
+              type={Icon.TYPES.SEARCH_OUTLINE}
+              size={20}
+              color={adminMode ? 'white' : theme.colorOnSurface}
             />
             <input id="global-search" type="text" placeholder="Search or jump to..." />
           </SearchBar>
@@ -598,7 +615,8 @@ const AppShellDemo: React.FC = () => {
                   value: 'berry',
                 },
                 {
-                  label: currentThemeName === 'plum' ? 'Plum Theme (Legacy) ✓' : 'Plum Theme (Legacy)',
+                  label:
+                    currentThemeName === 'plum' ? 'Plum Theme (Legacy) ✓' : 'Plum Theme (Legacy)',
                   value: 'plum',
                 },
                 {
@@ -639,12 +657,16 @@ const AppShellDemo: React.FC = () => {
               shouldAutoClose
             >
               <ProfileSection theme={theme} style={{ cursor: 'pointer' }}>
-                <CompanyName theme={theme} adminMode={adminMode}>Acme, Inc.</CompanyName>
-                <UserAvatar theme={theme} adminMode={adminMode}>A</UserAvatar>
-                <Icon 
-                  type={Icon.TYPES.CHEVRON_DOWN} 
-                  size={16} 
-                  color={adminMode ? 'white' : theme.colorOnSurface} 
+                <CompanyName theme={theme} adminMode={adminMode}>
+                  Acme, Inc.
+                </CompanyName>
+                <UserAvatar theme={theme} adminMode={adminMode}>
+                  A
+                </UserAvatar>
+                <Icon
+                  type={Icon.TYPES.CHEVRON_DOWN}
+                  size={16}
+                  color={adminMode ? 'white' : theme.colorOnSurface}
                 />
               </ProfileSection>
             </Dropdown>

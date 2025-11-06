@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme, StyledTheme } from '../utils/theme';
 import Tabs from '@rippling/pebble/Tabs';
 import Tip from '@rippling/pebble/Tip';
 
@@ -23,60 +23,60 @@ interface ColorCategory {
 }
 
 const Content = styled.div`
-  padding: ${({ theme }) => (theme as any).space800};
+  padding: ${({ theme }) => (theme as StyledTheme).space800};
 `;
 
 const Header = styled.div`
-  margin-bottom: ${({ theme }) => (theme as any).space800};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space800};
 `;
 
 const Title = styled.h1`
-  ${({ theme }) => (theme as any).typestyleDisplayMedium700};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
-  margin: 0 0 ${({ theme }) => (theme as any).space300} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleDisplayMedium700};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space300} 0;
 `;
 
 const Subtitle = styled.p`
-  ${({ theme }) => (theme as any).typestyleBodyLarge400};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleBodyLarge400};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   margin: 0;
 `;
 
 const CategorySection = styled.section`
-  margin-bottom: ${({ theme }) => (theme as any).space800};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space800};
 `;
 
 const CategoryTitle = styled.h2`
-  ${({ theme }) => (theme as any).typestyleHeadingMedium700};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
-  margin: 0 0 ${({ theme }) => (theme as any).space200} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleHeadingMedium700};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space200} 0;
 `;
 
 const CategoryDescription = styled.p`
-  ${({ theme }) => (theme as any).typestyleBodyMedium400};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
-  margin: 0 0 ${({ theme }) => (theme as any).space600} 0;
+  ${({ theme }) => (theme as StyledTheme).typestyleBodyMedium400};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
 `;
 
 const ColorGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: ${({ theme }) => (theme as any).space400};
-  margin-bottom: ${({ theme }) => (theme as any).space600};
+  gap: ${({ theme }) => (theme as StyledTheme).space400};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
 `;
 
 const ColorCard = styled.div<{ bgColor: string; textColor: string; showBorder?: boolean }>`
   background-color: ${({ bgColor }) => bgColor};
   color: ${({ textColor }) => textColor};
   border-radius: 24px;
-  padding: ${({ theme }) => (theme as any).space600};
+  padding: ${({ theme }) => (theme as StyledTheme).space600};
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: ${({ theme }) => (theme as any).space400};
+  gap: ${({ theme }) => (theme as StyledTheme).space400};
   transition: transform 150ms ease, box-shadow 150ms ease;
   border: ${({ showBorder, theme }) => 
-    showBorder ? `1px solid ${(theme as any).colorOutlineVariant}` : 'none'};
+    showBorder ? `1px solid ${(theme as StyledTheme).colorOutlineVariant}` : 'none'};
 
   &:hover {
     transform: translateY(-2px);
@@ -85,20 +85,20 @@ const ColorCard = styled.div<{ bgColor: string; textColor: string; showBorder?: 
 `;
 
 const ColorName = styled.div<{ textColor: string }>`
-  ${({ theme }) => (theme as any).typestyleLabelLarge600};
+  ${({ theme }) => (theme as StyledTheme).typestyleLabelLarge600};
   color: ${({ textColor }) => textColor};
-  margin-bottom: ${({ theme }) => (theme as any).space100};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space100};
 `;
 
 const ColorValue = styled.div<{ textColor: string }>`
-  ${({ theme }) => (theme as any).typestyleBodySmall400};
+  ${({ theme }) => (theme as StyledTheme).typestyleBodySmall400};
   color: ${({ textColor }) => textColor};
   font-family: 'Monaco', 'Courier New', monospace;
-  margin-bottom: ${({ theme }) => (theme as any).space200};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space200};
 `;
 
 const ColorDescription = styled.div<{ textColor: string }>`
-  ${({ theme }) => (theme as any).typestyleBodySmall400};
+  ${({ theme }) => (theme as StyledTheme).typestyleBodySmall400};
   color: ${({ textColor }) => textColor};
   opacity: 0.8;
 `;
@@ -106,21 +106,21 @@ const ColorDescription = styled.div<{ textColor: string }>`
 const OnColorsContainer = styled.div<{ parentBgColor: string }>`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => (theme as any).space300};
-  margin-top: ${({ theme }) => (theme as any).space600};
-  padding-top: ${({ theme }) => (theme as any).space400};
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  margin-top: ${({ theme }) => (theme as StyledTheme).space600};
+  padding-top: ${({ theme }) => (theme as StyledTheme).space400};
   border-top: 1px solid rgba(128, 128, 128, 0.2);
   background-color: ${({ parentBgColor }) => parentBgColor};
-  padding: ${({ theme }) => (theme as any).space400};
-  border-radius: ${({ theme }) => (theme as any).shapeCornerS};
-  margin: 0 calc(-1 * ${({ theme }) => (theme as any).space400});
-  margin-top: ${({ theme }) => (theme as any).space600};
+  padding: ${({ theme }) => (theme as StyledTheme).space400};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerS};
+  margin: 0 calc(-1 * ${({ theme }) => (theme as StyledTheme).space400});
+  margin-top: ${({ theme }) => (theme as StyledTheme).space600};
 `;
 
 const OnColorItem = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as any).space200};
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
   width: 100%;
 `;
 
@@ -133,7 +133,7 @@ const OnColorCircle = styled.div<{ color: string }>`
 `;
 
 const OnColorLabel = styled.span<{ color: string }>`
-  ${({ theme }) => (theme as any).typestyleBodySmall400};
+  ${({ theme }) => (theme as StyledTheme).typestyleBodySmall400};
   color: ${({ color }) => color};
   white-space: nowrap;
   font-weight: 500;
@@ -142,9 +142,9 @@ const OnColorLabel = styled.span<{ color: string }>`
 const TypographyList = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: ${({ theme }) => (theme as any).space800};
-  background-color: ${({ theme }) => (theme as any).colorSurfaceBright};
-  padding: ${({ theme }) => (theme as any).space800};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space800};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  padding: ${({ theme }) => (theme as StyledTheme).space800};
   border-radius: 24px; /* Using 24px (2XL) since shapeCornerXL (16px) may not be prominent enough */
   overflow: hidden; /* Ensures child content respects the border radius */
 `;
@@ -152,9 +152,9 @@ const TypographyList = styled.div`
 const TypographyRow = styled.div`
   display: grid;
   grid-template-columns: 2fr 2fr 1fr 3fr;
-  gap: ${({ theme }) => (theme as any).space600};
-  padding: ${({ theme }) => (theme as any).space600} 0;
-  border-bottom: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant};
+  gap: ${({ theme }) => (theme as StyledTheme).space600};
+  padding: ${({ theme }) => (theme as StyledTheme).space600} 0;
+  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   align-items: center;
   transition: background-color 150ms ease;
 
@@ -163,48 +163,48 @@ const TypographyRow = styled.div`
   }
 
   &:hover {
-    background-color: ${({ theme }) => (theme as any).colorSurfaceDim};
+    background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceDim};
   }
 `;
 
 const TypographyName = styled.div<{ tokenKey: string }>`
-  ${({ theme, tokenKey }) => (theme as any)[tokenKey]};
-  color: ${({ theme }) => (theme as any).colorOnSurface};
+  ${({ theme, tokenKey }) => (theme as StyledTheme)[tokenKey]};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
 `;
 
 const TypographyToken = styled.div`
-  ${({ theme }) => (theme as any).typestyleBodyMedium400};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleBodyMedium400};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
   cursor: pointer;
   user-select: all;
-  padding: ${({ theme }) => (theme as any).space200} ${({ theme }) => (theme as any).space300};
-  border-radius: ${({ theme }) => (theme as any).shapeCornerS};
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space300};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerS};
   transition: background-color 150ms ease, color 150ms ease;
 
   &:hover {
-    background-color: ${({ theme }) => (theme as any).colorPrimaryContainer};
-    color: ${({ theme }) => (theme as any).colorPrimary};
+    background-color: ${({ theme }) => (theme as StyledTheme).colorPrimaryContainer};
+    color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
   }
 
   &:active {
-    background-color: ${({ theme }) => (theme as any).colorPrimary};
-    color: ${({ theme }) => (theme as any).colorOnPrimary};
+    background-color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnPrimary};
   }
 `;
 
 const TypographyStyle = styled.div`
-  ${({ theme }) => (theme as any).typestyleBodySmall400};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleBodySmall400};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
 `;
 
 const TypographyUsage = styled.div`
-  ${({ theme }) => (theme as any).typestyleBodySmall400};
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
+  ${({ theme }) => (theme as StyledTheme).typestyleBodySmall400};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
 `;
 
 const DesignTokensDemo: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme } = usePebbleTheme();
   // Type assertion needed because theme types don't include all token properties
   const tokens = theme as any;
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);

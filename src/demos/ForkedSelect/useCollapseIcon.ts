@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import Icon from '@rippling/pebble/Icon';
-import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme } from '../../utils/theme';
 import { INPUT_SIZES } from '@rippling/pebble/Inputs/Input.constants';
 import type { Theme } from '@rippling/pebble/theme';
 
@@ -32,7 +32,7 @@ export function useCollapseIcon(props: {
 }) {
   const { isDisabled, isExpand, inputSize } = props;
   const { isHovered, onMouseEnter, onMouseLeave } = useHover();
-  const { theme } = useTheme();
+  const { theme } = usePebbleTheme();
 
   const listeners = useMemo(
     () => ({

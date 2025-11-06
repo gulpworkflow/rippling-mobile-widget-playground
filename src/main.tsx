@@ -3,9 +3,8 @@ import Button from '@rippling/pebble/Button';
 import Drawer from '@rippling/pebble/Drawer';
 import Dropdown from '@rippling/pebble/Dropdown';
 import ListItem from '@rippling/pebble/ListItem';
-import oneUiService, { getCurrentTheme } from '@rippling/pebble/services';
-import SnackBar from '@rippling/pebble/SnackBar';
-import { ThemeProvider, useTheme, useThemeSettings, THEME_CONFIGS } from '@rippling/pebble/theme';
+import oneUiService from '@rippling/pebble/services';
+import { ThemeProvider, useThemeSettings, THEME_CONFIGS } from '@rippling/pebble/theme';
 import resources from '@rippling/pebble/translations/locales/en-US/one-ui.json';
 import React, { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
@@ -20,6 +19,8 @@ import AppShellDemo from './demos/app-shell-demo';
 import IndexPage from './demos/index-page';
 import GettingStartedPage from './demos/getting-started-page';
 import DocViewerPage from './demos/doc-viewer-page';
+import { usePebbleTheme } from './utils/theme';
+// import { debounce } from 'lodash'; // Unused - kept for potential editor restoration
 
 // Initialize @rippling/ui package
 oneUiService.init({} as any);
@@ -103,8 +104,8 @@ const Playground = (props: { className?: string }) => {
     }
   }, []);
 
-  const { changeTheme, changeMode } = useThemeSettings() as any;
-  const { name: currentThemeName, theme, mode: currentMode } = useTheme();
+  const { changeMode } = useThemeSettings() as any;
+  const { theme, mode: currentMode } = usePebbleTheme();
 
   // Get current demo type from URL path
   const getCurrentDemoFromPath = React.useCallback(() => {
@@ -137,8 +138,6 @@ const Playground = (props: { className?: string }) => {
     storedData.showEditorBasedPreview ?? false,
   );
   const [showJSON, setShowJSON] = React.useState(storedData.showJSON ?? false);
-  const [html, setHtml] = React.useState(``);
-  const [json, setJson] = React.useState({});
   const [isDemoSwitcherOpen, setIsDemoSwitcherOpen] = React.useState(false);
   const [isTopBarVisible, setIsTopBarVisible] = React.useState(true);
 
@@ -176,23 +175,22 @@ const Playground = (props: { className?: string }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const reportError = React.useCallback((error: Error) => {
-    console.error(error);
-    SnackBar.error(error.message);
-  }, []);
+  // Commented out - currently unused since editors are disabled
+  // const reportError = React.useCallback((error: Error) => {
+  //   console.error(error);
+  //   SnackBar.error(error.message);
+  // }, []);
 
-  const handleChange = React.useMemo(
-    () =>
-      !logTypingPerf && (showPreview || showJSON || showEditorBasedPreview)
-        ? debounce(async ({ html, json }) => {
-            setHtml(await html());
-            setJson(json());
-          }, 250)
-        : undefined,
-    [logTypingPerf, showPreview, showJSON, showEditorBasedPreview],
-  );
-
-  console.log(html);
+  // const handleChange = React.useMemo(
+  //   () =>
+  //     !logTypingPerf && (showPreview || showJSON || showEditorBasedPreview)
+  //       ? debounce(async ({ html, json }: { html: () => Promise<string>; json: () => any }) => {
+  //           setHtml(await html());
+  //           setJson(json());
+  //         }, 250)
+  //       : undefined,
+  //   [logTypingPerf, showPreview, showJSON, showEditorBasedPreview],
+  // );
 
   const DEMO_OPTIONS = [
     // { type: EditorType.RICH_TEXT, label: 'Rich Text Editor' },

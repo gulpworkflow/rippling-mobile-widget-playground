@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme, StyledTheme } from '../utils/theme';
 import Select from '@rippling/pebble/Inputs/Select';
 
 /**
@@ -7,7 +7,7 @@ import Select from '@rippling/pebble/Inputs/Select';
  * Shows that components can be customized via src/overrides/
  */
 const OverrideSystemTest: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme } = usePebbleTheme();
   const [selectedValue, setSelectedValue] = useState<string | undefined>();
 
   const options = [

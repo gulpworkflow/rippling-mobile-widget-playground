@@ -15,7 +15,7 @@ import { useCollapseIcon } from '../useCollapseIcon';
 import Country from '@rippling/pebble/Atoms/Country';
 import Avatar from '@rippling/pebble/Avatar';
 import Button from '@rippling/pebble/Button';
-import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme, StyledTheme } from '../../../utils/theme';
 import Text from '@rippling/pebble/Text';
 import {
   getChipSizeFromInputSize,
@@ -87,7 +87,7 @@ const SelectControl = (props: SelectControlProps) => {
     inputSize: size,
   });
 
-  const { theme: pebbleTheme } = useTheme();
+  const { theme: pebbleTheme } = usePebbleTheme();
   // ==============================
   // memo
   // ==============================
