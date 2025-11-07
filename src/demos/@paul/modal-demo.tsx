@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Button from '@rippling/pebble/Button';
 import Drawer from '@rippling/pebble/Drawer';
-import { usePebbleTheme, StyledTheme } from '../utils/theme';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 
 const ModalDemo = () => {
   const { theme } = usePebbleTheme();

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { usePebbleTheme, StyledTheme } from '../utils/theme';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import { useNavigate } from 'react-router-dom';
 import Button from '@rippling/pebble/Button';
 import Icon from '@rippling/pebble/Icon';
@@ -223,7 +223,7 @@ const GettingStartedPage: React.FC = () => {
             <Paragraph theme={theme}>Here's a simple example to get you started:</Paragraph>
             <CodeBlock theme={theme}>{`import React from 'react';
 import styled from '@emotion/styled';
-import { usePebbleTheme, StyledTheme } from '../utils/theme';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import Button from '@rippling/pebble/Button';
 
 const MyDemo: React.FC = () => {

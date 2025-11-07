@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import { useThemeSettings, getStateColor } from '@rippling/pebble/theme';
-import { usePebbleTheme, StyledTheme } from '../utils/theme';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import Icon from '@rippling/pebble/Icon';
 import Button from '@rippling/pebble/Button';
 import Tabs from '@rippling/pebble/Tabs';
 import Page from '@rippling/pebble/Page';
 import Dropdown from '@rippling/pebble/Dropdown';
-import RipplingLogoBlack from '../assets/rippling-logo-black.svg';
-import RipplingLogoWhite from '../assets/rippling-logo-white.svg';
+import Card from '@rippling/pebble/Card';
+import RipplingLogoBlack from '@/assets/rippling-logo-black.svg';
+import RipplingLogoWhite from '@/assets/rippling-logo-white.svg';
 
 /**
- * App Shell Demo
+ * My Feature Demo
  *
  * Recreates Rippling's main application shell with:
  * - Top navigation bar
@@ -487,6 +488,18 @@ const SlotText = styled.div`
   }
 `;
 
+const CardTitle = styled.h2`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0;
+`;
+
+const CardDescription = styled.p`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  margin: ${({ theme }) => (theme as StyledTheme).space300} 0 ${({ theme }) => (theme as StyledTheme).space400} 0;
+`;
+
 interface NavItemData {
   id: string;
   label: string;
@@ -494,7 +507,7 @@ interface NavItemData {
   hasSubmenu?: boolean;
 }
 
-const AppShellDemo: React.FC = () => {
+const MyFeatureDemo: React.FC = () => {
   const { theme, mode: currentMode, name: currentThemeName } = usePebbleTheme();
   const { changeTheme, changeMode } = useThemeSettings();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -758,7 +771,7 @@ const AppShellDemo: React.FC = () => {
           <PageHeaderContainer theme={theme}>
             <PageHeaderWrapper theme={theme}>
               <Page.Header
-                title="App Shell"
+                title="My Feature"
                 shouldBeUnderlined={false}
                 size={Page.Header.SIZES.FLUID}
                 actions={
@@ -786,12 +799,17 @@ const AppShellDemo: React.FC = () => {
 
           {/* Page Content with Slots */}
           <PageContent theme={theme}>
-            <ContentSlot theme={theme}>
-              <SlotText theme={theme}>
-                <p>Section</p>
-                <p>Swap instance</p>
-              </SlotText>
-            </ContentSlot>
+            <Card.Layout padding={Card.Layout.PADDINGS.PX_24}>
+              <CardTitle theme={theme}>
+                Welcome to My Feature
+              </CardTitle>
+              <CardDescription theme={theme}>
+                This is a custom card component with content and actions.
+              </CardDescription>
+              <Button appearance={Button.APPEARANCES.PRIMARY} size={Button.SIZES.M}>
+                Get Started
+              </Button>
+            </Card.Layout>
 
             <ContentSlot theme={theme}>
               <SlotText theme={theme}>
@@ -813,4 +831,5 @@ const AppShellDemo: React.FC = () => {
   );
 };
 
-export default AppShellDemo;
+export default MyFeatureDemo;
+

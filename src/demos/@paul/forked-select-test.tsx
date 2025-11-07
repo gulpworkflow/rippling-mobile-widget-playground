@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { usePebbleTheme, StyledTheme } from '../utils/theme';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import Select from '@rippling/pebble/Inputs/Select';
 
 /**

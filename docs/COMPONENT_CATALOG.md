@@ -932,23 +932,32 @@ SnackBar.error('Failed to save changes');
 **Tabs.Tab Props:**
 - `title`: `string` - Tab label text (required)
 - `isDisabled`: `boolean` - Disable this tab
-- `badge`: `ReactNode` - Badge/count to display
+- `badge`: `{ text: string }` - Badge object with text property (e.g., `{ text: "3" }`)
 
 **⚠️ CRITICAL: Tabs use index-based navigation (numbers), NOT value-based (strings)**
 
 **Variants:**
 - `Tabs.LINK` - Link-style tabs (underline)
-- `Tabs.BUTTON` - Button-style tabs (filled background)
+- `Tabs.SWITCH` - Switch-style tabs (filled background, button-like)
+- `Tabs` (default) - Basic tabs
 
 **Example:**
 ```typescript
 const [activeTab, setActiveTab] = useState(0);
 
+// Link tabs (underlined)
 <Tabs.LINK activeIndex={activeTab} onChange={setActiveTab}>
   <Tabs.Tab title="Overview" />
   <Tabs.Tab title="Details" />
   <Tabs.Tab title="Settings" />
 </Tabs.LINK>
+
+// Switch tabs (button-style) with badges
+<Tabs.SWITCH activeIndex={activeTab} onChange={setActiveTab}>
+  <Tabs.Tab title="All" badge={{ text: "12" }} />
+  <Tabs.Tab title="Active" badge={{ text: "8" }} />
+  <Tabs.Tab title="Archived" badge={{ text: "4" }} />
+</Tabs.SWITCH>
 
 // Panel content
 <Tabs.Panel activeIndex={0} currentIndex={activeTab}>

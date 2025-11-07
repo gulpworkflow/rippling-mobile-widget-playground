@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
-import ForkedSelect from './ForkedSelect';
-import { DURATION, EASING, SCALE } from '../utils/animation-constants';
+import ForkedSelect from '@/components/ForkedSelect';
+import { DURATION, EASING, SCALE } from '@/utils/animation-constants';
 
 const fadeScaleIn = keyframes`
   from {

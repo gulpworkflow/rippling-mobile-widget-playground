@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { usePebbleTheme, StyledTheme } from '../utils/theme';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import Tabs from '@rippling/pebble/Tabs';
 import Tip from '@rippling/pebble/Tip';
 

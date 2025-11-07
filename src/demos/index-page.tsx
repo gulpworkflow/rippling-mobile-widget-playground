@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { usePebbleTheme, StyledTheme } from '../utils/theme';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import { useNavigate } from 'react-router-dom';
 import Icon from '@rippling/pebble/Icon';
 import Card from '@rippling/pebble/Card';
 import Drawer from '@rippling/pebble/Drawer';
 import TableBasic from '@rippling/pebble/TableBasic';
 import Avatar from '@rippling/pebble/Avatar';
-import { VStack, HStack } from '@rippling/pebble/Layout/Stack';
+import Tabs from '@rippling/pebble/Tabs';
+import Label from '@rippling/pebble/Label';
+import { APPEARANCES as BADGE_APPEARANCES } from '@rippling/pebble/Atoms/Badge/Badge.constants';
+import { VStack } from '@rippling/pebble/Layout/Stack';
 
 /**
  * Index Page
@@ -20,40 +23,93 @@ interface DemoCard {
   description: string;
   path: string;
   icon: string;
+  folder: string; // Which folder this demo belongs to: 'official', 'team', '@username'
 }
 
-const DEMO_CARDS: DemoCard[] = [
+// All available demos (will be filtered based on VITE_SHOW_DEMOS env var)
+const ALL_DEMO_CARDS: DemoCard[] = [
   {
     title: 'App Shell',
     description: 'Explore Rippling\'s main application shell with navigation, sidebar, and content areas.',
     path: '/app-shell-demo',
     icon: Icon.TYPES.HIERARCHY_HORIZONTAL_OUTLINE,
+    folder: 'official',
   },
   {
     title: 'Design Tokens',
     description: 'Browse and explore Pebble design tokens including colors, spacing, and typography.',
     path: '/design-tokens-demo',
     icon: Icon.TYPES.CUP_DROPLET_OUTLINE,
+    folder: '@paul',
   },
   {
     title: 'Animations',
     description: 'See Pebble animation patterns and transitions in action.',
     path: '/animations-demo',
     icon: Icon.TYPES.PLAY_CIRCLE_OUTLINE,
+    folder: '@paul',
   },
   {
     title: 'Drawer Demo',
     description: 'Explore drawer and modal patterns with various configurations.',
     path: '/drawer-demo',
     icon: Icon.TYPES.DOCUMENT_OUTLINE,
+    folder: '@paul',
   },
   {
     title: 'Forked Select Test',
     description: 'Test forked select component variations and interactions.',
     path: '/forked-select-test',
     icon: Icon.TYPES.LIST_OUTLINE,
+    folder: '@paul',
+  },
+  {
+    title: 'My Feature',
+    description: 'My custom feature demo based on the app shell template.',
+    path: '/my-feature-demo',
+    icon: Icon.TYPES.STAR_OUTLINE,
+    folder: '@paul',
   },
 ];
+
+// Get demos that user has access to based on VITE_SHOW_DEMOS environment variable
+const getAccessibleDemos = (): DemoCard[] => {
+  const showDemos = import.meta.env.VITE_SHOW_DEMOS || 'official';
+  
+  // If set to 'all', show everything
+  if (showDemos === 'all') {
+    return ALL_DEMO_CARDS;
+  }
+  
+  // Split by comma and trim whitespace
+  const foldersToShow = showDemos.split(',').map((f: string) => f.trim());
+  
+  // Filter demos that match any of the specified folders
+  return ALL_DEMO_CARDS.filter(demo => 
+    foldersToShow.includes(demo.folder)
+  );
+};
+
+// Filter demos based on active tab
+const filterDemosByTab = (demos: DemoCard[], activeTab: string): DemoCard[] => {
+  switch (activeTab) {
+    case 'all':
+      return demos; // Show all accessible demos
+    case 'personal':
+      // Show only current user's demos (@paul folder)
+      // Private demos aren't in the list (gitignored)
+      return demos.filter(demo => demo.folder === '@paul');
+    case 'team':
+      // Show team demos + other people's @ folders (exclude current user's @paul)
+      return demos.filter(demo => 
+        demo.folder === 'team' || (demo.folder.startsWith('@') && demo.folder !== '@paul')
+      );
+    case 'templates':
+      return demos.filter(demo => demo.folder === 'official');
+    default:
+      return demos;
+  }
+};
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -105,14 +161,18 @@ const Description = styled.div`
   }
 `;
 
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: ${({ theme }) => (theme as StyledTheme).space800};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
+`;
+
 const SectionLabel = styled.h2`
   ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space400} 0;
-`;
-
-const SectionLabelCount = styled.span`
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  margin: 0;
 `;
 
 const GuidesSection = styled.section`
@@ -190,6 +250,7 @@ const DemoGrid = styled.div`
 `;
 
 const DemoCardWrapper = styled.div`
+  position: relative;
   cursor: pointer;
   transition: transform 150ms ease;
   
@@ -202,6 +263,14 @@ const DemoCardWrapper = styled.div`
   }
 `;
 
+const BadgeWrapper = styled.div`
+  position: absolute;
+  top: ${({ theme }) => (theme as StyledTheme).space300};
+  right: ${({ theme }) => (theme as StyledTheme).space300};
+  z-index: 1;
+  pointer-events: none;
+`;
+
 const CardContent = styled.div`
   display: flex;
   flex-direction: column;
@@ -212,7 +281,7 @@ const CardIcon = styled.div`
   width: 48px;
   height: 48px;
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
-  background-color: ${({ theme }) => (theme as StyledTheme).colorPrimaryContainer};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorPrimaryVariant};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -315,10 +384,50 @@ const StepNumber = styled.span`
   margin-right: ${({ theme }) => (theme as StyledTheme).space200};
 `;
 
+const EmptyState = styled.div`
+  text-align: center;
+  padding: ${({ theme }) => (theme as StyledTheme).space1600} ${({ theme }) => (theme as StyledTheme).space800};
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerXl};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space800};
+`;
+
+const EmptyStateIcon = styled.div`
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
+  opacity: 0.6;
+`;
+
+const EmptyStateTitle = styled.h3`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0 0 ${({ theme }) => (theme as StyledTheme).space400} 0;
+`;
+
+const EmptyStateDescription = styled.p`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+
+  code {
+    background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+    padding: 2px 6px;
+    border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerS};
+    ${({ theme }) => (theme as StyledTheme).typestyleV2CodeSmall};
+  }
+`;
+
 const IndexPage: React.FC = () => {
   const { theme } = usePebbleTheme();
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+
+  // Tab configuration: maps index to filter type
+  const tabFilters = ['all', 'personal', 'team', 'templates'];
+  const activeTabFilter = tabFilters[activeTabIndex];
 
   // Get user preferences from environment (with safe fallbacks)
   const userName = import.meta.env.VITE_USER_NAME;
@@ -331,6 +440,28 @@ const IndexPage: React.FC = () => {
   // Create personalized greeting with fallback to "Rippler"
   const firstName = userName ? userName.split(' ')[0] : 'Rippler';
   const displayName = userName || 'User';
+
+  // Get accessible demos based on env var, then filter by active tab
+  const accessibleDemos = getAccessibleDemos();
+  const filteredDemos = filterDemosByTab(accessibleDemos, activeTabFilter);
+
+  // Calculate badge counts for each tab
+  const allCount = accessibleDemos.length;
+  const personalCount = accessibleDemos.filter(demo => demo.folder === '@paul').length;
+  const teamCount = accessibleDemos.filter(demo => 
+    demo.folder === 'team' || (demo.folder.startsWith('@') && demo.folder !== '@paul')
+  ).length;
+  const templatesCount = accessibleDemos.filter(demo => demo.folder === 'official').length;
+
+  // Tab descriptions
+  const tabDescriptions = {
+    all: 'All demos you have access to',
+    personal: 'Your personal demos and experiments',
+    team: 'Shared demos from teammates',
+    templates: 'Official starter templates you can copy',
+  };
+  
+  const currentDescription = tabDescriptions[activeTabFilter as keyof typeof tabDescriptions];
 
   return (
     <PageContainer theme={theme}>
@@ -364,33 +495,104 @@ const IndexPage: React.FC = () => {
           </Description>
         </Header>
 
-        <SectionLabel theme={theme}>
-          Your demos <SectionLabelCount theme={theme}>({DEMO_CARDS.length})</SectionLabelCount>
-        </SectionLabel>
+        {/* Section header with tabs */}
+        <SectionHeader theme={theme}>
+          <SectionLabel theme={theme}>
+            {currentDescription}
+          </SectionLabel>
+          
+          <Tabs.SWITCH activeIndex={activeTabIndex} onChange={(index) => setActiveTabIndex(Number(index))}>
+            <Tabs.Tab 
+              title="All" 
+              badge={{ 
+                text: String(allCount), 
+                appearance: activeTabIndex === 0 ? BADGE_APPEARANCES.PRIMARY_LIGHT : BADGE_APPEARANCES.NEUTRAL 
+              }} 
+            />
+            <Tabs.Tab 
+              title="Personal" 
+              badge={{ 
+                text: String(personalCount), 
+                appearance: activeTabIndex === 1 ? BADGE_APPEARANCES.PRIMARY_LIGHT : BADGE_APPEARANCES.NEUTRAL 
+              }} 
+            />
+            <Tabs.Tab 
+              title="Team" 
+              badge={{ 
+                text: String(teamCount), 
+                appearance: activeTabIndex === 2 ? BADGE_APPEARANCES.PRIMARY_LIGHT : BADGE_APPEARANCES.NEUTRAL 
+              }} 
+            />
+            <Tabs.Tab 
+              title="Templates" 
+              badge={{ 
+                text: String(templatesCount), 
+                appearance: activeTabIndex === 3 ? BADGE_APPEARANCES.PRIMARY_LIGHT : BADGE_APPEARANCES.NEUTRAL 
+              }} 
+            />
+          </Tabs.SWITCH>
+        </SectionHeader>
+
+        {activeTabFilter === 'personal' && filteredDemos.length === 0 && (
+          <EmptyState theme={theme}>
+            <EmptyStateIcon theme={theme}>
+              <Icon type={Icon.TYPES.ADD_CIRCLE_OUTLINE} size={48} color={theme.colorOnSurfaceVariant} />
+            </EmptyStateIcon>
+            <EmptyStateTitle theme={theme}>No personal demos yet</EmptyStateTitle>
+            <EmptyStateDescription theme={theme}>
+              Get started by creating your first demo! Click the "+ Create New Demo" button below.
+              <br /><br />
+              Tip: Start in your <code>private/</code> folder for experiments, then move to <code>@paul/</code> when ready to share.
+            </EmptyStateDescription>
+          </EmptyState>
+        )}
+
+        {activeTabFilter === 'team' && filteredDemos.length === 0 && (
+          <EmptyState theme={theme}>
+            <EmptyStateIcon theme={theme}>
+              <Icon type={Icon.TYPES.USERS_OUTLINE} size={48} color={theme.colorOnSurfaceVariant} />
+            </EmptyStateIcon>
+            <EmptyStateTitle theme={theme}>No team demos yet</EmptyStateTitle>
+            <EmptyStateDescription theme={theme}>
+              Team demos and other collaborators' demos will appear here once they're added to the repository.
+            </EmptyStateDescription>
+          </EmptyState>
+        )}
 
         <DemoGrid theme={theme}>
-          {DEMO_CARDS.map((demo) => (
-            <DemoCardWrapper
-              key={demo.path}
-              onClick={() => navigate(demo.path)}
-            >
-              <Card.Layout padding={Card.Layout.PADDINGS.PX_24}>
-                <CardContent>
-                  <CardIcon theme={theme}>
-                    <Icon 
-                      type={demo.icon} 
-                      size={24} 
-                      color={theme.colorOnPrimaryContainer} 
-                    />
-                  </CardIcon>
-                  <CardTitle theme={theme}>{demo.title}</CardTitle>
-                  <CardDescription theme={theme}>
-                    {demo.description}
-                  </CardDescription>
-                </CardContent>
-              </Card.Layout>
-            </DemoCardWrapper>
-          ))}
+          {filteredDemos.map((demo) => {
+            const isOfficialTemplate = demo.folder === 'official';
+            
+            return (
+              <DemoCardWrapper
+                key={demo.path}
+                onClick={() => navigate(demo.path)}
+              >
+                {isOfficialTemplate && (
+                  <BadgeWrapper theme={theme}>
+                    <Label size={Label.SIZES.S} appearance={Label.APPEARANCES.NEUTRAL}>
+                      Official Template
+                    </Label>
+                  </BadgeWrapper>
+                )}
+                <Card.Layout padding={Card.Layout.PADDINGS.PX_24}>
+                  <CardContent>
+                    <CardIcon theme={theme}>
+                      <Icon 
+                        type={demo.icon} 
+                        size={24} 
+                        color={theme.colorPrimary}
+                      />
+                    </CardIcon>
+                    <CardTitle theme={theme}>{demo.title}</CardTitle>
+                    <CardDescription theme={theme}>
+                      {demo.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card.Layout>
+              </DemoCardWrapper>
+            );
+          })}
           
           {/* Create New Demo Card */}
           <AddCardWrapper onClick={() => setIsDrawerOpen(true)}>

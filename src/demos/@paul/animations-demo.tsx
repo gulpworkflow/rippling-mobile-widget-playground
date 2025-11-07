@@ -8,10 +8,10 @@ import ModalCloseButton from '@rippling/pebble/Modal/ModalCloseButton';
 import Drawer from '@rippling/pebble/Drawer';
 import Dropdown from '@rippling/pebble/Dropdown';
 import Select from '@rippling/pebble/Inputs/Select';
-import ForkedSelect from './ForkedSelect'; // Our forked Select with rotating caret
+import ForkedSelect from '@/components/ForkedSelect'; // Our forked Select with rotating caret
 import AnimatedForkedSelect from './AnimatedForkedSelect'; // Forked Select with animations
-import { usePebbleTheme, StyledTheme } from '../utils/theme';
-import { DURATION, EASING, SCALE, enteringMixins } from '../utils/animation-constants';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
+import { DURATION, EASING, SCALE, enteringMixins } from '@/utils/animation-constants';
 import AnimatedSelect from './AnimatedSelect';
 import AnimatedDropdown from './AnimatedDropdown';
 

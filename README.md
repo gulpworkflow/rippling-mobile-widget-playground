@@ -46,6 +46,38 @@ AI creates the file, wires it up, and you'll see it live at the URL.
 
 ---
 
+## 🚀 Deploy Your Own Playground
+
+Want to share your demos online? Deploy your own instance to Vercel (it's free and takes 2 minutes):
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/pbest/pebble-playground&env=VITE_SHOW_DEMOS&envDescription=Which%20demo%20folders%20to%20show&envLink=https://github.com/pbest/pebble-playground/blob/main/docs/PUBLISH_WORKFLOW.md)
+
+### Quick Deploy Steps
+
+1. **Click the "Deploy with Vercel" button above**
+2. **Sign in or create a Vercel account** (free for personal projects)
+3. **Configure your deployment:**
+   - Set `VITE_SHOW_DEMOS` to `official` (shows only blessed demos)
+   - Or set to `official,team,@yourname` (shows official, team, and your personal demos)
+4. **Deploy!** Vercel builds and deploys automatically
+5. **Your playground is live** at `https://your-name-pebble-playground.vercel.app`
+
+### Auto-Deploy on Every Commit
+
+Once deployed, Vercel automatically rebuilds and deploys whenever you push to GitHub. No manual steps needed!
+
+### For Designers (No Deployment Experience?)
+
+Don't worry! Vercel walks you through everything:
+- Click the deploy button → follow the prompts
+- After deployment, go to **Project Settings → Environment Variables**
+- Add: `VITE_SHOW_DEMOS` = `official` (or customize as needed)
+- That's it! Share your URL with teammates
+
+**Want to learn more about the publish workflow?** See [PUBLISH_WORKFLOW.md](./docs/PUBLISH_WORKFLOW.md) for the full collaboration strategy.
+
+---
+
 ## How to Use With AI (Cursor)
 
 This playground is designed to work seamlessly with AI coding assistants like Cursor. Here's the pattern:
@@ -83,11 +115,19 @@ This playground is designed to work seamlessly with AI coding assistants like Cu
 
 ### 📁 Your Demos (`src/demos/`)
 
-This is where your prototypes live. Each demo is a separate `.tsx` file. Start by copying `app-shell-demo.tsx` as a template—it includes navigation, sidebar, and all the Rippling app shell patterns.
+This is where your prototypes live, organized into folders:
+
+- **`official/`** - Blessed starter templates (app shell, design tokens, etc.)
+- **`team/`** - Collaborative work-in-progress demos
+- **`@yourname/`** - Your personal shareable demos
+- **`private/`** - Your scratch pad (gitignored, never committed)
 
 **Quickest way to create a new demo:**
-- Just ask Cursor: *"Create a new demo called [Name] by copying app-shell-demo.tsx"*
-- It handles everything: creates the file, wires it up, adds it to the homepage
+1. Start in `private/` folder for messy experiments
+2. When it works, move to `@yourname/` to share with team
+3. If team loves it, promote to `team/` or `official/`
+
+**Or just ask Cursor:** *"Create a new demo in private/ called employee-directory"*
 
 ### 📖 Built-in Docs (`docs/`)
 
@@ -97,8 +137,11 @@ AI automatically references these docs when building your prototypes:
 - **Token Catalog** - Colors, spacing, typography
 - **Component Guides** - When to use each component and why
 - **Pattern Library** - Common UI patterns (modals, forms, tables, etc.)
+- **Import Patterns** - How to import shared utilities and assets
 
 You don't need to read these—AI does it for you. But they're there if you want to learn!
+
+**Pro tip:** Always use `@/` imports for shared resources (e.g., `@/utils/theme`, `@/assets/logo.svg`) so your demos work from any folder. See [docs/IMPORT_PATTERNS.md](./docs/IMPORT_PATTERNS.md) for details.
 
 ### 🎨 Live Examples
 

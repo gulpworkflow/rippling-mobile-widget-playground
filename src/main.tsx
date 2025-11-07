@@ -11,11 +11,12 @@ import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import GlobalStyle from '@rippling/pebble/GlobalStyle';
 import Icon from '@rippling/pebble/Icon';
-import ModalDemo from './demos/modal-demo';
-import AnimationsDemo from './demos/animations-demo';
-import DesignTokensDemo from './demos/design-tokens-demo';
-import ForkedSelectTest from './demos/forked-select-test';
-import AppShellDemo from './demos/app-shell-demo';
+import ModalDemo from './demos/@paul/modal-demo';
+import AnimationsDemo from './demos/@paul/animations-demo';
+import DesignTokensDemo from './demos/@paul/design-tokens-demo';
+import ForkedSelectTest from './demos/@paul/forked-select-test';
+import MyFeatureDemo from './demos/@paul/my-feature-demo';
+import AppShellDemo from './demos/official/app-shell-demo';
 import IndexPage from './demos/index-page';
 import GettingStartedPage from './demos/getting-started-page';
 import DocViewerPage from './demos/doc-viewer-page';
@@ -69,6 +70,7 @@ enum EditorType {
   ANIMATIONS = 'animations',
   DESIGN_TOKENS = 'design-tokens',
   FORKED_SELECT_TEST = 'forked-select-test',
+  MY_FEATURE = 'my-feature',
   APP_SHELL = 'app-shell',
 }
 
@@ -79,6 +81,7 @@ const DEMO_ROUTES: Record<EditorType, string> = {
   [EditorType.ANIMATIONS]: '/animations-demo',
   [EditorType.MODAL_DEMO]: '/drawer-demo',
   [EditorType.FORKED_SELECT_TEST]: '/forked-select-test',
+  [EditorType.MY_FEATURE]: '/my-feature-demo',
 };
 
 // Reverse map for path to demo type
@@ -201,6 +204,7 @@ const Playground = (props: { className?: string }) => {
     { type: EditorType.ANIMATIONS, label: 'Animations' },
     { type: EditorType.MODAL_DEMO, label: 'Drawer Demo' },
     { type: EditorType.FORKED_SELECT_TEST, label: 'Forked Select Test' },
+    { type: EditorType.MY_FEATURE, label: 'My Feature' },
   ];
 
   const SETTINGS_OPTIONS = [
@@ -355,13 +359,13 @@ const Playground = (props: { className?: string }) => {
 
   return (
     <>
-      {editorType !== EditorType.APP_SHELL && buttons}
+      {editorType !== EditorType.APP_SHELL && editorType !== EditorType.MY_FEATURE && buttons}
       <div
         role="main"
         style={{
           backgroundColor: theme.colorSurface,
           minHeight: '100vh',
-          paddingTop: isTopBarVisible && editorType !== EditorType.APP_SHELL ? '60px' : '0',
+          paddingTop: isTopBarVisible && editorType !== EditorType.APP_SHELL && editorType !== EditorType.MY_FEATURE ? '60px' : '0',
           transition: 'padding-top 0.2s ease',
         }}
         className={className}
@@ -431,6 +435,8 @@ const Playground = (props: { className?: string }) => {
 
         {editorType === EditorType.FORKED_SELECT_TEST && <ForkedSelectTest />}
 
+        {editorType === EditorType.MY_FEATURE && <MyFeatureDemo />}
+
         {/* EDITOR PREVIEW DISABLED - See EDITOR_ISSUE_ANALYSIS.md */}
         {/* <div style={{ maxWidth: '900px', margin: '32px auto 0' }}>
         {!logTypingPerf && showEditorBasedPreview && (
@@ -497,6 +503,7 @@ init().then(() => {
             <Route path="/animations-demo" element={<Playground />} />
             <Route path="/drawer-demo" element={<Playground />} />
             <Route path="/forked-select-test" element={<Playground />} />
+            <Route path="/my-feature-demo" element={<Playground />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ThemeProvider>

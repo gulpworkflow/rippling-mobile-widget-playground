@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import { usePebbleTheme, StyledTheme } from '../utils/theme';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Icon from '@rippling/pebble/Icon';
 import Button from '@rippling/pebble/Button';

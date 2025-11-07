@@ -47,9 +47,23 @@ color: '#000000'
 // ❌ Wrong component name
 import Tooltip from '@rippling/pebble/Tooltip';  // It's called Tip!
 
+// ❌ Typography component doesn't exist!
+import Typography from '@rippling/pebble/Typography';
+<Typography variant="heading">Title</Typography>
+
+// ❌ Wrong Card API
+<Card>
+  <Card.Section>Content</Card.Section>  // Card.Section doesn't exist!
+</Card>
+
 // ❌ Hardcoded spacing
 padding: '16px'
 margin: '24px'
+
+// ❌ Relative imports for shared resources
+import { usePebbleTheme } from '../utils/theme';
+import { usePebbleTheme } from '../../utils/theme';
+import logo from '../assets/logo.svg';
 ```
 
 ### ALWAYS do this:
@@ -68,16 +82,35 @@ color: theme.colorOnSurface
 // ✅ Correct component name
 import Tip from '@rippling/pebble/Tip';
 
+// ✅ Use styled components for text (Typography is NOT a component!)
+const Title = styled.h2`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+// ✅ Correct Card API
+import Card from '@rippling/pebble/Card';
+<Card.Layout padding={Card.Layout.PADDINGS.PX_24}>
+  <h2>Title</h2>
+  <p>Content goes here</p>
+</Card.Layout>
+
 // ✅ Use spacing tokens
 padding: theme.space400
 margin: theme.space600
+
+// ✅ Use @/ alias for shared imports (works from any folder depth!)
+import { usePebbleTheme } from '@/utils/theme';
+import { DURATION, EASING } from '@/utils/animation-constants';
+import RipplingLogo from '@/assets/rippling-logo-black.svg';
+import ForkedSelect from '@/demos/ForkedSelect';
 
 // ✅ Use HStack/VStack for layouts
 import { HStack, VStack } from '@rippling/pebble/Layout/Stack';
 
 <HStack gap="1rem" alignItems="center">
   <Avatar name="John" />
-  <Typography>John Doe</Typography>
+  <span>John Doe</span>
 </HStack>
 
 // Instead of:

@@ -2,7 +2,7 @@ import React from 'react';
 import Dropdown from '@rippling/pebble/Dropdown';
 import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
-import { DURATION, EASING, SCALE } from '../utils/animation-constants';
+import { DURATION, EASING, SCALE } from '@/utils/animation-constants';
 
 const fadeScaleIn = keyframes`
   from {
