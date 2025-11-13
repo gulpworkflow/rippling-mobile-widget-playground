@@ -15,13 +15,13 @@ const SearchInput = (props: SearchInputProps) => {
     placeholder,
     theme,
     value,
-    isLoading,
     ...rest
   } = props;
 
   return (
     <Text
-      ref={innerRef as any}
+      ref={innerRef}
+      autoComplete="auto-complete-off"
       shouldPersistCursorPosition
       canClear={false}
       isDisabled={isDisabled}
@@ -31,9 +31,9 @@ const SearchInput = (props: SearchInputProps) => {
       onKeyDown={onKeyDown}
       placeholder={placeholder}
       testId={SEARCH_TEST_ID}
-      theme={sanitizeTheme((Text as any).THEMES?.INLINE_SELECT_SEARCH, theme)}
+      theme={sanitizeTheme(Text.THEMES.INLINE_SELECT_SEARCH, theme)}
       value={value}
-      {...(rest as any)}
+      {...rest}
     />
   );
 };

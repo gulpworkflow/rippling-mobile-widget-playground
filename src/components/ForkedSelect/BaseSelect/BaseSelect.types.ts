@@ -1,18 +1,12 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { PopperProps, ReferenceChildrenProps, Placement } from '@rippling/pebble/Popper';
+import type { TextRefObject } from '@rippling/pebble/Text';
 import type { FlatListItem, MenuListProps, NestedListItem, OnClickEvent } from '@rippling/pebble/MenuList';
 import type { ALLOWED_ARIA_PROPS, THEMES } from './BaseSelect.constants';
 import type { INPUT_SIZES } from '@rippling/pebble/Inputs/Input.constants';
 import type { BaseInputProps } from '@rippling/pebble/Inputs/Input.types';
 
-// Local type definition for TextRefObject since it's not exported from @rippling/pebble/Text
-export type TextRefObject = {
-  getDOM: () => HTMLInputElement | null;
-  focus: () => void;
-  blur: () => void;
-};
-
-export type { FlatListItem, ReferenceChildrenProps };
+export type { FlatListItem, ReferenceChildrenProps, TextRefObject };
 
 export type List = NestedListItem[] | FlatListItem[];
 export type SelectedOptions = FlatListItem | FlatListItem[];

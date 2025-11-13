@@ -1,4 +1,5 @@
 import Styled from '@emotion/styled';
+import React from 'react';
 import { useTranslation } from '@rippling/lib-i18n/useTranslation';
 import type { SwitchProps } from '@rippling/pebble/Inputs/Switch';
 import Switch from '@rippling/pebble/Inputs/Switch';
@@ -7,7 +8,7 @@ import { useUniqueId } from '@rippling/pebble/hooks';
 import type { CheckboxProps } from '@rippling/pebble/Inputs/Checkbox';
 import Checkbox from '@rippling/pebble/Inputs/Checkbox';
 import Text from '@rippling/pebble/Text';
-import { usePebbleTheme } from '../../../utils/theme';
+import { usePebbleTheme, StyledTheme } from '../../../utils/theme';
 
 /** styles * */
 const StyledSwitchContainer = Styled.div`
@@ -62,8 +63,8 @@ const SelectAllToggle = (props: SelectAllToggleProps) => {
   } = props;
 
   const { theme } = usePebbleTheme();
-  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select.selectAllToggle' as any });
-  const switchLabel = t('switchLabel' as any);
+  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select.selectAllToggle' });
+  const switchLabel = t('switchLabel');
 
   // eslint-disable-next-line rippling-eslint/no-hard-coded-strings
   const id = useUniqueId({ prefix: 'select-all-toggle' });
@@ -116,7 +117,7 @@ const SelectAllToggle = (props: SelectAllToggleProps) => {
           typestyle={theme.typestyleBodyMedium600}
           color={isDisabled ? theme.colorOnDisabledSurface : theme.colorOnSurface}
         >
-          {t('selectedCount' as any, { selectedCount })}
+          {t('selectedCount', { selectedCount })}
         </Text>
       ) : (
         <span /> // Need to render something to keep the layout consistent

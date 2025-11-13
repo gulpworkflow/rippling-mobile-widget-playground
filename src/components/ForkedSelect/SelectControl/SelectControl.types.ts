@@ -1,5 +1,5 @@
 import type { BaseSelectProps } from '../BaseSelect';
-import type { TextRefObject } from '../BaseSelect/BaseSelect.types';
+import type { TextRefObject } from '@rippling/pebble/Text';
 import type { ACTION_TYPES } from '../Select.constants';
 import type { INPUT_SIZES } from '@rippling/pebble/Inputs/Input.constants';
 

@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
 import ForkedSelect from '@/components/ForkedSelect';
 import { DURATION, EASING, SCALE } from '@/utils/animation-constants';
-import type { StateSelectedOption } from '@rippling/pebble/Inputs/Select/Select.types';
 
 const fadeScaleIn = keyframes`
   from {
@@ -54,7 +53,7 @@ interface AnimatedForkedSelectProps {
   placeholder?: string;
   list: Array<{ label: string; value: string }>;
   value?: string;
-  onChange?: (value: unknown, selectedOption: StateSelectedOption, extraParams?: { event?: any; created?: boolean }) => void;
+  onChange?: (value: string) => void;
 }
 
 const AnimatedForkedSelect: React.FC<AnimatedForkedSelectProps> = props => {

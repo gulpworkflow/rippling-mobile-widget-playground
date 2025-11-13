@@ -56,7 +56,7 @@ export const CompositionDetail: React.FC = () => {
           appearance={Button.APPEARANCES.GHOST}
           size={Button.SIZES.M}
           icon={{
-            type: Icon.TYPES.ARROW_LEFT,
+            type: Icon.TYPES.ARROW_LEFT_OUTLINE,
             alignment: Button.ICON_ALIGNMENTS.LEFT,
           }}
           onClick={handleBackToList}

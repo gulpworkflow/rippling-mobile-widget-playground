@@ -3,7 +3,6 @@ import Select from '@rippling/pebble/Inputs/Select';
 import styled from '@emotion/styled';
 import { keyframes, css, Global } from '@emotion/react';
 import { DURATION, EASING, SCALE } from '@/utils/animation-constants';
-import type { StateSelectedOption } from '@rippling/pebble/Inputs/Select/Select.types';
 
 const fadeScaleIn = keyframes`
   from {
@@ -41,7 +40,7 @@ interface AnimatedSelectProps {
   placeholder?: string;
   list: Array<{ label: string; value: string }>;
   value?: string;
-  onChange?: (value: unknown, selectedOption: StateSelectedOption, extraParams?: { event?: any; created?: boolean }) => void;
+  onChange?: (value: string) => void;
 }
 
 const AnimatedSelect: React.FC<AnimatedSelectProps> = props => {

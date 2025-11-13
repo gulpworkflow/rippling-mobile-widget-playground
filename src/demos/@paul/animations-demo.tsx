@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import styled from '@emotion/styled';
+import { keyframes } from '@emotion/react';
 import Button from '@rippling/pebble/Button';
 import Modal from '@rippling/pebble/Modal';
 import ModalFooter from '@rippling/pebble/Modal/ModalFooter';
@@ -6,10 +8,138 @@ import ModalCloseButton from '@rippling/pebble/Modal/ModalCloseButton';
 import Drawer from '@rippling/pebble/Drawer';
 import Dropdown from '@rippling/pebble/Dropdown';
 import Select from '@rippling/pebble/Inputs/Select';
+import ForkedSelect from '@/components/ForkedSelect'; // Our forked Select with rotating caret
 import AnimatedForkedSelect from './AnimatedForkedSelect'; // Forked Select with animations
-import { usePebbleTheme } from '@/utils/theme';
-import { DURATION, EASING, SCALE } from '@/utils/animation-constants';
+import { usePebbleTheme, StyledTheme } from '@/utils/theme';
+import { DURATION, EASING, SCALE, enteringMixins } from '@/utils/animation-constants';
+import AnimatedSelect from './AnimatedSelect';
 import AnimatedDropdown from './AnimatedDropdown';
+
+// Improved Button with active scale animation using CSS variable
+const ImprovedButton = styled(Button)`
+  transition: transform ${DURATION.fast} ${EASING.easeOut} !important;
+
+  &:active {
+    transform: scale(${SCALE.buttonActive}) !important;
+  }
+
+  /* Also apply on mousedown for immediate feedback */
+  &[data-pressed='true'] {
+    transform: scale(${SCALE.buttonActive}) !important;
+  }
+`;
+
+// Modal backdrop fade animation
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+// Modal content fade + scale animation
+const fadeScaleIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(${SCALE.initial});
+  }
+  to {
+    opacity: 1;
+    transform: scale(${SCALE.full});
+  }
+`;
+
+// Drawer slide animation
+const slideInRight = keyframes`
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+`;
+
+// Wrapper for improved Modal animation
+const ImprovedModalWrapper = styled.div`
+  /* Override Pebble's default modal animations */
+  > div > div {
+    animation: ${fadeScaleIn} ${DURATION.fast} ${EASING.easeOut} !important;
+  }
+
+  /* Target the modal dialog specifically */
+  [role='dialog'] {
+    animation: ${fadeScaleIn} ${DURATION.fast} ${EASING.easeOut} !important;
+  }
+
+  /* Backdrop animation */
+  > div:first-of-type {
+    animation: ${fadeIn} ${DURATION.fast} ${EASING.easeOut} !important;
+  }
+`;
+
+// Wrapper for improved Drawer animation
+const ImprovedDrawerWrapper = styled.div`
+  /* Override Pebble's default drawer animations */
+  > div > div {
+    animation: ${slideInRight} ${DURATION.standard} ${EASING.easeOut} !important;
+  }
+
+  [role='dialog'] {
+    animation: ${slideInRight} ${DURATION.standard} ${EASING.easeOut} !important;
+  }
+
+  /* Also target the wrapper */
+  > div {
+    > div:last-child {
+      animation: ${slideInRight} ${DURATION.standard} ${EASING.easeOut} !important;
+    }
+  }
+`;
+
+// Keyframe for fade + scale out
+const fadeScaleOut = keyframes`
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(${SCALE.initial});
+  }
+`;
+
+// Wrapper for improved Dropdown animation with exit support
+const ImprovedDropdownWrapper = styled.div`
+  /* Add a global style to handle exit animations */
+  .improved-dropdown-menu-exit {
+    animation: ${fadeScaleOut} ${DURATION.fast} ${EASING.easeIn} forwards;
+    transform-origin: var(--transform-origin, top);
+  }
+
+  /* Target the dropdown menu for entrance */
+  [role='menu'],
+  [role='listbox'] {
+    animation: ${fadeScaleIn} ${DURATION.fast} ${EASING.easeOut};
+    transform-origin: var(--transform-origin, top);
+  }
+`;
+
+// Wrapper for improved Select animation with exit support
+const ImprovedSelectWrapper = styled.div`
+  /* Add a global style to handle exit animations */
+  .improved-select-menu-exit {
+    animation: ${fadeScaleOut} ${DURATION.fast} ${EASING.easeIn} forwards;
+    transform-origin: var(--transform-origin, top);
+  }
+
+  /* Target the select menu for entrance */
+  [role='listbox'] {
+    animation: ${fadeScaleIn} ${DURATION.fast} ${EASING.easeOut};
+    transform-origin: var(--transform-origin, top);
+  }
+`;
 
 const AnimationsDemo = () => {
   const { theme } = usePebbleTheme();

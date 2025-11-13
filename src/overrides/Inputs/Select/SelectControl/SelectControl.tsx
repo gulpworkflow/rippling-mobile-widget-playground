@@ -15,7 +15,7 @@ import { useCollapseIcon } from '@rippling/pebble/Internals/hooks/useCollapseIco
 import Country from '@rippling/pebble/Atoms/Country';
 import Avatar from '@rippling/pebble/Avatar';
 import Button from '@rippling/pebble/Button';
-import { usePebbleTheme } from '../../../../utils/theme';
+import { useTheme } from '@rippling/pebble/theme';
 import Text from '@rippling/pebble/Text';
 import ToggleableArrow from '@rippling/pebble/Atoms/ToggleableArrow';
 import {
@@ -88,7 +88,7 @@ const SelectControl = (props: SelectControlProps) => {
     inputSize: size,
   });
 
-  const { theme: pebbleTheme } = usePebbleTheme();
+  const { theme: pebbleTheme } = useTheme();
   // ==============================
   // memo
   // ==============================
@@ -97,13 +97,13 @@ const SelectControl = (props: SelectControlProps) => {
     [selectedOptions, isMulti],
   );
 
-  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select' as any });
-  const SELECT_PLACEHOLDER = t('placeholder' as any);
-  const SEARCH_INPUT_PLACEHOLDER = t('searchInputPlaceholder' as any);
+  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select' });
+  const SELECT_PLACEHOLDER = t('placeholder');
+  const SEARCH_INPUT_PLACEHOLDER = t('searchInputPlaceholder');
 
   const iconTipProps = useMemo(
     () => ({
-      content: t('selectControl.clearTip' as any),
+      content: t('selectControl.clearTip'),
       placement: Icon.TOOLTIP_PLACEMENTS.RIGHT,
     }),
     [t],
@@ -249,7 +249,7 @@ const SelectControl = (props: SelectControlProps) => {
         <Styled.LeftAssetContainer>
           <Icon
             type={option.leftIconType}
-            size={getLeftIconSizeFromInputSize({ size, theme: pebbleTheme as any })}
+            size={getLeftIconSizeFromInputSize({ size, theme: pebbleTheme })}
             color={pebbleTheme.colorOnSurface}
           />
         </Styled.LeftAssetContainer>
@@ -271,7 +271,7 @@ const SelectControl = (props: SelectControlProps) => {
       return (
         <Styled.DefaultWrapper>
           {renderLeftDisplayIcon(selectedOptions)}
-          <Text typestyle={getTypestyleFromInputSize({ size, theme: pebbleTheme as any })}>
+          <Text typestyle={getTypestyleFromInputSize({ size, theme: pebbleTheme })}>
             {option?.label}
           </Text>
         </Styled.DefaultWrapper>
@@ -317,7 +317,7 @@ const SelectControl = (props: SelectControlProps) => {
     return (
       iconProps.type && (
         <Icon
-          size={getSearchIconSizeFromInputSize({ theme: pebbleTheme as any, size })}
+          size={getSearchIconSizeFromInputSize({ theme: pebbleTheme, size })}
           color={pebbleTheme.colorOnSurface}
           {...iconPropsLocal}
         />
@@ -346,7 +346,7 @@ const SelectControl = (props: SelectControlProps) => {
       return (
         <Styled.NonSearchActionElement {...getNonInputControlProps()}>
           <Text
-            typestyle={getPlaceholderTypestyleFromInputSize({ size, theme: pebbleTheme as any })}
+            typestyle={getPlaceholderTypestyleFromInputSize({ size, theme: pebbleTheme })}
             color={pebbleTheme.colorOnSurfaceVariant}
           >
             {placeholder || SELECT_PLACEHOLDER}
@@ -372,7 +372,7 @@ const SelectControl = (props: SelectControlProps) => {
       <Styled.NonSearchActionElement {...getNonInputControlProps()}>
         {isEmpty(selectedOptions) ? (
           <Text
-            typestyle={getPlaceholderTypestyleFromInputSize({ size, theme: pebbleTheme as any })}
+            typestyle={getPlaceholderTypestyleFromInputSize({ size, theme: pebbleTheme })}
             color={pebbleTheme.colorOnSurfaceVariant}
           >
             {placeholder || SELECT_PLACEHOLDER}
@@ -398,7 +398,7 @@ const SelectControl = (props: SelectControlProps) => {
           isInline
           padding={{
             top: getButtonAffixTopPaddingFromInputSize({
-              theme: pebbleTheme as any,
+              theme: pebbleTheme,
               isMulti,
               size,
             }),
@@ -407,7 +407,7 @@ const SelectControl = (props: SelectControlProps) => {
           {/* eslint-disable-next-line react/jsx-pascal-case */}
           <DO_NOT_USE_ButtonContextProvider value={DEFAULT_BUTTON_CONTEXT_VALUE}>
             <Button.Icon
-              aria-label={t('clearLabel' as any)}
+              aria-label={t('clearLabel')}
               icon={Icon.TYPES.CLEAR}
               onClick={onClickCancel}
               tip={iconTipProps}

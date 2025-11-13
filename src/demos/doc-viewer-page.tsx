@@ -83,7 +83,7 @@ const DocViewerPage: React.FC = () => {
 
         {error && (
           <ErrorMessage theme={theme}>
-            <Icon type={Icon.TYPES.WARNING_CIRCLE_OUTLINE} size={20} />
+            <Icon type={Icon.TYPES.ERROR} size={20} />
             {error}
           </ErrorMessage>
         )}

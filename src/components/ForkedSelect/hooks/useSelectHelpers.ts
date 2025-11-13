@@ -46,12 +46,12 @@ function useSelectHelpers({
   const onSelectOption = useCallback(
     (
       newlySelectedValues: Value,
-      extraParams?: {
+      extraParams: {
         selectedOption?: StateSelectedOption;
         event?: OnClickEvent;
       },
     ) => {
-      const { selectedOption: newlySelectedOptions, event } = extraParams || {};
+      const { selectedOption: newlySelectedOptions, event } = extraParams;
       let updatedSelectedValues = newlySelectedValues;
       let updatedSelectedOptions = newlySelectedOptions;
 

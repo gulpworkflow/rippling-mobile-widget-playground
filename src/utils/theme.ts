@@ -122,20 +122,3 @@ export function usePebbleTheme() {
  */
 export type StyledTheme = PebbleTheme;
 
-/**
- * Helper function to get typed theme from styled-components theme prop
- * 
- * Usage in styled components:
- * ```typescript
- * import { t } from '@/utils/theme';
- * 
- * const StyledDiv = styled.div`
- *   color: ${({ theme }) => t(theme).colorOnSurface};
- *   padding: ${({ theme }) => t(theme).space400};
- * `;
- * ```
- */
-export function t(theme: any): PebbleTheme {
-  return theme as PebbleTheme;
-}
-

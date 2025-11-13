@@ -1,4 +1,4 @@
-import { isValidElement } from 'react';
+import React, { isValidElement } from 'react';
 import Typography from '@rippling/pebble/Typography';
 import type { ListFooter } from '../Select.types';
 import type { ListFooterObject } from '../BaseSelect/BaseSelect.types';

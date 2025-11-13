@@ -1,5 +1,5 @@
 import { castArray, isEmpty, isFunction, pick, size as _size } from 'lodash';
-import { forwardRef, useEffect, useRef } from 'react';
+import React, { forwardRef, useEffect, useRef } from 'react';
 import { useTranslation } from '@rippling/lib-i18n/useTranslation';
 import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
@@ -57,11 +57,11 @@ function renderFooter({
 }
 
 const SelectMenu = forwardRef<HTMLDivElement, SelectMenuProps>(function SelectMenu(props, ref) {
-  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select' as any });
+  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select' });
 
   const {
     children,
-    emptyListPlaceholder = t('emptyListPlaceholder' as any),
+    emptyListPlaceholder = t('emptyListPlaceholder'),
     footer,
     header,
     height,

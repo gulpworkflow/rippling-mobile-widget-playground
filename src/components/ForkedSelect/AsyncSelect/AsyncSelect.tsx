@@ -45,11 +45,11 @@ const AsyncSelect = React.forwardRef<SelectRef, AsyncSelectProps>((props, ref) =
     ...rest
   } = props;
   const hasValueInProps = value !== undefined;
-  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select' as any });
+  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select' });
 
-  const defaultEmptyListPlaceholder = t('emptyListPlaceholder' as any);
-  const loadingListPlaceholder = t('loadingListPlaceholder' as any);
-  const noSearchResultPlaceholder = t('noSearchResultPlaceholder' as any);
+  const defaultEmptyListPlaceholder = t('emptyListPlaceholder');
+  const loadingListPlaceholder = t('loadingListPlaceholder');
+  const noSearchResultPlaceholder = t('noSearchResultPlaceholder');
 
   const defaultListPlaceholder = useMemo(
     () =>
@@ -175,7 +175,7 @@ const AsyncSelect = React.forwardRef<SelectRef, AsyncSelectProps>((props, ref) =
       } catch (e) {
         logger.error(
           sanitizedError({
-            error: e instanceof Error ? e : new Error(String(e)),
+            error: e,
             componentName: 'AsyncSelect',
           }),
           {

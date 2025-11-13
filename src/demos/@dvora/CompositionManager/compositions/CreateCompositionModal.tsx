@@ -110,9 +110,9 @@ export const CreateCompositionModal: React.FC<CreateCompositionModalProps> = ({
           <Input.Text
             id="composition-system-name"
             value={systemName}
-            isReadOnly
+            readOnly
             size={Input.Text.SIZES.M}
-            isDisabled
+            disabled
           />
           <HelperText theme={theme}>
             Auto-generated from name
@@ -132,7 +132,7 @@ export const CreateCompositionModal: React.FC<CreateCompositionModalProps> = ({
           appearance={Button.APPEARANCES.PRIMARY}
           onClick={handleSave}
           size={Button.SIZES.M}
-          isDisabled={!name.trim()}
+          disabled={!name.trim()}
         >
           Save
         </Button>

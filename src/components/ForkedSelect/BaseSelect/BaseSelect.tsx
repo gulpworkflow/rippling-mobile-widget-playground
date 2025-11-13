@@ -1,5 +1,5 @@
 import { castArray, debounce, isEmpty, size as _size } from 'lodash';
-import {
+import React, {
   useCallback,
   useEffect,
   useReducer,
@@ -97,9 +97,9 @@ const BaseSelect = (originalProps: BaseSelectProps) => {
   } = props;
 
   const shouldUsePortal = internalContextShouldUsePortal ?? shouldUsePortalProp;
-  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select' as any });
-  const SELECT_PLACEHOLDER = t('placeholder' as any);
-  const SEARCH_INPUT_PLACEHOLDER = t('searchInputPlaceholder' as any);
+  const { t } = useTranslation('one-ui', { keyPrefix: 'inputs.select' });
+  const SELECT_PLACEHOLDER = t('placeholder');
+  const SEARCH_INPUT_PLACEHOLDER = t('searchInputPlaceholder');
   const { isThemeV2 } = useContext(FormChildrenContext);
 
   // ==============================
@@ -375,7 +375,7 @@ const BaseSelect = (originalProps: BaseSelectProps) => {
     disabled: !!isDisabled,
   });
 
-  const onActiveIndexChange = useCallback<OnActiveIndexChange>((_index, item) => {
+  const onActiveIndexChange = useCallback<OnActiveIndexChange>((index, item) => {
     setActiveOptionId(item?.id);
   }, []);
 
@@ -388,7 +388,7 @@ const BaseSelect = (originalProps: BaseSelectProps) => {
       const listOption = selectedOptions as FlatListItem;
       const ItemComponent = getTemplateComponent(listOption);
       return (
-        <Styled.ReadOnlyList data-testid={name}>
+        <Styled.ReadOnlyList size={size} data-testid={name}>
           <ItemComponent {...listOption} isReadOnly={isReadOnly} />
         </Styled.ReadOnlyList>
       );
@@ -412,7 +412,7 @@ const BaseSelect = (originalProps: BaseSelectProps) => {
     return (
       <span data-context="selection" role="status" aria-live="polite">
         {selectedOptions.length
-          ? t('selectionAriaInstruction' as any, { count: selectedOptions.length })
+          ? t('selectionAriaInstruction', { count: selectedOptions.length })
           : null}
       </span>
     );
@@ -425,7 +425,7 @@ const BaseSelect = (originalProps: BaseSelectProps) => {
 
     return (
       <span data-context="list" role="status" aria-live="polite">
-        {t('listAriaInstruction' as any, { count: list.length })}
+        {t('listAriaInstruction', { count: list.length })}
       </span>
     );
   };

@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import type { TextRefObject } from './BaseSelect.types';
+import type { TextRefObject } from '@rippling/pebble/Text';
 
 /**
  * To focus and blur search input w.r.t to menu visibility

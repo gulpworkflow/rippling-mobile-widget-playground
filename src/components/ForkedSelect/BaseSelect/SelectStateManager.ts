@@ -96,7 +96,7 @@ function onOutsideClick(prevState: SelectState, payload: OnOutsideClick) {
 
     /* istanbul ignore else */
     if (isSearchable) {
-      newSearchInputValue = isMulti ? '' : (get(selectedOptions, 'label') as string) || '';
+      newSearchInputValue = isMulti ? '' : get(selectedOptions, 'label');
     }
 
     if (isAsyncList) {

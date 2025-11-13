@@ -40,7 +40,7 @@ export const NavSection: React.FC<NavSectionProps> = ({
   section, 
   isCollapsed, 
   theme,
-  showDividerBefore: _showDividerBefore = false 
+  showDividerBefore = false 
 }) => {
   return (
     <StyledNavSection theme={theme}>
