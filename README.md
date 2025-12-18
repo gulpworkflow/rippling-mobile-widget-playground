@@ -40,7 +40,7 @@ The playground opens at **http://localhost:4201** with a personalized greeting.
 
 Open this folder in Cursor and start chatting with AI. Try this:
 
-> *"Create a new demo called 'Employee Directory' by copying app-shell-demo.tsx. Show a list of employees with avatars, names, and job titles. Use Pebble components."*
+> *"Create a new demo called 'Employee Directory' by copying app-shell-template.tsx. Show a list of employees with avatars, names, and job titles. Use Pebble components."*
 
 AI creates the file, wires it up, and you'll see it live at the URL.
 
@@ -50,33 +50,15 @@ AI creates the file, wires it up, and you'll see it live at the URL.
 
 ## 🚀 Deploy Your Own Playground
 
-Want to share your demos online? Deploy your own instance to Vercel (it's free and takes 2 minutes):
+Want to share your demos online? Deploy to Vercel (free, takes 2 minutes):
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/pbest/pebble-playground&env=VITE_SHOW_DEMOS&envDescription=Which%20demo%20folders%20to%20show&envLink=https://github.com/pbest/pebble-playground/blob/main/docs/PUBLISH_WORKFLOW.md)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/pbest/pebble-playground)
 
-### Quick Deploy Steps
+1. **Click the button** → sign in or create a free Vercel account
+2. **Deploy** → Vercel builds and deploys automatically  
+3. **Your playground is live** at `https://your-name-pebble-playground.vercel.app`
 
-1. **Click the "Deploy with Vercel" button above**
-2. **Sign in or create a Vercel account** (free for personal projects)
-3. **Configure your deployment:**
-   - Set `VITE_SHOW_DEMOS` to `official` (shows only blessed demos)
-   - Or set to `official,team,@yourname` (shows official, team, and your personal demos)
-4. **Deploy!** Vercel builds and deploys automatically
-5. **Your playground is live** at `https://your-name-pebble-playground.vercel.app`
-
-### Auto-Deploy on Every Commit
-
-Once deployed, Vercel automatically rebuilds and deploys whenever you push to GitHub. No manual steps needed!
-
-### For Designers (No Deployment Experience?)
-
-Don't worry! Vercel walks you through everything:
-- Click the deploy button → follow the prompts
-- After deployment, go to **Project Settings → Environment Variables**
-- Add: `VITE_SHOW_DEMOS` = `official` (or customize as needed)
-- That's it! Share your URL with teammates
-
-**Want to learn more about the publish workflow?** See [PUBLISH_WORKFLOW.md](./docs/PUBLISH_WORKFLOW.md) for the full collaboration strategy.
+Once deployed, Vercel auto-rebuilds whenever you push to GitHub. No manual steps!
 
 ---
 
@@ -121,7 +103,6 @@ This is where your prototypes live:
 
 - **`app-shell-template.tsx`** - The main template to copy for new demos (includes nav, sidebar, content area)
 - **Other demos** - Working examples showing different Pebble patterns
-- **`private/`** - Your scratch pad (gitignored, never committed)
 
 **Quickest way to create a new demo:**
 
@@ -161,7 +142,7 @@ You don't need to read these—AI does it for you. But they're there if you want
 ### 🎨 Live Examples
 
 The playground includes working examples:
-- **App Shell Demo** - Full Rippling app layout (nav, sidebar, content)
+- **App Shell Template** - Full Rippling app layout (nav, sidebar, content) - copy this to start new demos
 - **Design Tokens Demo** - Browse all colors, spacing, and typography
 - **Getting Started** - This guide, but prettier
 
