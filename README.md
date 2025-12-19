@@ -34,11 +34,13 @@ yarn dev
 
 The playground opens at **http://localhost:4201** with a personalized greeting.
 
+> **Note:** Running `yarn install` automatically sets up the **Pebble MCP** (Model Context Protocol) server. This gives AI assistants like Cursor direct access to Pebble component documentation, props, and examples. Just restart Cursor after install to activate it!
+
 ### 3. Start building
 
 Open this folder in Cursor and start chatting with AI. Try this:
 
-> *"Create a new demo called 'Employee Directory' by copying app-shell-demo.tsx. Show a list of employees with avatars, names, and job titles. Use Pebble components."*
+> *"Create a new demo called 'Employee Directory' by copying app-shell-template.tsx. Show a list of employees with avatars, names, and job titles. Use Pebble components."*
 
 AI creates the file, wires it up, and you'll see it live at the URL.
 
@@ -48,33 +50,15 @@ AI creates the file, wires it up, and you'll see it live at the URL.
 
 ## 🚀 Deploy Your Own Playground
 
-Want to share your demos online? Deploy your own instance to Vercel (it's free and takes 2 minutes):
+Want to share your demos online? Deploy to Vercel (free, takes 2 minutes):
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/pbest/pebble-playground&env=VITE_SHOW_DEMOS&envDescription=Which%20demo%20folders%20to%20show&envLink=https://github.com/pbest/pebble-playground/blob/main/docs/PUBLISH_WORKFLOW.md)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/pbest/pebble-playground)
 
-### Quick Deploy Steps
+1. **Click the button** → sign in or create a free Vercel account
+2. **Deploy** → Vercel builds and deploys automatically  
+3. **Your playground is live** at `https://your-name-pebble-playground.vercel.app`
 
-1. **Click the "Deploy with Vercel" button above**
-2. **Sign in or create a Vercel account** (free for personal projects)
-3. **Configure your deployment:**
-   - Set `VITE_SHOW_DEMOS` to `official` (shows only blessed demos)
-   - Or set to `official,team,@yourname` (shows official, team, and your personal demos)
-4. **Deploy!** Vercel builds and deploys automatically
-5. **Your playground is live** at `https://your-name-pebble-playground.vercel.app`
-
-### Auto-Deploy on Every Commit
-
-Once deployed, Vercel automatically rebuilds and deploys whenever you push to GitHub. No manual steps needed!
-
-### For Designers (No Deployment Experience?)
-
-Don't worry! Vercel walks you through everything:
-- Click the deploy button → follow the prompts
-- After deployment, go to **Project Settings → Environment Variables**
-- Add: `VITE_SHOW_DEMOS` = `official` (or customize as needed)
-- That's it! Share your URL with teammates
-
-**Want to learn more about the publish workflow?** See [PUBLISH_WORKFLOW.md](./docs/PUBLISH_WORKFLOW.md) for the full collaboration strategy.
+Once deployed, Vercel auto-rebuilds whenever you push to GitHub. No manual steps!
 
 ---
 
@@ -115,19 +99,31 @@ This playground is designed to work seamlessly with AI coding assistants like Cu
 
 ### 📁 Your Demos (`src/demos/`)
 
-This is where your prototypes live, organized into folders:
+This is where your prototypes live:
 
-- **`official/`** - Blessed starter templates (app shell, design tokens, etc.)
-- **`team/`** - Collaborative work-in-progress demos
-- **`@yourname/`** - Your personal shareable demos
-- **`private/`** - Your scratch pad (gitignored, never committed)
+- **`app-shell-template.tsx`** - The main template to copy for new demos (includes nav, sidebar, content area)
+- **Other demos** - Working examples showing different Pebble patterns
 
 **Quickest way to create a new demo:**
-1. Start in `private/` folder for messy experiments
-2. When it works, move to `@yourname/` to share with team
-3. If team loves it, promote to `team/` or `official/`
 
-**Or just ask Cursor:** *"Create a new demo in private/ called employee-directory"*
+Ask Cursor: *"Create a new demo called 'Employee Directory' by copying app-shell-template.tsx"*
+
+Or start from scratch: *"Create a simple demo showing a card with user info"*
+
+### 🪨 Pebble MCP (AI Superpower)
+
+The **Pebble MCP** (Model Context Protocol) server is automatically configured when you run `yarn install`. This gives AI assistants direct access to:
+
+- **Live component source code** - Actual prop types and implementations
+- **Storybook examples** - Working code examples for every component
+- **Full component list** - Discover all available Pebble components
+
+**Check your MCP status:**
+```bash
+yarn mcp:status
+```
+
+**Troubleshooting:** If Cursor doesn't seem to know about Pebble components, restart Cursor after running `yarn install`. The MCP server starts automatically when Cursor opens the project.
 
 ### 📖 Built-in Docs (`docs/`)
 
@@ -146,8 +142,8 @@ You don't need to read these—AI does it for you. But they're there if you want
 ### 🎨 Live Examples
 
 The playground includes working examples:
-- **App Shell Demo** - Full Rippling app layout (nav, sidebar, content)
-- **Design Tokens Demo** - Browse all colors, spacing, and typography
+- **App Shell Template** - Full Rippling app layout (nav, sidebar, content) - copy this to start new demos
+- **Composition Manager** - Complex multi-view app with tables, modals, and state management
 - **Getting Started** - This guide, but prettier
 
 Click around to see what's possible!

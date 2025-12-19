@@ -151,8 +151,7 @@ const actions = (
 ## 🔧 Customization
 
 All components accept `theme` prop and use emotion styled components, so they automatically adapt to:
-- Light/Dark mode
-- Berry/Plum theme
+- Light/Dark mode (Berry theme)
 - Admin mode (purple background for top nav)
 
 ## 📝 Examples

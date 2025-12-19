@@ -7,10 +7,11 @@ import Card from '@rippling/pebble/Card';
 import Drawer from '@rippling/pebble/Drawer';
 import TableBasic from '@rippling/pebble/TableBasic';
 import Avatar from '@rippling/pebble/Avatar';
-import Tabs from '@rippling/pebble/Tabs';
 import Label from '@rippling/pebble/Label';
-import { APPEARANCES as BADGE_APPEARANCES } from '@rippling/pebble/Atoms/Badge/Badge.constants';
-import { VStack } from '@rippling/pebble/Layout/Stack';
+import Tabs from '@rippling/pebble/Tabs';
+import Button from '@rippling/pebble/Button';
+import Tip from '@rippling/pebble/Tip';
+import { VStack, HStack } from '@rippling/pebble/Layout/Stack';
 
 /**
  * Index Page
@@ -18,104 +19,40 @@ import { VStack } from '@rippling/pebble/Layout/Stack';
  * Landing page for the Pebble Playground showing all available demos.
  */
 
+type DemoCategory = 'template' | 'prototype';
+
 interface DemoCard {
   title: string;
   description: string;
   path: string;
   icon: string;
-  folder: string; // Which folder this demo belongs to: 'official', 'team', '@username'
+  category: DemoCategory;
 }
 
-// All available demos (will be filtered based on VITE_SHOW_DEMOS env var)
-const ALL_DEMO_CARDS: DemoCard[] = [
+// All demos in the playground
+const ALL_DEMOS: DemoCard[] = [
+  // Templates - starting points you copy
   {
-    title: 'App Shell',
-    description: 'Explore Rippling\'s main application shell with navigation, sidebar, and content areas.',
-    path: '/app-shell-demo',
+    title: 'App Shell Template',
+    description: 'The main template to copy when creating a new demo. Includes navigation, sidebar, and content areas.',
+    path: '/app-shell-template',
     icon: Icon.TYPES.HIERARCHY_HORIZONTAL_OUTLINE,
-    folder: 'official',
+    category: 'template',
   },
-  {
-    title: 'Design Tokens',
-    description: 'Browse and explore Pebble design tokens including colors, spacing, and typography.',
-    path: '/design-tokens-demo',
-    icon: Icon.TYPES.CUP_DROPLET_OUTLINE,
-    folder: '@paul',
-  },
-  {
-    title: 'Animations',
-    description: 'See Pebble animation patterns and transitions in action.',
-    path: '/animations-demo',
-    icon: Icon.TYPES.PLAY_CIRCLE_OUTLINE,
-    folder: '@paul',
-  },
-  {
-    title: 'Drawer Demo',
-    description: 'Explore drawer and modal patterns with various configurations.',
-    path: '/drawer-demo',
-    icon: Icon.TYPES.DOCUMENT_OUTLINE,
-    folder: '@paul',
-  },
-  {
-    title: 'Forked Select Test',
-    description: 'Test forked select component variations and interactions.',
-    path: '/forked-select-test',
-    icon: Icon.TYPES.LIST_OUTLINE,
-    folder: '@paul',
-  },
-  {
-    title: 'My Feature',
-    description: 'My custom feature demo based on the app shell template.',
-    path: '/my-feature-demo',
-    icon: Icon.TYPES.STAR_OUTLINE,
-    folder: '@paul',
-  },
+  // Prototypes - examples and experiments
   {
     title: 'Composition Manager',
-    description: 'Prototype for managing and organizing app compositions in App Studio.',
-    path: '/app-studio/composition-manager',
+    description: 'A complex example showing a multi-view app with tables, modals, and state management.',
+    path: '/composition-manager',
     icon: Icon.TYPES.CUSTOM_APPS_OUTLINE,
-    folder: '@dvora',
+    category: 'prototype',
   },
 ];
 
-// Get demos that user has access to based on VITE_SHOW_DEMOS environment variable
-const getAccessibleDemos = (): DemoCard[] => {
-  const showDemos = import.meta.env.VITE_SHOW_DEMOS || 'official';
-  
-  // If set to 'all', show everything
-  if (showDemos === 'all') {
-    return ALL_DEMO_CARDS;
-  }
-  
-  // Split by comma and trim whitespace
-  const foldersToShow = showDemos.split(',').map((f: string) => f.trim());
-  
-  // Filter demos that match any of the specified folders
-  return ALL_DEMO_CARDS.filter(demo => 
-    foldersToShow.includes(demo.folder)
-  );
-};
-
-// Filter demos based on active tab
-const filterDemosByTab = (demos: DemoCard[], activeTab: string): DemoCard[] => {
-  switch (activeTab) {
-    case 'all':
-      return demos; // Show all accessible demos
-    case 'personal':
-      // Show only current user's demos (@paul folder)
-      // Private demos aren't in the list (gitignored)
-      return demos.filter(demo => demo.folder === '@paul');
-    case 'team':
-      // Show team demos + other people's @ folders (exclude current user's @paul)
-      return demos.filter(demo => 
-        demo.folder === 'team' || (demo.folder.startsWith('@') && demo.folder !== '@paul')
-      );
-    case 'templates':
-      return demos.filter(demo => demo.folder === 'official');
-    default:
-      return demos;
-  }
+// Filter helpers
+const getFilteredDemos = (filter: 'all' | DemoCategory): DemoCard[] => {
+  if (filter === 'all') return ALL_DEMOS;
+  return ALL_DEMOS.filter(demo => demo.category === filter);
 };
 
 const PageContainer = styled.div`
@@ -174,6 +111,25 @@ const SectionHeader = styled.div`
   justify-content: space-between;
   margin-top: ${({ theme }) => (theme as StyledTheme).space800};
   margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
+`;
+
+const ViewToggleButton = styled.button<{ isActive: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  cursor: pointer;
+  transition: background-color 150ms ease;
+  background-color: ${({ theme, isActive }) => 
+    isActive ? (theme as StyledTheme).colorSurfaceContainerHigh : 'transparent'};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  
+  &:hover {
+    background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+  }
 `;
 
 const SectionLabel = styled.h2`
@@ -254,6 +210,29 @@ const DemoGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: ${({ theme }) => (theme as StyledTheme).space600};
+`;
+
+const DemoTableWrapper = styled.div`
+  margin-top: ${({ theme }) => (theme as StyledTheme).space200};
+  
+  /* Hover effect for table rows */
+  tr {
+    transition: background-color 150ms ease;
+    
+    &:hover {
+      background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+    }
+  }
+`;
+
+const DemoTableName = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+const DemoTableDescription = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
 `;
 
 const DemoCardWrapper = styled.div`
@@ -431,10 +410,12 @@ const IndexPage: React.FC = () => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
-  // Tab configuration: maps index to filter type
-  const tabFilters = ['all', 'personal', 'team', 'templates'];
-  const activeTabFilter = tabFilters[activeTabIndex];
+  // Tab configuration
+  const tabFilters: Array<'all' | DemoCategory> = ['all', 'prototype', 'template'];
+  const activeFilter = tabFilters[activeTabIndex];
+  const filteredDemos = getFilteredDemos(activeFilter);
 
   // Get user preferences from environment (with safe fallbacks)
   const userName = import.meta.env.VITE_USER_NAME;
@@ -447,28 +428,6 @@ const IndexPage: React.FC = () => {
   // Create personalized greeting with fallback to "Rippler"
   const firstName = userName ? userName.split(' ')[0] : 'Rippler';
   const displayName = userName || 'User';
-
-  // Get accessible demos based on env var, then filter by active tab
-  const accessibleDemos = getAccessibleDemos();
-  const filteredDemos = filterDemosByTab(accessibleDemos, activeTabFilter);
-
-  // Calculate badge counts for each tab
-  const allCount = accessibleDemos.length;
-  const personalCount = accessibleDemos.filter(demo => demo.folder === '@paul').length;
-  const teamCount = accessibleDemos.filter(demo => 
-    demo.folder === 'team' || (demo.folder.startsWith('@') && demo.folder !== '@paul')
-  ).length;
-  const templatesCount = accessibleDemos.filter(demo => demo.folder === 'official').length;
-
-  // Tab descriptions
-  const tabDescriptions = {
-    all: 'All demos you have access to',
-    personal: 'Your personal demos and experiments',
-    team: 'Shared demos from teammates',
-    templates: 'Official starter templates you can copy',
-  };
-  
-  const currentDescription = tabDescriptions[activeTabFilter as keyof typeof tabDescriptions];
 
   return (
     <PageContainer theme={theme}>
@@ -502,83 +461,52 @@ const IndexPage: React.FC = () => {
           </Description>
         </Header>
 
-        {/* Section header with tabs */}
+        {/* Tabs and View Toggle */}
         <SectionHeader theme={theme}>
-          <SectionLabel theme={theme}>
-            {currentDescription}
-          </SectionLabel>
-          
-          <Tabs.SWITCH activeIndex={activeTabIndex} onChange={(index) => setActiveTabIndex(Number(index))}>
-            <Tabs.Tab 
-              title="All" 
-              badge={{ 
-                text: String(allCount), 
-                appearance: activeTabIndex === 0 ? BADGE_APPEARANCES.PRIMARY_LIGHT : BADGE_APPEARANCES.NEUTRAL 
-              }} 
-            />
-            <Tabs.Tab 
-              title="Personal" 
-              badge={{ 
-                text: String(personalCount), 
-                appearance: activeTabIndex === 1 ? BADGE_APPEARANCES.PRIMARY_LIGHT : BADGE_APPEARANCES.NEUTRAL 
-              }} 
-            />
-            <Tabs.Tab 
-              title="Team" 
-              badge={{ 
-                text: String(teamCount), 
-                appearance: activeTabIndex === 2 ? BADGE_APPEARANCES.PRIMARY_LIGHT : BADGE_APPEARANCES.NEUTRAL 
-              }} 
-            />
-            <Tabs.Tab 
-              title="Templates" 
-              badge={{ 
-                text: String(templatesCount), 
-                appearance: activeTabIndex === 3 ? BADGE_APPEARANCES.PRIMARY_LIGHT : BADGE_APPEARANCES.NEUTRAL 
-              }} 
-            />
+          <Tabs.SWITCH 
+            activeIndex={activeTabIndex} 
+            onChange={(index) => setActiveTabIndex(Number(index))}
+          >
+            <Tabs.Tab title="All" />
+            <Tabs.Tab title="Prototypes" />
+            <Tabs.Tab title="Templates" />
           </Tabs.SWITCH>
+          
+          <HStack gap="0.25rem">
+            <Tip content="Grid view" placement={Tip.PLACEMENTS.BOTTOM}>
+              <ViewToggleButton 
+                theme={theme} 
+                isActive={viewMode === 'grid'}
+                onClick={() => setViewMode('grid')}
+                aria-label="Grid view"
+              >
+                <Icon type={Icon.TYPES.BENTO_BOX} size={16} />
+              </ViewToggleButton>
+            </Tip>
+            <Tip content="Table view" placement={Tip.PLACEMENTS.BOTTOM}>
+              <ViewToggleButton 
+                theme={theme} 
+                isActive={viewMode === 'table'}
+                onClick={() => setViewMode('table')}
+                aria-label="Table view"
+              >
+                <Icon type={Icon.TYPES.LIST_OUTLINE} size={16} />
+              </ViewToggleButton>
+            </Tip>
+          </HStack>
         </SectionHeader>
 
-        {activeTabFilter === 'personal' && filteredDemos.length === 0 && (
-          <EmptyState theme={theme}>
-            <EmptyStateIcon theme={theme}>
-              <Icon type={Icon.TYPES.ADD_CIRCLE_OUTLINE} size={48} color={theme.colorOnSurfaceVariant} />
-            </EmptyStateIcon>
-            <EmptyStateTitle theme={theme}>No personal demos yet</EmptyStateTitle>
-            <EmptyStateDescription theme={theme}>
-              Get started by creating your first demo! Click the "+ Create New Demo" button below.
-              <br /><br />
-              Tip: Start in your <code>private/</code> folder for experiments, then move to <code>@paul/</code> when ready to share.
-            </EmptyStateDescription>
-          </EmptyState>
-        )}
-
-        {activeTabFilter === 'team' && filteredDemos.length === 0 && (
-          <EmptyState theme={theme}>
-            <EmptyStateIcon theme={theme}>
-              <Icon type={Icon.TYPES.USERS_OUTLINE} size={48} color={theme.colorOnSurfaceVariant} />
-            </EmptyStateIcon>
-            <EmptyStateTitle theme={theme}>No team demos yet</EmptyStateTitle>
-            <EmptyStateDescription theme={theme}>
-              Team demos and other collaborators' demos will appear here once they're added to the repository.
-            </EmptyStateDescription>
-          </EmptyState>
-        )}
-
-        <DemoGrid theme={theme}>
-          {filteredDemos.map((demo) => {
-            const isOfficialTemplate = demo.folder === 'official';
-            
-            return (
+        {viewMode === 'grid' ? (
+          <DemoGrid theme={theme}>
+            {filteredDemos.map((demo) => (
               <DemoCardWrapper
                 key={demo.path}
                 onClick={() => navigate(demo.path)}
               >
-                {isOfficialTemplate && (
+                {demo.category === 'template' && (
                   <BadgeWrapper theme={theme}>
                     <Label size={Label.SIZES.S} appearance={Label.APPEARANCES.NEUTRAL}>
-                      Official Template
+                      Template
                     </Label>
                   </BadgeWrapper>
                 )}
@@ -598,23 +526,71 @@ const IndexPage: React.FC = () => {
                   </CardContent>
                 </Card.Layout>
               </DemoCardWrapper>
-            );
-          })}
-          
-          {/* Create New Demo Card */}
-          <AddCardWrapper onClick={() => setIsDrawerOpen(true)}>
-            <AddCardContent theme={theme}>
-              <AddCardIcon theme={theme}>
-                <Icon 
-                  type={Icon.TYPES.ADD_CIRCLE_OUTLINE} 
-                  size={24} 
-                  color={theme.colorOnSurface} 
-                />
-              </AddCardIcon>
-              <AddCardTitle theme={theme}>Create a New Demo</AddCardTitle>
-            </AddCardContent>
-          </AddCardWrapper>
-        </DemoGrid>
+            ))}
+            
+            {/* Create New Demo Card - only show on All or Templates tab */}
+            {(activeFilter === 'all' || activeFilter === 'template') && (
+              <AddCardWrapper onClick={() => setIsDrawerOpen(true)}>
+                <AddCardContent theme={theme}>
+                  <AddCardIcon theme={theme}>
+                    <Icon 
+                      type={Icon.TYPES.ADD_CIRCLE_OUTLINE} 
+                      size={24} 
+                      color={theme.colorOnSurface} 
+                    />
+                  </AddCardIcon>
+                  <AddCardTitle theme={theme}>Create a New Demo</AddCardTitle>
+                  <AddCardDescription theme={theme}>
+                    Copy the template to start building
+                  </AddCardDescription>
+                </AddCardContent>
+              </AddCardWrapper>
+            )}
+          </DemoGrid>
+        ) : (
+          <DemoTableWrapper>
+            <TableBasic>
+              <TableBasic.THead>
+                <TableBasic.Tr>
+                  <TableBasic.Th>Name</TableBasic.Th>
+                  <TableBasic.Th>Description</TableBasic.Th>
+                  <TableBasic.Th>Type</TableBasic.Th>
+                </TableBasic.Tr>
+              </TableBasic.THead>
+              <TableBasic.TBody>
+                {filteredDemos.map((demo) => (
+                  <TableBasic.Tr 
+                    key={demo.path} 
+                    onClick={() => navigate(demo.path)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <TableBasic.Td>
+                      <HStack gap="0.5rem" alignItems="center">
+                        <Icon 
+                          type={demo.icon} 
+                          size={16} 
+                          color={theme.colorPrimary}
+                        />
+                        <DemoTableName theme={theme}>{demo.title}</DemoTableName>
+                      </HStack>
+                    </TableBasic.Td>
+                    <TableBasic.Td>
+                      <DemoTableDescription theme={theme}>{demo.description}</DemoTableDescription>
+                    </TableBasic.Td>
+                    <TableBasic.Td>
+                      <Label 
+                        size={Label.SIZES.S} 
+                        appearance={demo.category === 'template' ? Label.APPEARANCES.NEUTRAL : Label.APPEARANCES.PRIMARY_LIGHT}
+                      >
+                        {demo.category === 'template' ? 'Template' : 'Prototype'}
+                      </Label>
+                    </TableBasic.Td>
+                  </TableBasic.Tr>
+                ))}
+              </TableBasic.TBody>
+            </TableBasic>
+          </DemoTableWrapper>
+        )}
 
         {/* How AI Consumes Pebble Section */}
         <GuidesSection theme={theme}>
@@ -645,13 +621,34 @@ const IndexPage: React.FC = () => {
                     .cursorrules
                   </TableBasic.Td>
                   <TableBasic.Td>
-                    Primary directive, token reference, component gotchas
+                    Primary directive, token reference, forbidden patterns, component gotchas
                   </TableBasic.Td>
                   <TableBasic.Td>
                     Hand-written for AI agents
                   </TableBasic.Td>
                   <TableBasic.Td>
                     <CodePath theme={theme}>.cursorrules</CodePath>
+                  </TableBasic.Td>
+                </TableBasic.Tr>
+                
+                <TableBasic.Tr>
+                  <TableBasic.Td>
+                    <ResourceLink 
+                      theme={theme}
+                      href="https://rippling.design/pebble"
+                      target="_blank"
+                    >
+                      Pebble MCP
+                    </ResourceLink>
+                  </TableBasic.Td>
+                  <TableBasic.Td>
+                    Live component source, full prop types, Storybook examples
+                  </TableBasic.Td>
+                  <TableBasic.Td>
+                    Auto-queried from @rippling/pebble-mcp
+                  </TableBasic.Td>
+                  <TableBasic.Td>
+                    <CodePath theme={theme}>.cursor/mcp.json</CodePath>
                   </TableBasic.Td>
                 </TableBasic.Tr>
                 
@@ -668,10 +665,10 @@ const IndexPage: React.FC = () => {
                     </ResourceLink>
                   </TableBasic.Td>
                   <TableBasic.Td>
-                    Component props, examples, and common gotchas
+                    Curated quick reference with common patterns and gotchas
                   </TableBasic.Td>
                   <TableBasic.Td>
-                    Hand-curated from Pebble source
+                    Hand-curated for this playground
                   </TableBasic.Td>
                   <TableBasic.Td>
                     <CodePath theme={theme}>docs/COMPONENT_CATALOG.md</CodePath>
@@ -690,21 +687,6 @@ const IndexPage: React.FC = () => {
                   </TableBasic.Td>
                   <TableBasic.Td>
                     <CodePath theme={theme}>src/demos/*.tsx</CodePath>
-                  </TableBasic.Td>
-                </TableBasic.Tr>
-                
-                <TableBasic.Tr>
-                  <TableBasic.Td>
-                    Pebble source
-                  </TableBasic.Td>
-                  <TableBasic.Td>
-                    When Catalog is missing info or needs deeper understanding
-                  </TableBasic.Td>
-                  <TableBasic.Td>
-                    Rippling Pebble monorepo
-                  </TableBasic.Td>
-                  <TableBasic.Td>
-                    <CodePath theme={theme}>../pebble/packages/rippling-ui/</CodePath>
                   </TableBasic.Td>
                 </TableBasic.Tr>
               </TableBasic.TBody>
@@ -878,7 +860,7 @@ const IndexPage: React.FC = () => {
               Copy this prompt into Cursor (replace "My Feature" with your demo name):
             </InstructionText>
             <CodeSnippet theme={theme}>
-              Create a new demo called "My Feature" by copying app-shell-demo.tsx
+              Create a new demo called "My Feature" by copying app-shell-template.tsx
             </CodeSnippet>
             <InstructionText theme={theme}>
               Cursor will automatically create the file, wire it up in main.tsx, and add a card to the index page.

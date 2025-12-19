@@ -122,7 +122,7 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   showNotificationBadge = false,
   notificationCount = 0,
 }) => {
-  const { theme, mode: currentMode, name: currentThemeName } = usePebbleTheme();
+  const { theme, mode: currentMode } = usePebbleTheme();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
   const [adminMode, setAdminMode] = useState(false);
@@ -140,7 +140,6 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
         userInitial={userInitial}
         adminMode={adminMode}
         currentMode={currentMode as 'light' | 'dark'}
-        currentTheme={currentThemeName}
         searchPlaceholder={searchPlaceholder}
         onAdminModeToggle={() => setAdminMode(!adminMode)}
         onLogoClick={onLogoClick}

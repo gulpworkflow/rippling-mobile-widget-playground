@@ -1,34 +1,149 @@
 # Cursor Rules for Pebble Playground
 
-## 🎯 Primary Directive: Documentation First
+## 🎯 Primary Directive: Speed + Accuracy
 
-**ALWAYS check the `docs/` folder BEFORE:**
-- Writing any Pebble component code
-- Looking at Pebble source code in the monorepo
-- Making assumptions about component APIs
-- Hardcoding colors, spacing, or typography
+**This file contains everything you need for 90% of cases.** Memorize the gotchas table below.
+Query MCP only when you need to verify complex APIs or see examples.
 
-## 📚 Required Reading Order
+**The workflow:**
+1. **Check this file first** (always loaded, instant) — has gotchas, tokens, patterns
+2. **Query Pebble MCP** when needed — for complex props, unfamiliar components, or verification
+3. **Never hardcode** — always use theme tokens for colors, spacing, typography
 
-When implementing ANY Pebble UI:
+## 🪨 Pebble MCP (When to Query)
 
-1. **FIRST:** Check `docs/COMPONENT_CATALOG.md` for quick API reference
-   - Look for "Common Gotchas" section at the top
-   - Find the component you need
-   - Read the critical warnings (⚠️)
-   - Copy the example code
+The Pebble MCP (`mcp_Pebble_get-component-examples`) gives you live access to component source and Storybook examples. 
 
-2. **SECOND:** Check `docs/TOKEN_CATALOG.md` for design tokens
-   - Find the appropriate color/spacing/typography tokens
-   - NEVER hardcode values
+**Query MCP when:**
+| Situation | Action |
+|-----------|--------|
+| First time using a component this session | Query to verify API |
+| Building UI from a Figma design | Query each component for exact props |
+| Complex props (render functions, compound components) | Query for examples |
+| Something isn't working as expected | Query to check actual implementation |
+| User asks "how does X component work?" | Query for authoritative answer |
 
-3. **THIRD:** Check `docs/guides/components/[component-name].md` for comprehensive Confluence docs
-   - Read usage guidelines
-   - Understand when to use vs not use
-   - See design patterns
+**Skip MCP when:**
+| Situation | Action |
+|-----------|--------|
+| Simple component you just used | Trust this file's gotchas |
+| Basic Button, Icon, Card usage | Follow patterns in this file |
+| Token/color/spacing questions | Use the token reference below |
 
-4. **LAST RESORT:** Only if docs are incomplete, check Pebble source code at:
-   - `/Users/paulbest/Documents/htdocs/pebble/packages/rippling-ui/source/`
+## ⚡ Component Gotchas (Memorize This Table)
+
+These are the most common mistakes. **Check this table before writing any component code.**
+
+| Component | Wrong ❌ | Right ✅ | Notes |
+|-----------|----------|----------|-------|
+| **Tooltip** | `import Tooltip` | `import Tip from '@rippling/pebble/Tip'` | Component is called `Tip`, not `Tooltip` |
+| **Icon** | `<Icon size={Icon.SIZES.M} />` | `<Icon size={20} />` | Use numbers for size, not constants |
+| **Icon** | `<Icon name="check" />` | `<Icon type={Icon.TYPES.CHECK} />` | Use `type` prop with `Icon.TYPES.*` |
+| **Input** | `Input.SIZES.M` | `Input.Text.SIZES.M` | Size constant is on the sub-component |
+| **Button** | `<IconButton icon="x" />` | `<Button.Icon icon={Icon.TYPES.CLOSE} />` | Use `Button.Icon`, not `IconButton` |
+| **Button** | `Button.VARIANTS.ICON` | `Button.Icon` | It's a sub-component, not a variant |
+| **Card** | `<Card.Section>` | `<Card.Layout padding={...}>` | Use `Card.Layout`, not `Card.Section` |
+| **Card** | `<Card.Header>` | Just use styled elements | Card doesn't have Header/Footer sub-components |
+| **Typography** | `<Typography variant="h1">` | Use styled components + typestyle tokens | Typography component doesn't exist! |
+| **Select** | `<Select options={[...]} />` | `<Input.Select options={[...]} />` | Select is `Input.Select` |
+| **Checkbox** | `<Checkbox />` | `<Input.Checkbox />` | Checkbox is `Input.Checkbox` |
+| **Radio** | `<Radio />` | `<Input.Radio />` | Radio is `Input.Radio` |
+| **TextArea** | `<TextArea />` | `<Input.TextArea />` | TextArea is `Input.TextArea` |
+| **Modal** | `<Modal>` | `<Drawer>` or check MCP | Pebble uses `Drawer` for most modal patterns |
+| **Empty State** | Custom `Card` + styled text | `<ActionCard>` | Use ActionCard for empty states with CTAs |
+| **Layout** | `<Box display="flex">` | `<HStack>` or `<VStack>` | Use Stack components for flex layouts |
+| **Colors** | `backgroundColor: 'white'` | `backgroundColor: theme.colorSurface` | Never hardcode colors |
+| **Colors** | `color: '#000'` | `color: theme.colorOnSurface` | Never hardcode colors |
+| **Spacing** | `padding: '16px'` | `padding: theme.space400` | Never hardcode spacing |
+| **Imports** | `import { usePebbleTheme } from '../utils/theme'` | `import { usePebbleTheme } from '@/utils/theme'` | Always use `@/` alias |
+
+## 🔍 Quick Component Reference
+
+**Common imports you'll use constantly:**
+```typescript
+// Layout
+import { HStack, VStack } from '@rippling/pebble/Layout/Stack';
+import Card from '@rippling/pebble/Card';
+
+// Inputs
+import Input from '@rippling/pebble/Inputs';  // Then: Input.Text, Input.Select, Input.Checkbox, etc.
+import Button from '@rippling/pebble/Button'; // Then: Button.Icon for icon buttons
+
+// Display
+import Icon from '@rippling/pebble/Icon';
+import Avatar from '@rippling/pebble/Avatar';
+import Label from '@rippling/pebble/Label';
+import Tip from '@rippling/pebble/Tip';  // NOT Tooltip!
+
+// Feedback
+import Drawer from '@rippling/pebble/Drawer';
+import Snackbar from '@rippling/pebble/Snackbar';
+import ActionCard from '@rippling/pebble/ActionCard';  // Empty states
+
+// Data
+import TableBasic from '@rippling/pebble/TableBasic';
+import Tabs from '@rippling/pebble/Tabs';
+
+// Theme
+import { useTheme } from '@rippling/pebble/theme';
+import { usePebbleTheme } from '@/utils/theme';  // Playground utility
+```
+
+**Common patterns:**
+```typescript
+// Icon button
+<Button.Icon 
+  icon={Icon.TYPES.CLOSE} 
+  aria-label="Close"
+  appearance={Button.APPEARANCES.GHOST}
+  size={Button.SIZES.S}
+  onClick={handleClose}
+/>
+
+// Text input
+<Input.Text
+  label="Email"
+  value={email}
+  onChange={setEmail}
+  size={Input.Text.SIZES.M}
+/>
+
+// Select
+<Input.Select
+  label="Country"
+  options={[{ label: 'USA', value: 'us' }, { label: 'Canada', value: 'ca' }]}
+  value={country}
+  onChange={setCountry}
+/>
+
+// Card with content
+<Card.Layout padding={Card.Layout.PADDINGS.PX_24}>
+  <CardTitle>My Card</CardTitle>
+  <CardContent>Content here</CardContent>
+</Card.Layout>
+
+// Tooltip
+<Tip content="Helpful text" placement={Tip.PLACEMENTS.TOP}>
+  <Button>Hover me</Button>
+</Tip>
+
+// Flex layout
+<HStack gap="1rem" alignItems="center">
+  <Avatar name="John" size={Avatar.SIZES.S} />
+  <span>John Doe</span>
+</HStack>
+
+// Empty state
+<ActionCard
+  icon={Icon.TYPES.CHECKBOX_WITHCHECK_OUTLINE}
+  title="No items yet"
+  caption="Get started by creating your first item."
+  primaryAction={{
+    title: 'Create item',
+    onClick: handleCreate,
+  }}
+/>
+```
 
 ## 🚫 Forbidden Patterns
 
@@ -292,32 +407,18 @@ theme.shapeCornerFull   // 9999px - Fully rounded (pills, avatars, icons)
 
 ```
 pebble-playground/
-├── docs/                          ← START HERE
-│   ├── COMPONENT_CATALOG.md       ← Quick component reference
-│   ├── TOKEN_CATALOG.md           ← Quick token reference
-│   ├── AI_PROMPTING_GUIDE.md      ← Usage patterns
-│   └── guides/         ← Full documentation
-│       ├── components/            ← Synced from Confluence
-│       ├── tokens/                ← Auto-generated from npm
-│       ├── patterns/              ← UX patterns
-│       └── building-blocks/       ← Rippling-specific features
+├── .cursorrules                   ← THIS FILE (primary AI reference)
+├── .cursor/mcp.json               ← Pebble MCP config (auto-generated)
+├── docs/                          ← Human-readable docs
+│   ├── COMPONENT_CATALOG.md       ← Human reference (AI uses this file instead)
+│   ├── TOKEN_CATALOG.md           ← Detailed token docs
+│   └── guides/                    ← Confluence-synced docs
 ├── src/
-│   ├── demos/                     ← Example implementations
+│   ├── demos/                     ← Working examples (copy from these!)
 │   ├── overrides/                 ← Component customizations
 │   └── utils/                     ← Shared utilities
 └── scripts/                       ← Tooling
 ```
-
-## 🔄 Documentation Updates
-
-### Auto-Generated Docs (DON'T manually edit)
-- `docs/guides/tokens/` - Run `yarn generate-token-docs` to update
-- `docs/guides/components/` - Run `yarn sync-confluence` to update
-
-### Manual Docs (Edit as needed)
-- `docs/COMPONENT_CATALOG.md` - Update with common patterns
-- `docs/TOKEN_CATALOG.md` - Update with usage examples
-- `docs/guides/patterns/` - Add new UX patterns
 
 ## 🎯 Component Override System
 
@@ -335,32 +436,31 @@ When you need to customize a Pebble component:
 
 ### Recommended: Use the App Shell Template
 
-When a user asks to **"Create a new demo called [Name] by copying app-shell-demo.tsx"**, follow these steps:
+When a user asks to **"Create a new demo called [Name]"**, follow these steps:
 
-1. **Copy the app shell:**
-   - Read `src/demos/app-shell-demo.tsx`
+1. **Copy the app shell template:**
+   - Read `src/demos/app-shell-template.tsx`
    - Convert the name to kebab-case (e.g., "Employee Directory" → "employee-directory-demo.tsx")
    - Convert to PascalCase for component name (e.g., "EmployeeDirectoryDemo")
    - Create the new file in `src/demos/[kebab-case]-demo.tsx`
-   - Replace `AppShellDemo` with the new component name throughout
+   - Replace `AppShellTemplate` with the new component name throughout
    - Update the description comment
 
 2. **Wire up in main.tsx:**
    - Add import: `import [PascalName]Demo from './demos/[kebab]-demo';`
    - Add to `EditorType` enum: `[UPPER_SNAKE] = '[kebab]',`
-   - Add to `DEMO_OPTIONS` array with appropriate label
-   - Add to `DEMO_ROUTES` object: `'/[kebab]-demo': EditorType.[UPPER_SNAKE],`
+   - Add to `DEMO_ROUTES` object
    - Add `<Route>` in the Routes component
 
 3. **Add card to index page:**
    - Open `src/demos/index-page.tsx`
-   - Add entry to `DEMO_CARDS` array with title, description, path, and appropriate icon
+   - Add entry to `ALL_DEMO_CARDS` array with title, description, path, icon, and category
 
 4. **Confirm completion:**
    - Tell the user their demo is ready at `http://localhost:4201/[kebab]-demo`
    - Remind them they can now customize the main content area
 
-**The app shell provides:** Navigation bar, sidebar, content area, and theme integration. User should focus on customizing the main content area only.
+**The app shell provides:** Navigation bar, sidebar, content area, and theme integration.
 
 ### Alternative: Create from Scratch
 
@@ -408,55 +508,56 @@ If you need a simpler demo without the app shell:
    ```
 
 3. **Add to main.tsx:**
-   - Add to `EditorType` enum
-   - Import the demo
-   - Add to `DEMO_OPTIONS` array
-   - Add route in Routes component
-   - Add to `DEMO_ROUTES` mapping
+   - Import the demo component
+   - Add a `<Route>` in the Routes component
 
-4. **Add to index page:** Update `DEMO_CARDS` array in `src/demos/index-page.tsx`
+4. **Add to index page:** Update `ALL_DEMOS` array in `src/demos/index-page.tsx`
 
 ## 🐛 Debugging Component Issues
 
 If you encounter an error with a Pebble component:
 
-1. **Check `docs/COMPONENT_CATALOG.md` "Common Gotchas"** - Your issue might be listed
-2. **Verify you're using the correct API** - Check the example code
-3. **Check the Confluence docs** - May have additional context
-4. **Search the Pebble source** - Only if docs don't have the answer
-5. **Update the docs** - If you find a new gotcha, add it to `COMPONENT_CATALOG.md`
+1. **Check the Gotchas Table above** — Most common issues are listed there
+2. **Query Pebble MCP** — Get the actual component API and examples
+   ```
+   mcp_Pebble_get-component-examples({ componentName: "Button" })
+   ```
+3. **Check existing demos** — See how similar components are used in `src/demos/`
+4. **Verify props with TypeScript** — Let the type system catch mistakes
 
 ## 📝 Code Review Checklist
 
-Before considering code complete:
+Before considering code complete, verify against the Gotchas Table:
 
-- [ ] All colors use theme tokens (no hardcoded colors)
-- [ ] All spacing uses theme tokens (no hardcoded px values)
-- [ ] All typography uses theme tokens or Typography component
-- [ ] Icon sizes are numbers (not Icon.SIZES)
-- [ ] Input.Text uses Input.Text.SIZES (not Input.SIZES)
-- [ ] Tip component (not Tooltip)
-- [ ] All interactive icons have aria-label
-- [ ] Component APIs match COMPONENT_CATALOG.md examples
+- [ ] No hardcoded colors (use `theme.color*`)
+- [ ] No hardcoded spacing (use `theme.space*`)
+- [ ] No hardcoded typography (use `theme.typestyle*`)
+- [ ] Icon sizes are numbers (`size={20}`, not `Icon.SIZES.M`)
+- [ ] Input sub-components use their own SIZES (`Input.Text.SIZES.M`)
+- [ ] Using `Tip` not `Tooltip`
+- [ ] Using `Button.Icon` not `IconButton`
+- [ ] Using `@/` alias for imports
+- [ ] All interactive icons have `aria-label`
 - [ ] No linter errors
 
 ## 🎓 Learning Resources
 
-1. **Quick Reference:** `docs/COMPONENT_CATALOG.md` + `docs/TOKEN_CATALOG.md`
-2. **Deep Dive:** `docs/guides/components/[component].md`
-3. **Patterns:** `docs/guides/patterns/`
-4. **Live Examples:** Run `yarn dev` and check existing demos
-5. **Official Storybook:** https://pebble.rippling.dev
+| Resource | Use For | Speed |
+|----------|---------|-------|
+| **This file** | Gotchas, tokens, patterns | ⚡ Instant |
+| **Pebble MCP** | Component APIs, examples | ⚡ Fast |
+| **Existing demos** | Working patterns | ⚡ Fast |
+| **Storybook** | Visual exploration | 🔗 https://pebble.rippling.dev |
 
 ## 💡 Tips for Success
 
-1. **When in doubt, check docs first** - Save time by not making assumptions
-2. **Copy from existing demos** - `src/demos/` has working examples
-3. **Use TypeScript** - It will catch many API mistakes early
-4. **Test in both light and dark modes** - Theme tokens handle this automatically
-5. **Start simple** - Use basic Pebble components before customizing
+1. **Trust the Gotchas Table** — It catches 90% of mistakes
+2. **Query MCP when unsure** — It's the source of truth for APIs
+3. **Copy from existing demos** — `src/demos/` has working examples
+4. **Use TypeScript** — Let the compiler catch mistakes
+5. **Test both light and dark modes** — Theme tokens handle this automatically
 
 ---
 
-**Remember: This playground exists to make prototyping with Pebble fast and correct. The docs are your fastest path to success.**
+**Speed + Accuracy: This file has the gotchas. MCP has the APIs. You don't need to read anything else.**
 

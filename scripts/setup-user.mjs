@@ -40,29 +40,16 @@ function getGravatarUrl(email) {
 }
 
 /**
- * Try to get GitHub username from git config or remote URL
+ * Try to get GitHub username from git config
+ * 
+ * NOTE: We intentionally do NOT parse the remote URL because that gives us
+ * the repo OWNER (pbest), not the person who cloned it. Users must explicitly
+ * set their GitHub username via: git config --global github.user "username"
  */
 function getGitHubUsername() {
-  // First try github.user config
-  let username = getGitConfig('github.user');
-  if (username) return username;
-  
-  // Try to parse from git remote URL
-  try {
-    const remoteUrl = execSync('git config --get remote.origin.url', { encoding: 'utf8' }).trim();
-    
-    // Parse github.com URLs (both HTTPS and SSH)
-    // https://github.com/username/repo.git
-    // git@github.com:username/repo.git
-    const match = remoteUrl.match(/github\.com[:/]([^/]+)\//);
-    if (match && match[1]) {
-      return match[1];
-    }
-  } catch (error) {
-    // No remote or unable to parse
-  }
-  
-  return null;
+  // Only use explicitly configured github.user
+  // Do NOT parse remote URL - that's the repo owner, not the current user
+  return getGitConfig('github.user');
 }
 
 /**
@@ -90,6 +77,8 @@ function setup() {
     console.log('   To personalize, run:');
     console.log('   git config --global user.name "Your Name"');
     console.log('   git config --global user.email "your.email@example.com"');
+    console.log('');
+    console.log('   For GitHub avatar (optional):');
     console.log('   git config --global github.user "your-github-username"\n');
     // Exit successfully - this is not a critical failure
     process.exit(0);
@@ -117,6 +106,11 @@ function setup() {
     envVars.push(`VITE_USER_GITHUB_AVATAR="${githubAvatarUrl}"`);
     console.log(`✅ GitHub: ${githubUsername}`);
     console.log(`✅ GitHub Avatar: ${githubAvatarUrl}`);
+  } else if (userName || userEmail) {
+    // Only show hint if we have other user info but no GitHub
+    console.log(`ℹ️  No GitHub username set (will use Gravatar or initials)`);
+    console.log(`   To show your GitHub avatar, run:`);
+    console.log(`   git config --global github.user "your-github-username"`);
   }
   
   // Read existing .env.local if it exists and preserve other vars

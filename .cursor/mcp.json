@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "Pebble": {
+      "command": "npx",
+      "args": ["@rippling/pebble-mcp"]
+    }
+  }
+}
+
+

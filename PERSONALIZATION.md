@@ -13,10 +13,10 @@ When you run `yarn dev`, the playground:
 1. ✅ Reads your name from `git config user.name`
 2. ✅ Reads your email from `git config user.email`  
 3. ✅ Generates a Gravatar URL from your email
-4. ✅ Tries to detect your GitHub username (from git remote or `github.user` config)
+4. ✅ Reads your GitHub username from `git config github.user` (if set)
 5. ✅ Creates a `.env.local` file with your preferences
 6. ✅ Displays a personalized greeting: **"Hi [YourFirstName], welcome to your Pebble Playground"**
-7. ✅ Shows your avatar (GitHub or Gravatar)
+7. ✅ Shows your avatar (GitHub → Gravatar → Initials)
 
 ### Fallback Behavior (Progressive Enhancement)
 
@@ -70,9 +70,9 @@ Generated in `.env.local` (gitignored):
 ```bash
 VITE_USER_NAME="Your Name"              # From git config user.name
 VITE_USER_EMAIL="you@example.com"      # From git config user.email
-VITE_USER_GITHUB="your-username"       # From git remote or github.user
-VITE_USER_GITHUB_AVATAR="https://..."  # GitHub avatar URL
-VITE_USER_GRAVATAR="https://..."       # Gravatar URL (fallback)
+VITE_USER_GITHUB="your-username"       # From git config github.user (must be set explicitly)
+VITE_USER_GITHUB_AVATAR="https://..."  # GitHub avatar URL (only if github.user is set)
+VITE_USER_GRAVATAR="https://..."       # Gravatar URL (from email hash)
 ```
 
 ## User Experience
@@ -91,22 +91,18 @@ A prototyping environment for exploring...
 
 ## Optional: GitHub Avatar
 
-By default, the system uses Gravatar (generated from your email). For a GitHub avatar:
+By default, the system uses Gravatar (generated from your email). For a GitHub avatar, set your GitHub username in git config:
 
-**Option 1:** Set GitHub username in git config
 ```bash
 git config --global github.user "your-github-username"
 ```
 
-**Option 2:** Add a GitHub remote
-```bash
-git remote add origin git@github.com:your-username/pebble-playground.git
-```
-
-Then refresh:
+Then refresh your settings:
 ```bash
 yarn setup:user
 ```
+
+> **Note:** The system cannot auto-detect your GitHub username from the remote URL because that shows the **repo owner**, not you. You must explicitly set `github.user` in your git config to get your GitHub avatar.
 
 ## Benefits for Multi-User Contribution Model
 

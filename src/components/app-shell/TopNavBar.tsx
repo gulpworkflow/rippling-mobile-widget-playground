@@ -14,7 +14,6 @@ interface TopNavBarProps {
   userInitial: string;
   adminMode: boolean;
   currentMode: 'light' | 'dark';
-  currentTheme: string;
   searchPlaceholder?: string;
   onAdminModeToggle: () => void;
   onLogoClick?: () => void;
@@ -146,7 +145,6 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
   userInitial,
   adminMode,
   currentMode,
-  currentTheme,
   searchPlaceholder,
   onAdminModeToggle,
   onLogoClick,
@@ -214,7 +212,6 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
             companyName={companyName}
             userInitial={userInitial}
             adminMode={adminMode}
-            currentTheme={currentTheme}
             currentMode={currentMode}
             onAdminModeToggle={onAdminModeToggle}
             theme={theme}

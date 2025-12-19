@@ -17,6 +17,7 @@
 5. **TableBasic uses Tr/Th/Td, not Row/Cell:** Use `<TableBasic.Tr>`, `<TableBasic.Th>`, `<TableBasic.Td>`, NOT `TableBasic.Row` or `TableBasic.Cell`. Must wrap in `<TableBasic.THead>` and `<TableBasic.TBody>`.
 6. **Always use theme tokens:** Use `theme.colorPrimary`, NOT `"#7a005d"`
 7. **Use leftIconType for Dropdown/Select icons:** Don't create custom React elements as labels - use the `leftIconType` prop instead
+8. **ActionCard for empty states:** Use `<ActionCard>` for empty state patterns with icon, title, description, and CTA buttons
 
 ## Table of Contents
 
@@ -30,6 +31,53 @@
 ---
 
 ## Action Components
+
+### ActionCard
+
+**Purpose:** Empty state pattern with icon, title, description, and call-to-action buttons  
+**Import:** `import ActionCard from '@rippling/pebble/ActionCard';`
+
+**ActionCard Props:**
+- `icon`: `Icon.TYPES.*` - Icon displayed at top in circle
+- `iconColor`: `string` - Custom icon color (theme token)
+- `title`: `string` - Bold title text
+- `caption`: `string | ReactNode` - Description text below title
+- `primaryAction`: `{ title, onClick, to?, icon?, isDisabled? }` - Primary CTA button
+- `secondaryAction`: `{ title, onClick, to?, icon?, isDisabled? }` - Secondary CTA button
+- `alignment`: `ActionCard.CONTENT_ALIGNMENT.CENTER | LEFT` - Content alignment (default: CENTER)
+- `animation`: `Animation.TYPES.*` - Animated icon instead of static icon
+
+**Example (Empty State):**
+```typescript
+<ActionCard
+  icon={Icon.TYPES.CHECKBOX_WITHCHECK_OUTLINE}
+  title="Agreements"
+  caption="An agreement is created once a procurement request is completed. Agreements let you store relationships with vendors, view committed spending, and track upcoming renewals."
+  primaryAction={{
+    title: 'Submit a request',
+    onClick: () => handleSubmit(),
+  }}
+  secondaryAction={{
+    title: 'Import existing agreements',
+    onClick: () => handleImport(),
+  }}
+/>
+```
+
+**Example (Success State with Animation):**
+```typescript
+<ActionCard
+  animation={Animation.TYPES.CHECK_MARK}
+  title="You're all set!"
+  caption="You are done setting up commuter for your employees"
+  primaryAction={{
+    title: 'Continue',
+    onClick: () => handleContinue(),
+  }}
+/>
+```
+
+---
 
 ### Button
 

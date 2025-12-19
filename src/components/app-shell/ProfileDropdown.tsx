@@ -9,7 +9,6 @@ interface ProfileDropdownProps {
   companyName: string;
   userInitial: string;
   adminMode: boolean;
-  currentTheme: string;
   currentMode: 'light' | 'dark';
   onAdminModeToggle: () => void;
   theme: StyledTheme;
@@ -68,27 +67,15 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   companyName,
   userInitial,
   adminMode,
-  currentTheme,
   currentMode,
   onAdminModeToggle,
   theme,
 }) => {
-  const { changeTheme, changeMode } = useThemeSettings();
+  const { changeMode } = useThemeSettings();
 
   return (
     <Dropdown
       list={[
-        {
-          label: currentTheme === 'berry' ? 'Berry Theme ✓' : 'Berry Theme',
-          value: 'berry',
-        },
-        {
-          label: currentTheme === 'plum' ? 'Plum Theme (Legacy) ✓' : 'Plum Theme (Legacy)',
-          value: 'plum',
-        },
-        {
-          isSeparator: true,
-        },
         {
           label: currentMode === 'light' ? 'Light Mode ✓' : 'Light Mode',
           leftIconType: Icon.TYPES.SUN_OUTLINE,
@@ -114,8 +101,6 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           onAdminModeToggle();
         } else if (value === 'light' || value === 'dark') {
           changeMode(value);
-        } else if (value === 'berry' || value === 'plum') {
-          changeTheme(value);
         }
       }}
       placement="bottom-end"
