@@ -12,6 +12,7 @@ import { CompositionDetail } from './demos/composition-manager/compositions/Comp
 import IndexPage from './demos/index-page';
 import GettingStartedPage from './demos/getting-started-page';
 import DocViewerPage from './demos/doc-viewer-page';
+import PaySchedulesDemo from './demos/pay-schedules-demo';
 
 // Initialize @rippling/ui package
 oneUiService.init({} as any);
@@ -63,6 +64,7 @@ init().then(() => {
             <Route path="/app-shell-template" element={<AppShellTemplate />} />
             <Route path="/composition-manager" element={<CompositionManagerDemo />} />
             <Route path="/composition-manager/compositions/:id" element={<CompositionDetail />} />
+            <Route path="/pay-schedules" element={<PaySchedulesDemo />} />
             
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
