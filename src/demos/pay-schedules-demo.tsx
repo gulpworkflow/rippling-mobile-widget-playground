@@ -636,23 +636,6 @@ const PaySchedulesDemo: React.FC = () => {
                     <Icon type={Icon.TYPES.VISIBILITY_OUTLINE} size={16} />
                     View employees on this schedule
                   </PreviewButton>
-
-                  {/* Assignment Rules - moved to left column */}
-                  <AssignmentRules theme={theme}>
-                    <AssignmentRulesLabel theme={theme}>Applies to</AssignmentRulesLabel>
-                    <AssignmentRulesTags theme={theme}>
-                      {schedule.appliesTo.length > 0 ? (
-                        schedule.appliesTo.map((tag, i) => (
-                          <AssignmentRuleTag key={i} theme={theme}>
-                            <Icon type={Icon.TYPES.TEAM_OUTLINE} size={12} />
-                            {tag}
-                          </AssignmentRuleTag>
-                        ))
-                      ) : (
-                        <NoMembersText theme={theme}>No Members</NoMembersText>
-                      )}
-                    </AssignmentRulesTags>
-                  </AssignmentRules>
                 </ScheduleLeftColumn>
 
                 <ScheduleRightColumn theme={theme}>
