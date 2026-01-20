@@ -12,6 +12,8 @@ A workspace for prototyping with AI using Rippling's actual design system. When 
 
 Build interactive mockups (modals, forms, dashboards), test micro-interactions, or explore layout ideas. Since everything uses Pebble's actual components and design tokens, what you build can be handed off to engineering without translation.
 
+![Pebble Playground Homepage](docs/images/playground-homepage.png)
+
 ---
 
 ## Getting Started
