@@ -362,7 +362,7 @@ This playground is designed for:
 3. **Design system engineers** - Testing new component patterns
 4. **Product teams** - Prototyping flows before full implementation
 
-See `docs/COLLABORATION_OPTIONS.md` for team workflows.
+See `docs/COLLABORATION.md` for team workflows and contributing back fixes.
 
 ## 🚀 Quick Start Template
 

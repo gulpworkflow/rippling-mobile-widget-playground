@@ -12,18 +12,43 @@ A workspace for prototyping with AI using Rippling's actual design system. When 
 
 Build interactive mockups (modals, forms, dashboards), test micro-interactions, or explore layout ideas. Since everything uses Pebble's actual components and design tokens, what you build can be handed off to engineering without translation.
 
+![Pebble Playground Homepage](docs/images/playground-homepage.png)
+
 ---
 
 ## Getting Started
 
-### 1. Clone this repo
+### 1. Fork this repo (don't clone!)
 
-In Cursor's terminal or your command line:
+**Why fork?** Each person/team gets their own copy to customize, deploy to Vercel, and maintain independently—while still being able to pull updates from the core repo. Previous approaches of sharing one repo led to conflicts, bloat, and dependency nightmares.
+
+**To fork:**
+
+1. Go to [github.com/pbest/pebble-playground](https://github.com/pbest/pebble-playground)
+2. Click the **"Fork"** button (top right)
+3. Choose your personal account or your team's org
+4. Clone **your fork** locally:
 
 ```bash
-git clone https://github.com/pbest/pebble-playground.git
+git clone https://github.com/YOUR-USERNAME/pebble-playground.git
 cd pebble-playground
 ```
+
+**Set up upstream to get future updates:**
+
+```bash
+git remote add upstream https://github.com/pbest/pebble-playground.git
+```
+
+Now you can pull improvements from the core repo anytime:
+
+```bash
+git fetch upstream
+git merge upstream/main
+# Resolve any conflicts, then commit
+```
+
+> 💡 **Tip:** Your fork is yours—add demos, customize themes, break things. When we release new features or fixes, just pull from upstream to get them.
 
 ### 2. Install and run
 
@@ -38,27 +63,29 @@ The playground opens at **http://localhost:4201** with a personalized greeting.
 
 ### 3. Start building
 
-Open this folder in Cursor and start chatting with AI. Try this:
+Open the `pebble-playground` folder in Cursor (File → Open Folder → select the folder you just cloned). Then start chatting with AI. Try this:
 
 > *"Create a new demo called 'Employee Directory' by copying app-shell-template.tsx. Show a list of employees with avatars, names, and job titles. Use Pebble components."*
 
 AI creates the file, wires it up, and you'll see it live at the URL.
 
+> 💡 **Where are my demos?** Your demo files live in `src/demos/`. That's where AI creates new demos and where you'll find examples to learn from.
+
 **Need help?** See the detailed [Setup Guide](./SETUP_GUIDE.md) for troubleshooting.
 
 ---
 
-## 🚀 Deploy Your Own Playground
+## 🚀 Deploy Your Fork to Vercel
 
-Want to share your demos online? Deploy to Vercel (free, takes 2 minutes):
+Want to share your demos online? Deploy your fork to Vercel (free, takes 2 minutes):
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/pbest/pebble-playground)
+1. **Go to [vercel.com](https://vercel.com)** → sign in or create a free account
+2. **Click "Add New" → "Project"**
+3. **Import your fork** from GitHub (not the original pbest/pebble-playground)
+4. **Deploy** → Vercel builds and deploys automatically
+5. **Your playground is live** at `https://your-fork-name.vercel.app`
 
-1. **Click the button** → sign in or create a free Vercel account
-2. **Deploy** → Vercel builds and deploys automatically  
-3. **Your playground is live** at `https://your-name-pebble-playground.vercel.app`
-
-Once deployed, Vercel auto-rebuilds whenever you push to GitHub. No manual steps!
+Once deployed, Vercel auto-rebuilds whenever you push to your fork. Your demos, your deployments, your URL—no conflicts with anyone else!
 
 ---
 
@@ -152,14 +179,18 @@ Click around to see what's possible!
 
 ## Working With a Teammate
 
-This is a **private repo** on your GitHub. To collaborate:
+Since you forked the repo, you have full control over who can collaborate:
 
-1. Go to: https://github.com/pbest/pebble-playground/settings/access
-2. Click **"Add people"**
-3. Enter their GitHub username
-4. Give them **Write** access
+**Option A: Add collaborators to your fork**
+1. Go to your fork's Settings → Collaborators
+2. Click **"Add people"** → enter their GitHub username
+3. Give them **Write** access
 
-Now you can both:
+**Option B: Each person forks their own copy**
+- Best for independent experimentation
+- Share ideas via PRs to a shared team fork, or just share links
+
+Once collaborating, you can both:
 - Create branches for different ideas
 - Review each other's prototypes
 - Share demos by committing and pushing
