@@ -47,20 +47,6 @@ const ALL_DEMOS: DemoCard[] = [
     icon: Icon.TYPES.CUSTOM_APPS_OUTLINE,
     category: 'prototype',
   },
-  {
-    title: 'Pay Schedules',
-    description: 'A payroll settings page with sidebar navigation, tabbed views, and schedule configuration cards.',
-    path: '/pay-schedules',
-    icon: Icon.TYPES.CALENDAR_OUTLINE,
-    category: 'prototype',
-  },
-  {
-    title: 'Canada Bulk ROE',
-    description: 'Bulk Record of Employment management for Canadian payroll.',
-    path: '/canada-bulk-roe',
-    icon: Icon.TYPES.DOCUMENT_OUTLINE,
-    category: 'prototype',
-  },
 ];
 
 // Filter helpers
