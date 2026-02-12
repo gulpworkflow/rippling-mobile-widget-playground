@@ -228,7 +228,7 @@ Just tell it! Say "Use a Button instead of a link" or "That should be an Input.T
 - **Detailed setup:** [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - **Technical questions:** Check the [docs/](./docs/) folder
 - **AI tips:** [docs/AI_PROMPTING_GUIDE.md](./docs/AI_PROMPTING_GUIDE.md)
-- **Got stuck?** Ask your teammate or #design-systems
+- **Got stuck?** Ask your teammate or #ai-design
 
 ---
 
