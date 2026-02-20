@@ -5,7 +5,6 @@
 The **Pebble Pathways initiative** represents MVP experiment to define reusable intent driven patterns across Rippling.  
 
 Between October 2025 and Q1 2026, a cross-functional audit identified the most frequent, high-friction UI scenarios and codified them into **guided defaults** known as Pebble Pathways.  
-These pathways represent the “gold-standard” usage patterns that reduce system ambiguity and align design and code around clarity, guidance, and ease of use.
 
 ---
 
