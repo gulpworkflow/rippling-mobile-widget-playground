@@ -1,9 +1,8 @@
-# Pebble Pathways v1.1 — Combined Master File
+# Pebble Patterns 
 
 ## Phase 1 Overview: Guided Defaults Framework
 
-The **Pebble Pathways initiative** represents Phase 1 of Rippling’s Pebble NPS Recovery Plan.  
-It focuses on transforming Pebble from a complex, over-configurable system into a **frictionless, opinionated foundation** for product development across web and mobile.
+The **Pebble Pathways initiative** represents MVP experiment to define reusable intent driven patterns across Rippling.  
 
 Between October 2025 and Q1 2026, a cross-functional audit identified the most frequent, high-friction UI scenarios and codified them into **guided defaults** known as Pebble Pathways.  
 These pathways represent the “gold-standard” usage patterns that reduce system ambiguity and align design and code around clarity, guidance, and ease of use.
