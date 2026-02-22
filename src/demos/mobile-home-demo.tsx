@@ -242,38 +242,8 @@ const ContentArea = styled.div`
 const WidgetZones = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   padding: 0 16px 120px;
-`;
-
-// ─── Widget Zone ────────────────────────────────────────────────────────
-
-const WidgetZone = styled.div<{ flex?: number }>`
-  flex: ${({ flex }) => flex ?? 1};
-  min-height: 120px;
-  border: 2px dashed rgba(0, 0, 0, 0.12);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 24px 16px;
-`;
-
-const ZoneLabel = styled.span`
-  font-size: 17px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.45);
-  text-align: center;
-`;
-
-const ZoneCaption = styled.span`
-  font-size: 14px;
-  font-weight: 400;
-  font-style: italic;
-  color: rgba(0, 0, 0, 0.3);
-  text-align: center;
 `;
 
 // ─── Tab View Header ────────────────────────────────────────────────────
@@ -446,76 +416,399 @@ function getZoneWidgets(persona: PersonaId, onboarding: boolean): ZoneMapping {
   };
 }
 
-const ZoneWidgetList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 6px;
+// ─── WidgetCard (Figma-based) ────────────────────────────────────────────
+
+const WidgetCardContainer = styled.div<{ outlineVariant?: string }>`
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid ${({ outlineVariant }) => outlineVariant || 'rgba(0, 0, 0, 0.12)'};
+  overflow: hidden;
+  width: 100%;
 `;
 
-const ZoneWidgetItem = styled.span`
-  font-size: 12px;
+const WidgetCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px 0 12px;
+`;
+
+const WidgetCardTitleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+`;
+
+const WidgetCardTitle = styled.span<{ surfaceVariant?: string }>`
+  font-size: 14px;
   font-weight: 400;
-  color: rgba(0, 0, 0, 0.35);
-  text-align: center;
+  letter-spacing: 0;
+  color: ${({ surfaceVariant }) => surfaceVariant || 'rgba(0, 0, 0, 0.45)'};
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.3;
+`;
+
+const WidgetCardMeta = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const WidgetCardBody = styled.div`
+  padding: 10px 12px 12px;
+`;
+
+const WidgetCardFooter = styled.div`
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const ContentSlot = styled.div`
+  width: 100%;
+  height: 64px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.2);
   font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
 `;
 
+interface WidgetCardProps {
+  title: string;
+  meta?: React.ReactNode;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+  surfaceVariant?: string;
+  outlineVariant?: string;
+}
+
+const WidgetCard: React.FC<WidgetCardProps> = ({ title, meta, children, footer, surfaceVariant, outlineVariant }) => (
+  <WidgetCardContainer outlineVariant={outlineVariant}>
+    <WidgetCardHeader>
+      <WidgetCardTitleGroup>
+        <WidgetCardTitle surfaceVariant={surfaceVariant}>{title}</WidgetCardTitle>
+        <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={surfaceVariant || 'rgba(0, 0, 0, 0.45)'} />
+      </WidgetCardTitleGroup>
+      {meta && <WidgetCardMeta>{meta}</WidgetCardMeta>}
+    </WidgetCardHeader>
+    <WidgetCardBody>{children}</WidgetCardBody>
+    {footer && <WidgetCardFooter>{footer}</WidgetCardFooter>}
+  </WidgetCardContainer>
+);
+
+// ─── Discovery App List Data ─────────────────────────────────────────────
+
+type AppItem = { id: string; label: string; group: string };
+
+const ALL_APPS: AppItem[] = [
+  // HR Management
+  { id: 'people_directory', label: 'People Directory', group: 'HR' },
+  { id: 'time_off', label: 'Time Off (PTO)', group: 'HR' },
+  { id: 'time_attendance', label: 'Time & Attendance', group: 'HR' },
+  { id: 'scheduling', label: 'Scheduling', group: 'HR' },
+  { id: 'time_standalone', label: 'Time (Standalone)', group: 'HR' },
+  { id: 'learn', label: 'Learn', group: 'HR' },
+  { id: 'surveys', label: 'Surveys', group: 'HR' },
+  { id: 'my_benefits', label: 'My Benefits', group: 'HR' },
+  { id: 'news_feed', label: 'News Feed', group: 'HR' },
+  // Finance
+  { id: 'my_pay', label: 'My Pay', group: 'Finance' },
+  { id: 'spend_management', label: 'Spend Management', group: 'Finance' },
+  { id: 'travel', label: 'Travel', group: 'Finance' },
+  // IT
+  { id: 'passwords', label: 'Passwords', group: 'IT' },
+];
+
+const APP_GROUPS = ['HR', 'Finance', 'IT'] as const;
+
+// ─── Discovery List Styles ───────────────────────────────────────────────
+
+const AppListContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+`;
+
+const AppGroupHeader = styled.div`
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 4px 6px;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  &:first-of-type {
+    padding-top: 4px;
+  }
+`;
+
+const AppRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const AppIcon = styled.div<{ primary?: string }>`
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: ${({ primary }) => primary || '#6750A4'};
+  flex-shrink: 0;
+`;
+
+const AppLabel = styled.span`
+  ${({ theme }) => (theme as any).typestyleV2BodyLargeEmphasized};
+  color: #1a1a1a;
+`;
+
+const AppChevron = styled.span`
+  margin-left: auto;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.2);
+`;
+
+// ─── HUD App Checkbox Styles ─────────────────────────────────────────────
+
+const HudCheckboxRow = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const HudCheckbox = styled.input<{ primaryColor?: string }>`
+  width: 16px;
+  height: 16px;
+  accent-color: ${({ primaryColor }) => primaryColor || '#6750A4'};
+  cursor: pointer;
+  flex-shrink: 0;
+`;
+
+const HudCheckboxLabel = styled.span`
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+`;
+
+const ModalGroupRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 4px;
+`;
+
+const ModalGroupName = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const ModalActionRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px 6px;
+`;
+
+const ModalActionLink = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #7ec8e3;
+  &:hover { opacity: 0.8; }
+`;
+
+const ModalActionSep = styled.span`
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 13px;
+`;
+
+const ModalGroupActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const HudAppSummary = styled.span`
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.4;
+`;
+
+const HudAppMore = styled.span`
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+`;
+
+const HudEditButton = styled.button`
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  flex-shrink: 0;
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+`;
+
+// ─── Apps Modal ──────────────────────────────────────────────────────────
+
+const AppsModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 30000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const AppsModalPanel = styled.div`
+  width: 600px;
+  max-height: 80vh;
+  background: #1a1a1a;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+const AppsModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+`;
+
+const AppsModalTitle = styled.span`
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+`;
+
+const AppsModalClose = styled.button`
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  &:hover { color: #fff; }
+`;
+
+const AppsModalBody = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0 12px;
+`;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────
+
+function widgetIdToTitle(id: string): string {
+  return id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// ─── Discovery App List Component ────────────────────────────────────────
+
+const DiscoveryAppList: React.FC<{ enabledApps: Set<string>; primary?: string }> = ({ enabledApps, primary }) => {
+  const visibleApps = ALL_APPS.filter(a => enabledApps.has(a.id));
+  const groups = APP_GROUPS.filter(g => visibleApps.some(a => a.group === g));
+  if (groups.length === 0) return null;
+  return (
+    <AppListContainer>
+      {groups.map(group => (
+        <React.Fragment key={group}>
+          <AppGroupHeader>{group}</AppGroupHeader>
+          {visibleApps.filter(a => a.group === group).map(app => (
+            <AppRow key={app.id}>
+              <AppIcon primary={primary} />
+              <AppLabel>{app.label}</AppLabel>
+              <AppChevron>›</AppChevron>
+            </AppRow>
+          ))}
+        </React.Fragment>
+      ))}
+    </AppListContainer>
+  );
+};
+
 // ─── Home View ──────────────────────────────────────────────────────────
 
-const HomeView: React.FC<{ theme: any; zoneWidgets: ZoneMapping }> = ({ theme, zoneWidgets }) => (
-  <>
-    <AppHeader>
-      <LogoImage src={RipplingLogo} alt="Rippling" />
-      <HeaderRight>
-        <AppsButton aria-label="Apps">
-          <Icon type={Icon.TYPES.APPS_OUTLINE} size={22} color={theme.colorOnSurfaceVariant} />
-        </AppsButton>
-      </HeaderRight>
-    </AppHeader>
-    <WidgetZones>
-      <WidgetZone flex={1.3}>
-        <ZoneLabel>Primary work</ZoneLabel>
-        <ZoneCaption>What needs attention right now?</ZoneCaption>
-        {zoneWidgets.primary.length > 0 && (
-          <ZoneWidgetList>
-            {zoneWidgets.primary.map(w => <ZoneWidgetItem key={w}>• {w}</ZoneWidgetItem>)}
-          </ZoneWidgetList>
-        )}
-      </WidgetZone>
+const HomeView: React.FC<{ theme: any; zoneWidgets: ZoneMapping; enabledApps: Set<string> }> = ({ theme, zoneWidgets, enabledApps }) => {
+  const sv = theme.colorOnSurfaceVariant;
+  const ov = theme.colorOutlineVariant;
+  return (
+    <>
+      <AppHeader>
+        <LogoImage src={RipplingLogo} alt="Rippling" />
+        <HeaderRight>
+          <AppsButton aria-label="Apps">
+            <Icon type={Icon.TYPES.APPS_OUTLINE} size={22} color={sv} />
+          </AppsButton>
+        </HeaderRight>
+      </AppHeader>
+      <WidgetZones>
+        {/* Primary zone */}
+        {zoneWidgets.primary.map(w => (
+          <WidgetCard key={w} title={widgetIdToTitle(w)} surfaceVariant={sv} outlineVariant={ov}>
+            <ContentSlot>Content slot</ContentSlot>
+          </WidgetCard>
+        ))}
 
-      <WidgetZone flex={1}>
-        <ZoneLabel>Core actions</ZoneLabel>
-        <ZoneCaption>What do I commonly do?</ZoneCaption>
-        {zoneWidgets.core.length > 0 && (
-          <ZoneWidgetList>
-            {zoneWidgets.core.map(w => <ZoneWidgetItem key={w}>• {w}</ZoneWidgetItem>)}
-          </ZoneWidgetList>
-        )}
-      </WidgetZone>
+        {/* Core zone */}
+        {zoneWidgets.core.map(w => (
+          <WidgetCard key={w} title={widgetIdToTitle(w)} surfaceVariant={sv} outlineVariant={ov}>
+            <ContentSlot>Content slot</ContentSlot>
+          </WidgetCard>
+        ))}
 
-      <WidgetZone flex={1}>
-        <ZoneLabel>Contextual</ZoneLabel>
-        <ZoneCaption>What's the state of my world?</ZoneCaption>
-        {zoneWidgets.contextual.length > 0 && (
-          <ZoneWidgetList>
-            {zoneWidgets.contextual.map(w => <ZoneWidgetItem key={w}>• {w}</ZoneWidgetItem>)}
-          </ZoneWidgetList>
-        )}
-      </WidgetZone>
+        {/* Contextual zone */}
+        {zoneWidgets.contextual.map(w => (
+          <WidgetCard key={w} title={widgetIdToTitle(w)} surfaceVariant={sv} outlineVariant={ov}>
+            <ContentSlot>Content slot</ContentSlot>
+          </WidgetCard>
+        ))}
 
-      <WidgetZone style={{ minHeight: 400 }}>
-        <ZoneLabel>Discovery/expansion</ZoneLabel>
-        <ZoneCaption>What else is available?</ZoneCaption>
-        {zoneWidgets.discovery.length > 0 && (
-          <ZoneWidgetList>
-            {zoneWidgets.discovery.map(w => <ZoneWidgetItem key={w}>• {w}</ZoneWidgetItem>)}
-          </ZoneWidgetList>
-        )}
-      </WidgetZone>
-    </WidgetZones>
-  </>
-);
+        {/* Discovery zone — flat app list, not cards */}
+        <DiscoveryAppList enabledApps={enabledApps} primary={theme.colorPrimary} />
+      </WidgetZones>
+    </>
+  );
+};
 
 // ─── Bottom Navigation (Liquid Glass) ───────────────────────────────────
 
@@ -641,27 +934,6 @@ const HomeIndicatorBar = styled.div`
 
 // ─── SVG Icons (matching Figma) ─────────────────────────────────────────
 
-const AppsGridIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#1a1a1a" strokeWidth="1.8"/>
-    <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#1a1a1a" strokeWidth="1.8"/>
-    <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#1a1a1a" strokeWidth="1.8"/>
-    <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#1a1a1a" strokeWidth="1.8"/>
-    <line x1="21" y1="14" x2="21" y2="10.5" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round"/>
-  </svg>
-);
-
-const SettingsSliderIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <line x1="4" y1="6" x2="20" y2="6" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round"/>
-    <line x1="4" y1="12" x2="20" y2="12" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round"/>
-    <line x1="4" y1="18" x2="20" y2="18" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round"/>
-    <circle cx="8" cy="6" r="2.5" fill="#f5f2ef" stroke="#1a1a1a" strokeWidth="1.8"/>
-    <circle cx="16" cy="12" r="2.5" fill="#f5f2ef" stroke="#1a1a1a" strokeWidth="1.8"/>
-    <circle cx="10" cy="18" r="2.5" fill="#f5f2ef" stroke="#1a1a1a" strokeWidth="1.8"/>
-  </svg>
-);
-
 // ─── Status bar icons ───────────────────────────────────────────────────
 
 const SignalBars = () => (
@@ -767,6 +1039,9 @@ const HudCard = styled.div`
 `;
 
 const HudCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 12px 14px;
   font-size: 13px;
   font-weight: 600;
@@ -892,34 +1167,53 @@ const MobileHomeDemo: React.FC = () => {
   const [activeNav, setActiveNav] = useState(0);
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
+  const [appsModalOpen, setAppsModalOpen] = useState(false);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const leftToggleRef = useRef<HTMLButtonElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const rightToggleRef = useRef<HTMLButtonElement>(null);
 
-  // Persona + onboarding state from query params
+  // Persona + onboarding + apps state from query params
   const initialPersona = (PERSONA_OPTIONS.find(p => p.id === searchParams.get('persona'))?.id) ?? 'hourly_operator';
   const initialOnboarding = searchParams.get('onboarding') === '1';
+  const initialApps = (() => {
+    const appsParam = searchParams.get('apps');
+    if (appsParam) return new Set(appsParam.split(',').filter(Boolean));
+    return new Set(ALL_APPS.map(a => a.id));
+  })();
   const [persona, setPersona] = useState<PersonaId>(initialPersona);
   const [onboarding, setOnboarding] = useState(initialOnboarding);
+  const [enabledApps, setEnabledApps] = useState<Set<string>>(initialApps);
 
-  const updateParams = useCallback((p: PersonaId, o: boolean) => {
-    setSearchParams({ persona: p, onboarding: o ? '1' : '0' }, { replace: true });
+  const updateParams = useCallback((p: PersonaId, o: boolean, apps: Set<string>) => {
+    const allEnabled = apps.size === ALL_APPS.length;
+    const params: Record<string, string> = { persona: p, onboarding: o ? '1' : '0' };
+    if (!allEnabled) params.apps = Array.from(apps).join(',');
+    setSearchParams(params, { replace: true });
   }, [setSearchParams]);
 
   const handlePersonaChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value as PersonaId;
     setPersona(val);
-    updateParams(val, onboarding);
-  }, [onboarding, updateParams]);
+    updateParams(val, onboarding, enabledApps);
+  }, [onboarding, enabledApps, updateParams]);
 
   const handleOnboardingToggle = useCallback(() => {
     setOnboarding(prev => {
       const next = !prev;
-      updateParams(persona, next);
+      updateParams(persona, next, enabledApps);
       return next;
     });
-  }, [persona, updateParams]);
+  }, [persona, enabledApps, updateParams]);
+
+  const handleAppToggle = useCallback((appId: string) => {
+    setEnabledApps(prev => {
+      const next = new Set(prev);
+      if (next.has(appId)) next.delete(appId); else next.add(appId);
+      updateParams(persona, onboarding, next);
+      return next;
+    });
+  }, [persona, onboarding, updateParams]);
 
   const zoneWidgets = getZoneWidgets(persona, onboarding);
   const personaAvatar = PERSONA_OPTIONS.find(p => p.id === persona)?.avatar ?? PERSONA_OPTIONS[0].avatar;
@@ -972,7 +1266,7 @@ const MobileHomeDemo: React.FC = () => {
       </HudToggle>
       <HudToggle ref={rightToggleRef} position="right" onClick={() => setRightPanelOpen(prev => !prev)} aria-label="Toggle Persona panel">
         <HudToggleAvatar src={personaAvatar} alt="Persona" />
-        User Intent
+        {PERSONA_OPTIONS.find(p => p.id === persona)?.label ?? 'Persona'}
       </HudToggle>
 
       {/* HUD Panels */}
@@ -1035,11 +1329,116 @@ const MobileHomeDemo: React.FC = () => {
             <HudRow><HudRowLabel>Company size</HudRowLabel><HudRowPlaceholder variant="dropdown" /></HudRow>
             <HudRow><HudRowLabel>Active modules</HudRowLabel><HudRowPlaceholder variant="toggle" /></HudRow>
           </HudCard>
+
+          <HudCard>
+            <HudCardHeader>
+              Available Apps
+              <HudEditButton onClick={() => setAppsModalOpen(true)}>Edit</HudEditButton>
+            </HudCardHeader>
+            <div style={{ padding: '10px 14px' }}>
+              {(() => {
+                const enabled = ALL_APPS.filter(a => enabledApps.has(a.id));
+                const shown = enabled.slice(0, 5);
+                const remaining = enabled.length - shown.length;
+                return (
+                  <>
+                    {shown.map(app => (
+                      <div key={app.id} style={{ padding: '2px 0' }}>
+                        <HudAppSummary>{app.label}</HudAppSummary>
+                      </div>
+                    ))}
+                    {remaining > 0 && (
+                      <HudAppMore>+ {remaining} more</HudAppMore>
+                    )}
+                    {enabled.length === 0 && (
+                      <HudAppSummary>No apps selected</HudAppSummary>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          </HudCard>
         </HudSections>
         <HudFooter>
-          State: persona={persona}, onboarding={String(onboarding)}
+          State: persona={persona}, onboarding={String(onboarding)}, apps={enabledApps.size}/{ALL_APPS.length}
         </HudFooter>
       </HudPanel>
+
+      {/* Apps Modal */}
+      {appsModalOpen && (
+        <AppsModalOverlay onClick={() => setAppsModalOpen(false)}>
+          <AppsModalPanel onClick={e => e.stopPropagation()}>
+            <AppsModalHeader>
+              <AppsModalTitle>Available Apps</AppsModalTitle>
+              <AppsModalClose onClick={() => setAppsModalOpen(false)}>Done</AppsModalClose>
+            </AppsModalHeader>
+            <AppsModalBody>
+              <ModalActionRow>
+                <ModalActionLink
+
+                  onClick={() => {
+                    const next = new Set(ALL_APPS.map(a => a.id));
+                    setEnabledApps(next);
+                    updateParams(persona, onboarding, next);
+                  }}
+                >Select all</ModalActionLink>
+                <ModalActionSep>|</ModalActionSep>
+                <ModalActionLink
+
+                  onClick={() => {
+                    const next = new Set<string>();
+                    setEnabledApps(next);
+                    updateParams(persona, onboarding, next);
+                  }}
+                >Unselect all</ModalActionLink>
+              </ModalActionRow>
+              {APP_GROUPS.map(group => {
+                const groupApps = ALL_APPS.filter(a => a.group === group);
+                const groupIds = groupApps.map(a => a.id);
+                return (
+                  <React.Fragment key={group}>
+                    <ModalGroupRow>
+                      <ModalGroupName>{group}</ModalGroupName>
+                      <ModalGroupActions>
+                        <ModalActionLink
+        
+                          onClick={() => {
+                            const next = new Set(enabledApps);
+                            groupIds.forEach(id => next.add(id));
+                            setEnabledApps(next);
+                            updateParams(persona, onboarding, next);
+                          }}
+                        >Select all</ModalActionLink>
+                        <ModalActionSep>|</ModalActionSep>
+                        <ModalActionLink
+        
+                          onClick={() => {
+                            const next = new Set(enabledApps);
+                            groupIds.forEach(id => next.delete(id));
+                            setEnabledApps(next);
+                            updateParams(persona, onboarding, next);
+                          }}
+                        >Unselect all</ModalActionLink>
+                      </ModalGroupActions>
+                    </ModalGroupRow>
+                    {groupApps.map(app => (
+                      <HudCheckboxRow key={app.id}>
+                        <HudCheckbox
+                          type="checkbox"
+                          checked={enabledApps.has(app.id)}
+                          onChange={() => handleAppToggle(app.id)}
+                          primaryColor={theme.colorPrimary}
+                        />
+                        <HudCheckboxLabel>{app.label}</HudCheckboxLabel>
+                      </HudCheckboxRow>
+                    ))}
+                  </React.Fragment>
+                );
+              })}
+            </AppsModalBody>
+          </AppsModalPanel>
+        </AppsModalOverlay>
+      )}
 
       <Canvas>
         <PhoneMockup>
@@ -1062,7 +1461,7 @@ const MobileHomeDemo: React.FC = () => {
 
             {/* Scrollable content: switches based on active tab */}
             <ContentArea key={activeNav}>
-              {activeNav === 0 && <HomeView theme={theme} zoneWidgets={zoneWidgets} />}
+              {activeNav === 0 && <HomeView theme={theme} zoneWidgets={zoneWidgets} enabledApps={enabledApps} />}
               {activeNav === 1 && <ActivityView />}
               {activeNav === 2 && <FindView />}
               {activeNav === 3 && <ChatView />}
