@@ -41,6 +41,13 @@ const ALL_DEMOS: DemoCard[] = [
   },
   // Prototypes - examples and experiments
   {
+    title: 'Mobile Home',
+    description: 'A mobile home screen prototype with liquid glass UI, quick actions, to-do items, and balance cards.',
+    path: '/mobile-home-demo',
+    icon: Icon.TYPES.HOME_OUTLINE,
+    category: 'prototype',
+  },
+  {
     title: 'Composition Manager',
     description: 'A complex example showing a multi-view app with tables, modals, and state management.',
     path: '/composition-manager',

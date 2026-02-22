@@ -7,6 +7,7 @@ import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import GlobalStyle from '@rippling/pebble/GlobalStyle';
 import AppShellTemplate from './demos/app-shell-template';
+import MobileHomeDemo from './demos/mobile-home-demo';
 import CompositionManagerDemo from './demos/composition-manager/composition-manager-demo';
 import { CompositionDetail } from './demos/composition-manager/compositions/CompositionDetail';
 import IndexPage from './demos/index-page';
@@ -61,6 +62,7 @@ init().then(() => {
             
             {/* Demos */}
             <Route path="/app-shell-template" element={<AppShellTemplate />} />
+            <Route path="/mobile-home-demo" element={<MobileHomeDemo />} />
             <Route path="/composition-manager" element={<CompositionManagerDemo />} />
             <Route path="/composition-manager/compositions/:id" element={<CompositionDetail />} />
             
