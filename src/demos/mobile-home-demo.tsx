@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from '@emotion/styled';
 import { Global, css } from '@emotion/react';
 import Icon from '@rippling/pebble/Icon';
+import { useSearchParams } from 'react-router-dom';
 import { usePebbleTheme } from '@/utils/theme';
 import RipplingLogo from '@/assets/rippling-logo-black.svg';
 
@@ -322,9 +323,147 @@ const ChatView: React.FC = () => (
   </>
 );
 
+// ─── Persona Types & Mapping ─────────────────────────────────────────────
+
+type PersonaId =
+  | 'hourly_operator'
+  | 'employee_self_service'
+  | 'frontline_shift_manager'
+  | 'people_manager'
+  | 'functional_admin'
+  | 'executive_owner'
+  | 'contractor';
+
+const PERSONA_OPTIONS: { id: PersonaId; label: string; avatar: string }[] = [
+  { id: 'hourly_operator', label: 'Hourly Operator', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' },
+  { id: 'employee_self_service', label: 'Employee Self-Service', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face' },
+  { id: 'frontline_shift_manager', label: 'Frontline Shift Manager', avatar: 'https://images.unsplash.com/photo-1534751516642-a1af1ef26a56?w=100&h=100&fit=crop&crop=face' },
+  { id: 'people_manager', label: 'People Manager (Knowledge Work)', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face' },
+  { id: 'functional_admin', label: 'Functional Admin', avatar: 'https://images.unsplash.com/photo-1557862921-37829c790f19?w=100&h=100&fit=crop&crop=face' },
+  { id: 'executive_owner', label: 'Executive / Owner', avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=100&h=100&fit=crop&crop=face' },
+  { id: 'contractor', label: 'Contractor', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face' },
+];
+
+type ZoneMapping = {
+  primary: string[];
+  core: string[];
+  contextual: string[];
+  discovery: string[];
+};
+
+const PERSONA_ZONE_MAP: Record<PersonaId, ZoneMapping> = {
+  hourly_operator: {
+    primary: ['shift_clock'],
+    core: ['quick_actions'],
+    contextual: ['earnings_summary'],
+    discovery: ['apps_list'],
+  },
+  contractor: {
+    primary: ['earnings_summary'],
+    core: ['quick_actions'],
+    contextual: ['inbox_preview'],
+    discovery: ['apps_list'],
+  },
+  frontline_shift_manager: {
+    primary: ['shift_clock'],
+    core: ['quick_actions'],
+    contextual: ['team_status'],
+    discovery: ['apps_list'],
+  },
+  employee_self_service: {
+    primary: ['inbox_preview'],
+    core: ['quick_actions'],
+    contextual: ['team_status'],
+    discovery: ['apps_list'],
+  },
+  people_manager: {
+    primary: ['inbox_preview'],
+    core: ['quick_actions'],
+    contextual: ['team_status'],
+    discovery: ['apps_list'],
+  },
+  functional_admin: {
+    primary: ['inbox_preview'],
+    core: ['quick_actions'],
+    contextual: ['admin_insights'],
+    discovery: ['apps_list'],
+  },
+  executive_owner: {
+    primary: ['inbox_preview'],
+    core: ['quick_actions'],
+    contextual: ['admin_insights'],
+    discovery: ['apps_list'],
+  },
+};
+
+// Derivation logic per persona (read-only display, human-readable)
+const PERSONA_DERIVATION: Record<PersonaId, { property: string; value: string }[]> = {
+  hourly_operator: [
+    { property: 'Employment type', value: 'Hourly' },
+    { property: 'Manager', value: 'No' },
+    { property: 'Admin status', value: 'None' },
+  ],
+  employee_self_service: [
+    { property: 'Employment type', value: 'Salaried' },
+    { property: 'Manager', value: 'No' },
+    { property: 'Admin status', value: 'None' },
+  ],
+  frontline_shift_manager: [
+    { property: 'Employment type', value: 'Hourly' },
+    { property: 'Manager', value: 'Yes' },
+    { property: 'Admin status', value: 'None' },
+  ],
+  people_manager: [
+    { property: 'Employment type', value: 'Salaried' },
+    { property: 'Manager', value: 'Yes' },
+    { property: 'Admin status', value: 'None' },
+  ],
+  functional_admin: [
+    { property: 'Employment type', value: 'Salaried' },
+    { property: 'Manager', value: 'No' },
+    { property: 'Admin status', value: 'Partial' },
+  ],
+  executive_owner: [
+    { property: 'Employment type', value: 'Salaried' },
+    { property: 'Manager', value: 'Yes' },
+    { property: 'Admin status', value: 'Full' },
+    { property: 'Company owner', value: 'Yes' },
+  ],
+  contractor: [
+    { property: 'Employment type', value: 'Contractor' },
+    { property: 'Manager', value: 'No' },
+    { property: 'Admin status', value: 'None' },
+  ],
+};
+
+function getZoneWidgets(persona: PersonaId, onboarding: boolean): ZoneMapping {
+  const base = PERSONA_ZONE_MAP[persona] ?? PERSONA_ZONE_MAP.hourly_operator;
+  return {
+    primary: onboarding ? ['onboarding_setup', ...base.primary] : base.primary,
+    core: base.core,
+    contextual: base.contextual,
+    discovery: base.discovery,
+  };
+}
+
+const ZoneWidgetList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+`;
+
+const ZoneWidgetItem = styled.span`
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.35);
+  text-align: center;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+`;
+
 // ─── Home View ──────────────────────────────────────────────────────────
 
-const HomeView: React.FC<{ theme: any }> = ({ theme }) => (
+const HomeView: React.FC<{ theme: any; zoneWidgets: ZoneMapping }> = ({ theme, zoneWidgets }) => (
   <>
     <AppHeader>
       <LogoImage src={RipplingLogo} alt="Rippling" />
@@ -338,21 +477,41 @@ const HomeView: React.FC<{ theme: any }> = ({ theme }) => (
       <WidgetZone flex={1.3}>
         <ZoneLabel>Primary work</ZoneLabel>
         <ZoneCaption>What needs attention right now?</ZoneCaption>
+        {zoneWidgets.primary.length > 0 && (
+          <ZoneWidgetList>
+            {zoneWidgets.primary.map(w => <ZoneWidgetItem key={w}>• {w}</ZoneWidgetItem>)}
+          </ZoneWidgetList>
+        )}
       </WidgetZone>
 
       <WidgetZone flex={1}>
         <ZoneLabel>Core actions</ZoneLabel>
         <ZoneCaption>What do I commonly do?</ZoneCaption>
+        {zoneWidgets.core.length > 0 && (
+          <ZoneWidgetList>
+            {zoneWidgets.core.map(w => <ZoneWidgetItem key={w}>• {w}</ZoneWidgetItem>)}
+          </ZoneWidgetList>
+        )}
       </WidgetZone>
 
       <WidgetZone flex={1}>
         <ZoneLabel>Contextual</ZoneLabel>
         <ZoneCaption>What's the state of my world?</ZoneCaption>
+        {zoneWidgets.contextual.length > 0 && (
+          <ZoneWidgetList>
+            {zoneWidgets.contextual.map(w => <ZoneWidgetItem key={w}>• {w}</ZoneWidgetItem>)}
+          </ZoneWidgetList>
+        )}
       </WidgetZone>
 
       <WidgetZone style={{ minHeight: 400 }}>
         <ZoneLabel>Discovery/expansion</ZoneLabel>
         <ZoneCaption>What else is available?</ZoneCaption>
+        {zoneWidgets.discovery.length > 0 && (
+          <ZoneWidgetList>
+            {zoneWidgets.discovery.map(w => <ZoneWidgetItem key={w}>• {w}</ZoneWidgetItem>)}
+          </ZoneWidgetList>
+        )}
       </WidgetZone>
     </WidgetZones>
   </>
@@ -537,9 +696,9 @@ const HudToggle = styled.button<{ position: 'left' | 'right' }>`
   top: 16px;
   ${({ position }) => position}: 16px;
   height: 36px;
-  padding: 0 12px;
-  gap: 6px;
-  border-radius: 8px;
+  padding: 0 20px;
+  gap: 8px;
+  border-radius: 100px;
   border: none;
   background: #1a1a1a;
   color: #fff;
@@ -644,10 +803,92 @@ const HudRowPlaceholder = styled.div<{ variant?: 'toggle' | 'dropdown' }>`
   border: 1px solid rgba(255, 255, 255, 0.06);
 `;
 
+
+const HudToggleSwitch = styled.button<{ on: boolean }>`
+  width: 42px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  background: ${({ on }) => (on ? '#4ade80' : 'rgba(255, 255, 255, 0.15)')};
+  transition: background 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: ${({ on }) => (on ? '20px' : '2px')};
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.2s ease;
+  }
+`;
+
+const PersonaCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+`;
+
+const PersonaAvatar = styled.img`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+`;
+
+const PersonaSelectInline = styled.select`
+  flex: 1;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  outline: none;
+  appearance: auto;
+  &:focus {
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+  option {
+    background: #1a1a1a;
+    color: #fff;
+  }
+`;
+
+const HudRowValue = styled.span`
+  font-size: 12px;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: right;
+`;
+
+const HudFooter = styled.div`
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  color: rgba(255, 255, 255, 0.3);
+  line-height: 1.5;
+`;
+
 // ─── Component ──────────────────────────────────────────────────────────
 
 const MobileHomeDemo: React.FC = () => {
   const { theme } = usePebbleTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeNav, setActiveNav] = useState(0);
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
@@ -655,6 +896,33 @@ const MobileHomeDemo: React.FC = () => {
   const leftToggleRef = useRef<HTMLButtonElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const rightToggleRef = useRef<HTMLButtonElement>(null);
+
+  // Persona + onboarding state from query params
+  const initialPersona = (PERSONA_OPTIONS.find(p => p.id === searchParams.get('persona'))?.id) ?? 'hourly_operator';
+  const initialOnboarding = searchParams.get('onboarding') === '1';
+  const [persona, setPersona] = useState<PersonaId>(initialPersona);
+  const [onboarding, setOnboarding] = useState(initialOnboarding);
+
+  const updateParams = useCallback((p: PersonaId, o: boolean) => {
+    setSearchParams({ persona: p, onboarding: o ? '1' : '0' }, { replace: true });
+  }, [setSearchParams]);
+
+  const handlePersonaChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value as PersonaId;
+    setPersona(val);
+    updateParams(val, onboarding);
+  }, [onboarding, updateParams]);
+
+  const handleOnboardingToggle = useCallback(() => {
+    setOnboarding(prev => {
+      const next = !prev;
+      updateParams(persona, next);
+      return next;
+    });
+  }, [persona, updateParams]);
+
+  const zoneWidgets = getZoneWidgets(persona, onboarding);
+  const personaAvatar = PERSONA_OPTIONS.find(p => p.id === persona)?.avatar ?? PERSONA_OPTIONS[0].avatar;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -703,7 +971,7 @@ const MobileHomeDemo: React.FC = () => {
         System Display
       </HudToggle>
       <HudToggle ref={rightToggleRef} position="right" onClick={() => setRightPanelOpen(prev => !prev)} aria-label="Toggle Persona panel">
-        <HudToggleAvatar src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="Persona" />
+        <HudToggleAvatar src={personaAvatar} alt="Persona" />
         User Intent
       </HudToggle>
 
@@ -733,16 +1001,31 @@ const MobileHomeDemo: React.FC = () => {
       </HudPanel>
 
       <HudPanel ref={rightPanelRef} position="right" open={rightPanelOpen}>
-        <HudTitle>Persona</HudTitle>
+        <HudTitle>User Intent</HudTitle>
         <HudSections>
           <HudCard>
-            <HudCardHeader>Persona</HudCardHeader>
-            <HudRow><HudRowLabel>Role</HudRowLabel><HudRowPlaceholder variant="dropdown" /></HudRow>
-            <HudRow><HudRowLabel>Permissions</HudRowLabel><HudRowPlaceholder variant="toggle" /></HudRow>
+            <PersonaCardHeader>
+              <PersonaAvatar src={personaAvatar} alt="Persona" />
+              <PersonaSelectInline value={persona} onChange={handlePersonaChange}>
+                {PERSONA_OPTIONS.map(p => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </PersonaSelectInline>
+            </PersonaCardHeader>
+            {PERSONA_DERIVATION[persona].map(d => (
+              <HudRow key={d.property}>
+                <HudRowLabel>{d.property}</HudRowLabel>
+                <HudRowValue>{d.value}</HudRowValue>
+              </HudRow>
+            ))}
           </HudCard>
 
           <HudCard>
             <HudCardHeader>Scenario</HudCardHeader>
+            <HudRow>
+              <HudRowLabel>Is Onboarding?</HudRowLabel>
+              <HudToggleSwitch on={onboarding} onClick={handleOnboardingToggle} />
+            </HudRow>
             <HudRow><HudRowLabel>Time of day</HudRowLabel><HudRowPlaceholder variant="dropdown" /></HudRow>
             <HudRow><HudRowLabel>Notifications</HudRowLabel><HudRowPlaceholder variant="toggle" /></HudRow>
           </HudCard>
@@ -753,6 +1036,9 @@ const MobileHomeDemo: React.FC = () => {
             <HudRow><HudRowLabel>Active modules</HudRowLabel><HudRowPlaceholder variant="toggle" /></HudRow>
           </HudCard>
         </HudSections>
+        <HudFooter>
+          State: persona={persona}, onboarding={String(onboarding)}
+        </HudFooter>
       </HudPanel>
 
       <Canvas>
@@ -771,12 +1057,12 @@ const MobileHomeDemo: React.FC = () => {
 
             {/* Floating Avatar - stays fixed */}
             <FloatingAvatar>
-              <AvatarCircle src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="Profile" />
+              <AvatarCircle src={personaAvatar} alt="Profile" />
             </FloatingAvatar>
 
             {/* Scrollable content: switches based on active tab */}
             <ContentArea key={activeNav}>
-              {activeNav === 0 && <HomeView theme={theme} />}
+              {activeNav === 0 && <HomeView theme={theme} zoneWidgets={zoneWidgets} />}
               {activeNav === 1 && <ActivityView />}
               {activeNav === 2 && <FindView />}
               {activeNav === 3 && <ChatView />}
