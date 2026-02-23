@@ -6,6 +6,7 @@ import React, { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import GlobalStyle from '@rippling/pebble/GlobalStyle';
+import { Global, css } from '@emotion/react';
 import AppShellTemplate from './demos/app-shell-template';
 import MobileHomeDemo from './demos/mobile-home-demo';
 import CompositionManagerDemo from './demos/composition-manager/composition-manager-demo';
@@ -54,6 +55,7 @@ init().then(() => {
       <BrowserRouter>
         <ThemeProvider themeConfigs={THEME_CONFIGS} defaultTheme="berry" defaultColorMode="light">
           <GlobalStyle />
+          <Global styles={css`body { letter-spacing: normal; }`} />
           <Routes>
             {/* Main pages */}
             <Route path="/" element={<IndexPage />} />
