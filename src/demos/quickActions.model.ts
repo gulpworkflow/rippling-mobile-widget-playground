@@ -355,7 +355,7 @@ export const ACTION_REGISTRY: Record<QuickActionId, QuickAction> = {
   },
   view_profile: {
     id: 'view_profile',
-    label: 'Profile',
+    label: 'Edit your Profile',
     route: 'mobile_platform/Profile',
     product: 'HR',
     requiredSkus: [],
@@ -408,7 +408,6 @@ const GLOBAL_RANKING: QuickActionId[] = [
   'view_expenses',
   'view_expense_approvals',
   'view_cards',
-  'view_notifications',
   'view_profile',
   'view_pto_balances', // Low priority: only in "all shortcuts" sheet, not default quick actions
   'book_travel',

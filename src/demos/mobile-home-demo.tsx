@@ -369,6 +369,8 @@ const PERSONA_ZONE_MAP: Record<PersonaId, ZoneMapping> = {
   },
 };
 
+const HOURLY_PERSONAS: PersonaId[] = ['hourly_operator', 'frontline_shift_manager'];
+
 // Derivation logic per persona (read-only display, human-readable)
 const PERSONA_DERIVATION: Record<PersonaId, { property: string; value: string }[]> = {
   hourly_operator: [
@@ -408,6 +410,17 @@ const PERSONA_DERIVATION: Record<PersonaId, { property: string; value: string }[
     { property: 'Admin status', value: 'None' },
   ],
 };
+
+function getIntentSummary(persona: PersonaId): { employment: string; manager: string; admin: string; owner?: string } {
+  const d = PERSONA_DERIVATION[persona];
+  const owner = d.find(x => x.property === 'Company owner')?.value;
+  return {
+    employment: d.find(x => x.property === 'Employment type')?.value ?? '',
+    manager: d.find(x => x.property === 'Manager')?.value ?? '—',
+    admin: d.find(x => x.property === 'Admin status')?.value ?? '—',
+    ...(owner && { owner }),
+  };
+}
 
 function getZoneWidgets(persona: PersonaId, onboarding: boolean, enabledApps: Set<string>): ZoneMapping {
   const base = PERSONA_ZONE_MAP[persona] ?? PERSONA_ZONE_MAP.hourly_operator;
@@ -2071,12 +2084,90 @@ const HudToggle = styled.button<{ position: 'left' | 'right' }>`
   }
 `;
 
-const HudToggleAvatar = styled.img`
-  width: 22px;
-  height: 22px;
+const UserIntentWrapper = styled.div`
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 19998;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const UserIntentEyebrow = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.35);
+  padding-left: 2px;
+`;
+
+const UserIntentCard = styled.button`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #1a1a1a;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: opacity 0.2s ease;
+  max-width: 280px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  &:hover {
+    opacity: 0.95;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+`;
+
+const UserIntentAvatar = styled.img`
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+`;
+
+const UserIntentContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+`;
+
+const UserIntentPersona = styled.span`
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+`;
+
+const UserIntentRow = styled.span`
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.3;
+`;
+
+const UserIntentPills = styled.span`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: rgba(255, 255, 255, 0.5);
+`;
+
+const UserIntentPill = styled.span`
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
 `;
 
 const HudPanel = styled.div<{ position: 'left' | 'right'; open: boolean }>`
@@ -2369,6 +2460,8 @@ const MobileHomeDemo: React.FC = () => {
   const [persona, setPersona] = useState<PersonaId>(initialPersona);
   const [onboarding, setOnboarding] = useState(initialOnboarding);
   const [enabledApps, setEnabledApps] = useState<Set<string>>(initialApps);
+  const [shiftToday, setShiftToday] = useState(initialPersona === 'hourly_operator');
+  const [onClock, setOnClock] = useState(false);
 
   const updateParams = useCallback((p: PersonaId, o: boolean, apps: Set<string>) => {
     const allEnabled = apps.size === ALL_APPS.length;
@@ -2382,6 +2475,8 @@ const MobileHomeDemo: React.FC = () => {
     const defaultSkus = new Set(PERSONA_DEFAULT_SKUS[val] ?? []);
     setPersona(val);
     setEnabledApps(defaultSkus);
+    setShiftToday(val === 'hourly_operator');
+    setOnClock(false);
     updateParams(val, onboarding, defaultSkus);
   }, [onboarding, updateParams]);
 
@@ -2445,10 +2540,29 @@ const MobileHomeDemo: React.FC = () => {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="14" rx="2" stroke="#fff" strokeWidth="2"/><path d="M8 21h8M12 17v4" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
         System Display
       </HudToggle>
-      <HudToggle ref={rightToggleRef} position="right" onClick={() => setRightPanelOpen(prev => !prev)} aria-label="Toggle Persona panel">
-        <HudToggleAvatar src={personaAvatar} alt="Persona" />
-        {PERSONA_OPTIONS.find(p => p.id === persona)?.label ?? 'Persona'}
-      </HudToggle>
+      <UserIntentWrapper>
+        <UserIntentEyebrow>User intent</UserIntentEyebrow>
+        <UserIntentCard ref={rightToggleRef} onClick={() => setRightPanelOpen(prev => !prev)} aria-label="Toggle User Intent panel">
+          <UserIntentAvatar src={personaAvatar} alt="Persona" />
+          <UserIntentContent>
+            <UserIntentPersona>{PERSONA_OPTIONS.find(p => p.id === persona)?.label ?? 'Persona'}</UserIntentPersona>
+            <UserIntentRow>
+              {(() => {
+                const s = getIntentSummary(persona);
+                let text = `${s.employment} • Manager: ${s.manager} • Admin: ${s.admin}`;
+                if (s.owner) text += ` • Owner: ${s.owner}`;
+                return text;
+              })()}
+            </UserIntentRow>
+            {HOURLY_PERSONAS.includes(persona) && (
+              <UserIntentPills>
+                <UserIntentPill>{onClock ? 'On clock' : 'Off clock'}</UserIntentPill>
+                <UserIntentPill>{shiftToday ? 'Shift today' : 'No shift today'}</UserIntentPill>
+              </UserIntentPills>
+            )}
+          </UserIntentContent>
+        </UserIntentCard>
+      </UserIntentWrapper>
 
       {/* HUD Panels */}
       <HudPanel ref={leftPanelRef} position="left" open={leftPanelOpen}>
@@ -2502,6 +2616,20 @@ const MobileHomeDemo: React.FC = () => {
               </HudRow>
             ))}
           </HudCard>
+
+          {HOURLY_PERSONAS.includes(persona) && (
+            <HudCard>
+              <HudCardHeader>Hourly intent</HudCardHeader>
+              <HudRow>
+                <HudRowLabel>Shift today</HudRowLabel>
+                <HudToggleSwitch on={shiftToday} onClick={() => setShiftToday(prev => !prev)} />
+              </HudRow>
+              <HudRow>
+                <HudRowLabel>On clock</HudRowLabel>
+                <HudToggleSwitch on={onClock} onClick={() => setOnClock(prev => !prev)} />
+              </HudRow>
+            </HudCard>
+          )}
 
           <HudCard>
             <HudCardHeader>
