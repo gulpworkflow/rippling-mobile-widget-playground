@@ -7,10 +7,7 @@ import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import GlobalStyle from '@rippling/pebble/GlobalStyle';
 import { Global, css } from '@emotion/react';
-import AppShellTemplate from './demos/app-shell-template';
-import MobileHomeDemo from './demos/mobile-home-demo';
-import CompositionManagerDemo from './demos/composition-manager/composition-manager-demo';
-import { CompositionDetail } from './demos/composition-manager/compositions/CompositionDetail';
+import MobileHomeDemo from './playground/MobileHomeDemo';
 import IndexPage from './demos/index-page';
 import GettingStartedPage from './demos/getting-started-page';
 import DocViewerPage from './demos/doc-viewer-page';
@@ -62,11 +59,8 @@ init().then(() => {
             <Route path="/getting-started" element={<GettingStartedPage />} />
             <Route path="/docs" element={<DocViewerPage />} />
             
-            {/* Demos */}
-            <Route path="/app-shell-template" element={<AppShellTemplate />} />
+            {/* Mobile Home Prototype */}
             <Route path="/mobile-home-demo" element={<MobileHomeDemo />} />
-            <Route path="/composition-manager" element={<CompositionManagerDemo />} />
-            <Route path="/composition-manager/compositions/:id" element={<CompositionDetail />} />
             
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -14,22 +14,14 @@
 
 // ─── Types ───────────────────────────────────────────────────────────────
 
-export type PersonaId =
-  | 'hourly_operator'
-  | 'employee_self_service'
-  | 'frontline_shift_manager'
-  | 'people_manager'
-  | 'functional_admin'
-  | 'executive_owner'
-  | 'contractor';
+import type { PersonaId } from './types';
+export type { PersonaId };
 
 export type QuickActionId =
   | 'request_time_off'
   | 'view_my_schedule'
   | 'view_my_timecard'
-  | 'pick_up_shift'
   | 'view_pto_balances'
-  | 'view_team_schedule'
   | 'view_paystubs'
   | 'update_bank_account'
   | 'view_tax_documents'
@@ -109,7 +101,7 @@ export const ACTION_REGISTRY: Record<QuickActionId, QuickAction> = {
   },
   view_my_schedule: {
     id: 'view_my_schedule',
-    label: 'View Schedules',
+    label: 'My Schedule',
     route: 'my-schedule',
     product: 'Time',
     requiredSkus: ['scheduling'],
@@ -121,26 +113,12 @@ export const ACTION_REGISTRY: Record<QuickActionId, QuickAction> = {
     product: 'Time',
     requiredSkus: ['time_tracking'],
   },
-  pick_up_shift: {
-    id: 'pick_up_shift',
-    label: 'Pick Up Shift',
-    route: 'scheduling/availableShifts',
-    product: 'Time',
-    requiredSkus: ['scheduling'],
-  },
   view_pto_balances: {
     id: 'view_pto_balances',
     label: 'View PTO Balances',
     route: 'pto/Balances',
     product: 'Time',
     requiredSkus: ['time_off'],
-  },
-  view_team_schedule: {
-    id: 'view_team_schedule',
-    label: 'View Team Schedule',
-    route: 'team-schedule',
-    product: 'Time',
-    requiredSkus: ['scheduling'],
   },
   view_paystubs: {
     id: 'view_paystubs',
@@ -378,7 +356,6 @@ const GLOBAL_RANKING: QuickActionId[] = [
   'view_my_schedule',
   'submit_expense',
   'people_directory',
-  'pick_up_shift',
   'shift_swaps',
   'edit_availability',
   'view_my_timecard',
@@ -391,7 +368,6 @@ const GLOBAL_RANKING: QuickActionId[] = [
   'log_mileage',
   'view_documents',
   'view_my_benefits',
-  'view_team_schedule',
   'update_bank_account',
   'view_tax_documents',
   // Extended (bottom of stack, from usage data; 4–6 per product for sheet rows)
@@ -409,7 +385,7 @@ const GLOBAL_RANKING: QuickActionId[] = [
   'view_expense_approvals',
   'view_cards',
   'view_profile',
-  'view_pto_balances', // Low priority: only in "all shortcuts" sheet, not default quick actions
+  'view_pto_balances',
   'book_travel',
 ];
 
@@ -438,10 +414,11 @@ export const DEFAULT_PERSONA_RANKINGS: Record<PersonaId, QuickActionId[]> = {
     'request_time_off',
   ],
   people_manager: [
-    'people_directory',
     'request_time_off',
     'submit_expense',
     'view_my_benefits',
+    'book_travel',
+    'view_documents',
   ],
   functional_admin: [
     'people_directory',
@@ -533,23 +510,6 @@ export interface GetQuickActionsParams {
   maxCount?: number;
 }
 
-/**
- * Returns the ordered Quick Actions for a given persona + SKU configuration.
- *
- * Filtering: actions whose requiredSkus aren't all enabled are excluded.
- * Ordering: persona ranking first, then global fallback ranking.
- * Onboarding: actions with `onboardingPriority` are boosted to the top.
- *
- * @example
- * ```ts
- * const { actions } = getQuickActions({
- *   persona: 'hourly_operator',
- *   skuFlags: { time_off: true, scheduling: true },
- *   maxCount: 4,
- * });
- * // actions → [View My Schedule, Request Time Off, Pick Up Shift, View PTO Balances]
- * ```
- */
 export function getQuickActions(params: GetQuickActionsParams): QuickActionsResult {
   const { persona, skuFlags, onboarding = false, maxCount = 4 } = params;
   const all = buildRankedList(persona, skuFlags, onboarding);
@@ -558,37 +518,3 @@ export function getQuickActions(params: GetQuickActionsParams): QuickActionsResu
     all,
   };
 }
-
-// ─── Example Usage (console sample) ─────────────────────────────────────
-//
-// import { getQuickActions } from './quickActions.model';
-//
-// const result = getQuickActions({
-//   persona: 'hourly_operator',
-//   skuFlags: {
-//     time_off: true,
-//     scheduling: true,
-//     time_tracking: true,
-//     my_pay: true,
-//   },
-//   onboarding: false,
-//   maxCount: 4,
-// });
-//
-// console.log('Quick Actions:', result.actions.map(a => a.label));
-// → ["View My Schedule", "Request Time Off", "Pick Up Shift", "View PTO Balances"]
-//
-// console.log('Full list:', result.all.map(a => a.label));
-// → ["View My Schedule", "Request Time Off", "Pick Up Shift", "View PTO Balances",
-//    "View My Timecard", "View Paystubs"]
-//
-// // With onboarding:
-// const onboarding = getQuickActions({
-//   persona: 'employee_self_service',
-//   skuFlags: { time_off: true, my_pay: true, my_benefits: true, spend_management: true, people_directory: true },
-//   onboarding: true,
-//   maxCount: 4,
-// });
-//
-// console.log('Onboarding:', onboarding.actions.map(a => a.label));
-// → ["View My Benefits", "View Documents", "Update Bank Account", "Request Time Off"]

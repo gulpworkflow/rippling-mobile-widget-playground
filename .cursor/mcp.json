@@ -3,6 +3,9 @@
     "Pebble": {
       "command": "npx",
       "args": ["@rippling/pebble-mcp"]
+    },
+    "figma-desktop": {
+      "url": "http://127.0.0.1:3845/mcp"
     }
   }
 }

@@ -1,249 +1,133 @@
-# Pebble Playground
+# Rippling Mobile Home — Product Spec & Interactive Prototype
 
-**Your personal sandbox for prototyping with AI and Rippling's design system.**
+**Living product spec + interactive prototype for Rippling's mobile app home experience.**
 
-Think of this as your private workspace where you can describe what you want to build, and AI (like Cursor) makes it real—using actual Pebble components, not generic placeholders.
-
----
-
-## What This Is
-
-A workspace for prototyping with AI using Rippling's actual design system. When you build here, AI uses real Pebble components instead of generic alternatives—so your prototypes match production from the start.
-
-Build interactive mockups (modals, forms, dashboards), test micro-interactions, or explore layout ideas. Since everything uses Pebble's actual components and design tokens, what you build can be handed off to engineering without translation.
-
-![Pebble Playground Homepage](docs/images/playground-homepage.png)
+This repo is the source of truth for the mobile home screen architecture: personas, widget framework, navigation model, and adaptive personalization system. The code IS the spec — run it to see the prototype, read it to understand the system.
 
 ---
 
-## Getting Started
-
-### 1. Fork this repo (don't clone!)
-
-**Why fork?** Each person/team gets their own copy to customize, deploy to Vercel, and maintain independently—while still being able to pull updates from the core repo. Previous approaches of sharing one repo led to conflicts, bloat, and dependency nightmares.
-
-**To fork:**
-
-1. Go to [github.com/pbest/pebble-playground](https://github.com/pbest/pebble-playground)
-2. Click the **"Fork"** button (top right)
-3. Choose your personal account or your team's org
-4. Clone **your fork** locally:
-
-```bash
-git clone https://github.com/YOUR-USERNAME/pebble-playground.git
-cd pebble-playground
-```
-
-**Set up upstream to get future updates:**
-
-```bash
-git remote add upstream https://github.com/pbest/pebble-playground.git
-```
-
-Now you can pull improvements from the core repo anytime:
-
-```bash
-git fetch upstream
-git merge upstream/main
-# Resolve any conflicts, then commit
-```
-
-> 💡 **Tip:** Your fork is yours—add demos, customize themes, break things. When we release new features or fixes, just pull from upstream to get them.
-
-### 2. Install and run
+## Quick Start
 
 ```bash
 yarn install
 yarn dev
 ```
 
-The playground opens at **http://localhost:4201** with a personalized greeting.
-
-> **Note:** Running `yarn install` automatically sets up the **Pebble MCP** (Model Context Protocol) server. This gives AI assistants like Cursor direct access to Pebble component documentation, props, and examples. Just restart Cursor after install to activate it!
-
-### 3. Start building
-
-Open the `pebble-playground` folder in Cursor (File → Open Folder → select the folder you just cloned). Then start chatting with AI. Try this:
-
-> *"Create a new demo called 'Employee Directory' by copying app-shell-template.tsx. Show a list of employees with avatars, names, and job titles. Use Pebble components."*
-
-AI creates the file, wires it up, and you'll see it live at the URL.
-
-> 💡 **Where are my demos?** Your demo files live in `src/demos/`. That's where AI creates new demos and where you'll find examples to learn from.
-
-**Need help?** See the detailed [Setup Guide](./SETUP_GUIDE.md) for troubleshooting.
+Open **http://localhost:4201/mobile-home-demo** to launch the interactive prototype.
 
 ---
 
-## 🚀 Deploy Your Fork to Vercel
+## For Product Managers
 
-Want to share your demos online? Deploy your fork to Vercel (free, takes 2 minutes):
+Start with **[`src/data-models/README.md`](./src/data-models/README.md)** — it explains the persona derivation model, zone maps (which widgets each persona sees and where), quick action ranking, and SKU gating logic. The `.ts` files alongside the README are the source of truth you can reference in product discussions.
 
-1. **Go to [vercel.com](https://vercel.com)** → sign in or create a free account
-2. **Click "Add New" → "Project"**
-3. **Import your fork** from GitHub (not the original pbest/pebble-playground)
-4. **Deploy** → Vercel builds and deploys automatically
-5. **Your playground is live** at `https://your-fork-name.vercel.app`
+## For Designers
 
-Once deployed, Vercel auto-rebuilds whenever you push to your fork. Your demos, your deployments, your URL—no conflicts with anyone else!
+Start with **[`src/widgets/README.md`](./src/widgets/README.md)** — it explains widget archetypes, the design contract, and how each widget maps to a system-defined type. Also see the full [Widget Design Contract](./.cursor/rules/widget-design-contract.mdc) for principles and anti-patterns.
 
----
+## For Engineers
 
-## How to Use With AI (Cursor)
-
-This playground is designed to work seamlessly with AI coding assistants like Cursor. Here's the pattern:
-
-### Your Workflow
-
-1. **Describe what you want** in natural language
-   - "Add a modal with a confirmation button"
-   - "Make the sidebar collapsible with an icon"
-   - "Use our primary color for the header background"
-
-2. **AI builds it** using real Pebble components
-   - It checks the built-in docs for component APIs
-   - Uses proper design tokens (colors, spacing, typography)
-   - Follows Rippling's patterns and best practices
-
-3. **See it live instantly** - no compile step, just refresh
-   - Make changes: "Move that to the right side"
-   - Iterate: "Make it bigger"
-   - Refine: "Use our secondary button style"
-
-### Tips for Better Results
-
-✅ **Be specific:** "Create a card with rounded corners" → "Create a Card using Pebble's Card.Layout component"
-
-✅ **Reference examples:** "Make it look like the getting-started page"
-
-✅ **Ask questions:** "What Pebble components should I use for a settings form?"
-
-❌ **Don't worry about code** - just describe what you want to see
+The folder structure IS the architecture diagram. Start here, then drill into any domain:
 
 ---
 
-## What's Inside
+## Architecture
 
-### 📁 Your Demos (`src/demos/`)
+The system has 5 layers. Data models drive screens, which compose from widgets and navigation. The playground layer is presentation infrastructure — not product.
 
-This is where your prototypes live:
+```
+src/
+  data-models/          ← WHO sees WHAT and WHY (app-wide personalization)
+    personas.ts           7 personas, zone maps, derivation logic
+    quick-actions.ts      Action registry, persona rankings, SKU gating
+    apps.ts               App catalog, groups, default SKUs per persona
+    types.ts              Shared types (PersonaId, ZoneMapping, etc.)
 
-- **`app-shell-template.tsx`** - The main template to copy for new demos (includes nav, sidebar, content area)
-- **Other demos** - Working examples showing different Pebble patterns
+  screens/              ← App screens (sibling tabs in bottom nav)
+    HomeScreen.tsx        Home tab: widget zones + app discovery list
+    ActivityScreen.tsx    Activity tab: task/approval feed with filtering
 
-**Quickest way to create a new demo:**
+  widgets/              ← The widget system (reusable framework)
+    framework/            Base primitive + shared infrastructure
+      WidgetCard.tsx        The card container every widget uses
+      widget-helpers.ts     Title overrides, actions, SKU flag transforms
+      types.ts              WidgetCardProps, WidgetAction
+    ShiftClockWidget.tsx  Action Widget: clock in/out, shift details
+    InboxWidget.tsx       Queue Widget: task/approval aggregator
+    EarningsWidget.tsx    Status Widget: pay summary by persona
+    ShortcutsWidget.tsx   Grid of quick action icons
+    ShortcutsSheet.tsx    Full shortcuts modal (expands from widget)
+    DiscoveryAppList.tsx  App discovery list (in widget zone)
 
-Ask Cursor: *"Create a new demo called 'Employee Directory' by copying app-shell-template.tsx"*
+  navigation/           ← Global app navigation primitives
+    BottomNavigation.tsx  Tab bar (Home, Activity, Find, Chat)
 
-Or start from scratch: *"Create a simple demo showing a card with user info"*
+  components/           ← Shared UI patterns (used across domains)
+    ListItemDetail/       Reusable list-item-detail pattern
 
-### 🪨 Pebble MCP (AI Superpower)
-
-The **Pebble MCP** (Model Context Protocol) server is automatically configured when you run `yarn install`. This gives AI assistants direct access to:
-
-- **Live component source code** - Actual prop types and implementations
-- **Storybook examples** - Working code examples for every component
-- **Full component list** - Discover all available Pebble components
-
-**Check your MCP status:**
-```bash
-yarn mcp:status
+  playground/           ← Presentation infrastructure (NOT product)
+    PhoneFrame.tsx        Phone mockup, status bar, canvas
+    ThemedPhoneScreen.tsx Screen router + phone chrome wrapper
+    HudPanels.tsx         Persona/SKU control panels on canvas
+    AppsModal.tsx         SKU selection modal
+    MobileHomeDemo.tsx    Entry point: wires playground + product together
 ```
 
-**Troubleshooting:** If Cursor doesn't seem to know about Pebble components, restart Cursor after running `yarn install`. The MCP server starts automatically when Cursor opens the project.
+### Dependency Flow
 
-### 📖 Built-in Docs (`docs/`)
-
-AI automatically references these docs when building your prototypes:
-
-- **Component Catalog** - Quick reference for all Pebble components
-- **Token Catalog** - Colors, spacing, typography
-- **Component Guides** - When to use each component and why
-- **Pattern Library** - Common UI patterns (modals, forms, tables, etc.)
-- **Import Patterns** - How to import shared utilities and assets
-
-You don't need to read these—AI does it for you. But they're there if you want to learn!
-
-**Pro tip:** Always use `@/` imports for shared resources (e.g., `@/utils/theme`, `@/assets/logo.svg`) so your demos work from any folder. See [docs/IMPORT_PATTERNS.md](./docs/IMPORT_PATTERNS.md) for details.
-
-### 🎨 Live Examples
-
-The playground includes working examples:
-- **App Shell Template** - Full Rippling app layout (nav, sidebar, content) - copy this to start new demos
-- **Composition Manager** - Complex multi-view app with tables, modals, and state management
-- **Getting Started** - This guide, but prettier
-
-Click around to see what's possible!
-
----
-
-## Working With a Teammate
-
-Since you forked the repo, you have full control over who can collaborate:
-
-**Option A: Add collaborators to your fork**
-1. Go to your fork's Settings → Collaborators
-2. Click **"Add people"** → enter their GitHub username
-3. Give them **Write** access
-
-**Option B: Each person forks their own copy**
-- Best for independent experimentation
-- Share ideas via PRs to a shared team fork, or just share links
-
-Once collaborating, you can both:
-- Create branches for different ideas
-- Review each other's prototypes
-- Share demos by committing and pushing
-
-**Pro tip:** Each person sees a personalized greeting on the homepage (e.g., "Hi Paul" vs "Hi Sarah") since the setup auto-detects from your git config.
-
----
-
-## Common Questions
-
-### "I'm not an engineer—will this be hard?"
-
-Not at all! You're not writing code—you're describing what you want in plain English. AI handles the technical details. Think of it like working with a really fast, really patient engineer who never sleeps.
-
-### "What if I break something?"
-
-You won't! This is your personal playground. Worst case, just delete the file and start over. That's what it's here for—safe experimentation.
-
-### "Can I share my prototypes?"
-
-Yes! Just push your changes to GitHub and share the branch link with your teammate. Or, run `yarn dev` and share screenshots/recordings of the live prototype.
-
-### "Do I need to learn React?"
-
-Nope! You'll pick up patterns naturally by working with AI. Over time you'll recognize component names and props, but that's learning by doing—not required upfront.
-
-### "What if AI uses the wrong component?"
-
-Just tell it! Say "Use a Button instead of a link" or "That should be an Input.Text, not a textarea." AI will correct it instantly. The built-in docs help AI make better choices, but you're always in control.
-
----
-
-## Need Help?
-
-- **Detailed setup:** [SETUP_GUIDE.md](./SETUP_GUIDE.md)
-- **Technical questions:** Check the [docs/](./docs/) folder
-- **AI tips:** [docs/AI_PROMPTING_GUIDE.md](./docs/AI_PROMPTING_GUIDE.md)
-- **Got stuck?** Ask your teammate or #ai-design
-
----
-
-## Why Use This vs Other Tools
-
-Generic AI prototyping tools (v0, shadcn) use placeholder components that don't match Rippling's design system. This playground uses Pebble directly, so prototypes look and behave like production from the start. No translation needed when handing off to engineering.
-
----
-
-## Ready to Build?
-
-```bash
-yarn dev
+```
+data-models/  ──→  screens/  ──→  widgets/
+                       ↓              ↑
+                  navigation/         │
+                       ↓              │
+                  playground/  ───────┘
 ```
 
-Open **http://localhost:4201** and start chatting with AI in Cursor. 
+- **`data-models/`** is the foundation — personas, quick actions, and app SKUs are referenced by everything
+- **`screens/`** are sibling tabs (Home, Activity, Find, Chat) — not nested under each other
+- **`widgets/`** is a reusable framework: `WidgetCard` is the base, individual widgets scaffold from it
+- **`navigation/`** is a product primitive (bottom nav bar) — it's part of the app, not the playground
+- **`playground/`** is meta — the phone mockup, HUD panels, and canvas. Viewers see it, but it's not the product
 
-Try this first prompt: *"Create a new demo showing a simple employee profile card with an avatar, name, title, and edit button. Use Pebble components."*
+---
+
+## Playground Controls
+
+When running the prototype, you'll see two HUD controls:
+
+| Control | Location | What It Does |
+|---------|----------|--------------|
+| **System Display** | Top-left pill | Opens the left panel: dark mode toggle, layout experiments |
+| **User Intent** | Top-right card | Opens the right panel: persona selector, SKU toggles, onboarding flag |
+
+**Switching personas** automatically resets enabled SKUs to that persona's defaults and updates the home screen widget layout in real time.
+
+The URL includes query params (`?persona=hourly_operator&onboarding=0&apps=...`) so you can share specific configurations by copying the URL.
+
+---
+
+## Key Concepts
+
+### Personas
+7 personas derived from employment type, manager status, and admin level. Each persona has a zone map controlling which widgets appear in which zones (primary, core, contextual, discovery). See [`data-models/README.md`](./src/data-models/README.md).
+
+### Widget Zones
+The home screen is divided into 4 zones ordered by importance: **Primary** (top, most important), **Core** (always present), **Contextual** (role-dependent), **Discovery** (apps list). Each persona's zone map defines what goes where.
+
+### Quick Actions
+A deterministic ranking algorithm: persona-specific ranking → global fallback → SKU gating. Only actions whose required SKUs are enabled appear. Manager-only actions are filtered for non-managers. See [`data-models/README.md`](./src/data-models/README.md).
+
+### Widget Archetypes
+4 system-defined types from the [design contract](./.cursor/rules/widget-design-contract.mdc): **Action** (immediate execution), **Queue** (task aggregator), **Status** (passive monitoring), **List Preview** (lightweight feed). Every widget must fit one. See [`widgets/README.md`](./src/widgets/README.md).
+
+---
+
+## Related Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [`src/data-models/README.md`](./src/data-models/README.md) | Persona model, zone maps, quick action ranking |
+| [`src/screens/README.md`](./src/screens/README.md) | Screen inventory and status |
+| [`src/widgets/README.md`](./src/widgets/README.md) | Widget archetypes, framework, how to add widgets |
+| [`src/navigation/README.md`](./src/navigation/README.md) | Navigation model and future plans |
+| [`.cursor/rules/widget-design-contract.mdc`](./.cursor/rules/widget-design-contract.mdc) | Full widget design principles and anti-patterns |

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "node scripts/setup-mcp.mjs setup",
-    "dev": "node scripts/setup-user.mjs && vite --port 4201",
+    "dev": "vite --port 4201",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "setup:user": "node scripts/setup-user.mjs",

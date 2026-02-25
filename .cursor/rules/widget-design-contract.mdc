@@ -1,0 +1,232 @@
+---
+description: Rippling Mobile Widget Design Contract — guiding principles for Home widget design and prototyping
+globs:
+alwaysApply: true
+---
+
+# Rippling Mobile Widget Design Contract
+
+Home as a role-aware, task-first orchestration layer.
+
+**When to reference this contract:**
+- Designing or modifying any Home widget
+- Adding new widget types or archetypes
+- Making prioritization/ranking decisions
+- Writing widget copy or labels
+- Reviewing widget density or visual hierarchy
+- If any instruction or idea conflicts with these principles, **pause and ask for input**
+
+---
+
+## 1. Purpose
+
+Widgets are the primary building block of the mobile Home experience.
+Home is not a launcher. Home is a **workflow orchestrator** that:
+- Surfaces the most important job a person needs to complete
+- Aggregates cross-product tasks into a unified view
+- Adapts based on role, employment type, and product suite
+- Scales from standalone customers to full-suite enterprise users
+
+---
+
+## 2. High-Level Design Principles
+
+### 2.1 Job-first, not product-first
+Users think about outcomes, not modules.
+- ✅ "Clock in" / "3 approvals need review" / "Complete HIPAA training"
+- ❌ "Time Tracking app" / "Learning Management module"
+
+### 2.2 One dominant action per widget
+Each widget answers: *What is the single most important thing this person should do here?*
+- Only one primary visual emphasis (bold value, large metric, or strong CTA)
+- Only one primary tap target
+- Secondary actions must be clearly subordinate
+- If a widget needs 3 equal CTAs, it is not a widget — it is a screen
+
+### 2.3 Dynamic and contextual
+Widgets are not static dashboards. They should:
+- Change state based on urgency
+- Re-rank based on role
+- Collapse when irrelevant
+- Expand when attention is required
+
+### 2.4 Progressive disclosure
+Home must scale from a time-only customer to a full HR + Finance + IT platform.
+- Standalone: 3–4 tightly focused widgets
+- Full suite: role-based mix of tasks, monitoring, insights, quick actions
+- No relearning required
+
+### 2.5 Native, accessible, and scalable
+Widgets must:
+- Use Pebble components where possible
+- Support dynamic type
+- Handle long translations
+- Work in right-to-left layouts
+- Avoid custom gesture-only interactions
+- If a widget breaks accessibility, it fails the contract
+
+---
+
+## 3. Widget Archetypes
+
+All widgets must fit into one of these system-defined types.
+
+### 3.1 Action Widget (Primary Task)
+**Purpose:** Immediate execution
+**Examples:** Clock in, Submit timesheet, Review payroll, Complete training
+**Structure:**
+- Large title (dynamic)
+- Single primary CTA
+- Minimal supporting context
+- Optional urgency indicator
+
+Used heavily for hourly workers and time-sensitive workflows.
+
+### 3.2 Queue Widget (Task Aggregator)
+**Purpose:** Show count + enable triage
+**Examples:** 3 approvals pending, 2 expenses to review, 1 onboarding task overdue
+**Structure:**
+- Aggregated count (visually dominant)
+- Short descriptor
+- Tap → unified filtered task list
+- Optional preview of top item
+
+Critical for managers and admins.
+
+### 3.3 Status Widget (Monitoring)
+**Purpose:** Passive awareness with optional drill-in
+**Examples:** This pay period: 42 hours worked, Team out today: 2, Benefits enrollment closes in 5 days
+**Structure:**
+- Primary metric
+- Supporting label
+- Optional secondary stat
+- Entire card tappable
+
+Used when awareness matters more than immediate action.
+
+### 3.4 List Preview Widget (Lightweight Feed)
+**Purpose:** Surface a short queue without overwhelming
+**Examples:** Upcoming shifts (next 2), Recent notifications, Travel itinerary preview
+**Rules:**
+- Max 3 rows
+- No nested interactions
+- Tap → full screen view
+- Not scrollable inside widget
+- If it scrolls inside the card, it breaks hierarchy
+
+---
+
+## 4. Visual Hierarchy Rules
+
+### 4.1 Single emphasis rule
+Only one of the following may be visually dominant:
+- Bold large number
+- Primary button
+- Highlighted alert state
+
+Never combine big number + big button + red banner (cognitive overload).
+
+### 4.2 Density constraints
+Home should feel intentional, calm, structured.
+- 3–6 widgets visible above fold
+- No more than 8 total without strong justification
+- Consistent vertical rhythm
+- Clear separation between cards
+
+### 4.3 Clear affordance
+Every widget must feel tappable or have a clear action via:
+- Card elevation, chevron, or subtle background contrast
+- No hidden hotspots, gesture-only patterns, or multiple competing tap zones
+
+---
+
+## 5. Behavioral Rules
+
+### 5.1 Widget prioritization logic
+Ranking considers: Urgency > Role responsibility > Frequency > Business impact
+- Overdue > upcoming > informational
+- Manager responsibilities > employee-only info
+- Daily > monthly
+- Payroll > team feed
+
+### 5.2 State handling
+Every widget must define: Empty state, Loading state, Error state, Offline state (where applicable).
+- Loading states use consistent Spinner patterns
+- In-progress states use ellipsis ("Syncing…", "Generating report…")
+
+### 5.3 Escalation model
+Widgets with overdue tasks, compliance violations, or payroll risk may escalate via:
+- Color shift, icon alert, position promotion
+- Escalation must be **reversible** once resolved
+
+---
+
+## 6. Copy Standards
+
+All widget copy must:
+- Follow **sentence case**
+- Use **active voice**
+- Use **short verbs**
+- Avoid anthropomorphizing
+
+**Good:** "Clock in" / "Review 3 approvals" / "Complete safety training"
+**Avoid:** "Let's review your approvals" / "You have successfully clocked in" / "Access the Time Tracking module"
+
+**Never:**
+- Use ampersands (&)
+- Use "Save & continue"
+- Use the word "module"
+
+---
+
+## 7. Role-Specific Expectations
+
+| Role | Primary widgets |
+|------|----------------|
+| **Hourly employee** | Action (clock in/out), schedule preview, hours worked summary |
+| **Salaried employee** | Task queue, pay preview, PTO balance |
+| **Manager** | Unified approvals queue, team availability status, escalations |
+| **Admin** | Cross-product alerts, payroll readiness, compliance issues |
+
+Home must adapt — not duplicate product navigation.
+
+---
+
+## 8. Anti-Patterns (Do Not Do)
+
+- ❌ Widget as mini-app
+- ❌ Horizontal scroll inside card
+- ❌ More than 2 CTAs in one card
+- ❌ Competing primary colors in same card
+- ❌ Static dashboard that never changes
+- ❌ Product-labeled widgets as first-class items
+- If it looks like a 2016 SaaS dashboard, it fails
+
+---
+
+## 9. Relationship to Navigation
+
+Widgets are:
+- Entry points into deeper workflows
+- Not replacements for full app navigation
+- Not substitutes for global search
+- Not permanent tabs
+
+Widgets are an **adaptive surface layer** on top of consistent navigation.
+
+---
+
+## 10. Success Criteria
+
+The widget framework succeeds if:
+- Users complete core tasks in fewer taps
+- Cross-product approvals feel unified
+- Users don't need to know which app something belongs to
+- Standalone → full suite transition feels natural
+- No role feels overloaded
+
+---
+
+## Evolution Notes
+
+This contract is a living document. When building new widgets that need to bend rules (e.g., a List Preview for admin reports/dashboards that may exceed 3 rows), **flag the conflict and discuss** rather than silently breaking the contract. We evolve the rules together.
