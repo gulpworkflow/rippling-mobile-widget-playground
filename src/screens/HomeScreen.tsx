@@ -4,7 +4,7 @@ import Icon from '@rippling/pebble/Icon';
 import RipplingLogoBlack from '@/assets/rippling-logo-black.svg';
 import RipplingLogoWhite from '@/assets/rippling-logo-white.svg';
 import { getQuickActions } from '@/data-models/quick-actions';
-import type { QuickAction } from '@/data-models/quick-actions';
+import type { QuickAction, QuickActionId } from '@/data-models/quick-actions';
 import type { PersonaId, ZoneMapping } from '@/data-models/types';
 import { widgetIdToTitle, WIDGET_ACTIONS, enabledAppsToSkuFlags } from '@/widgets/framework/widget-helpers';
 import WidgetCard, { ContentSlot } from '@/widgets/framework/WidgetCard';
@@ -53,8 +53,15 @@ const WidgetZones = styled.div`
   padding: 0 16px 120px;
 `;
 
-const renderWidgetContent = (widgetId: string, _sv: string, onSurface?: string, quickActions?: QuickAction[], persona?: PersonaId) => {
-  if (widgetId === 'quick_actions' && quickActions) return <ShortcutsContent actions={quickActions} onSurface={onSurface} />;
+const renderWidgetContent = (
+  widgetId: string,
+  _sv: string,
+  onSurface?: string,
+  quickActions?: QuickAction[],
+  persona?: PersonaId,
+  onQuickActionTap?: (actionId: QuickActionId) => void,
+) => {
+  if (widgetId === 'quick_actions' && quickActions) return <ShortcutsContent actions={quickActions} onSurface={onSurface} onActionTap={onQuickActionTap} />;
   if (widgetId === 'shift_clock') return <ShiftClockContent />;
   if (widgetId === 'inbox_preview') return <InboxPreviewContent />;
   if (widgetId === 'earnings_summary' && persona) return <EarningsSummaryContent persona={persona} />;
@@ -69,7 +76,9 @@ const HomeScreen: React.FC<{
   onboarding: boolean;
   darkMode?: boolean;
   onOpenShortcutsSheet?: () => void;
-}> = ({ theme, zoneWidgets, enabledApps, persona, onboarding, darkMode, onOpenShortcutsSheet }) => {
+  onQuickActionTap?: (actionId: QuickActionId) => void;
+  onOpenReorderSheet?: () => void;
+}> = ({ theme, zoneWidgets, enabledApps, persona, onboarding, darkMode, onOpenShortcutsSheet, onQuickActionTap, onOpenReorderSheet }) => {
   const sv = theme.colorOnSurfaceVariant;
   const ov = theme.colorOutlineVariant;
   const skuFlags = enabledAppsToSkuFlags(enabledApps);
@@ -79,7 +88,7 @@ const HomeScreen: React.FC<{
       <AppHeader>
         <LogoImage src={darkMode ? RipplingLogoWhite : RipplingLogoBlack} alt="Rippling" />
         <HeaderRight>
-          <AppsButton aria-label="Apps">
+          <AppsButton aria-label="Reorder widgets" onClick={onOpenReorderSheet}>
             <Icon type={Icon.TYPES.APPS_OUTLINE} size={22} color={sv} />
           </AppsButton>
         </HeaderRight>
@@ -87,19 +96,19 @@ const HomeScreen: React.FC<{
       <WidgetZones>
         {zoneWidgets.primary.map(w => (
           <WidgetCard key={w} title={widgetIdToTitle(w, persona)} surfaceVariant={sv} outlineVariant={ov} actions={WIDGET_ACTIONS[w]} primaryColor={theme.colorPrimaryContainer} onTitleClick={w === 'quick_actions' ? onOpenShortcutsSheet : () => {}}>
-            {renderWidgetContent(w, sv, theme.colorOnSurface, quickActions, persona)}
+            {renderWidgetContent(w, sv, theme.colorOnSurface, quickActions, persona, onQuickActionTap)}
           </WidgetCard>
         ))}
 
         {zoneWidgets.core.map(w => (
           <WidgetCard key={w} title={widgetIdToTitle(w, persona)} surfaceVariant={sv} outlineVariant={ov} actions={WIDGET_ACTIONS[w]} primaryColor={theme.colorPrimaryContainer} onTitleClick={w === 'quick_actions' ? onOpenShortcutsSheet : () => {}}>
-            {renderWidgetContent(w, sv, theme.colorOnSurface, quickActions, persona)}
+            {renderWidgetContent(w, sv, theme.colorOnSurface, quickActions, persona, onQuickActionTap)}
           </WidgetCard>
         ))}
 
         {zoneWidgets.contextual.map(w => (
           <WidgetCard key={w} title={widgetIdToTitle(w, persona)} surfaceVariant={sv} outlineVariant={ov} actions={WIDGET_ACTIONS[w]} primaryColor={theme.colorPrimaryContainer} onTitleClick={w === 'quick_actions' ? onOpenShortcutsSheet : () => {}}>
-            {renderWidgetContent(w, sv, theme.colorOnSurface, quickActions, persona)}
+            {renderWidgetContent(w, sv, theme.colorOnSurface, quickActions, persona, onQuickActionTap)}
           </WidgetCard>
         ))}
 

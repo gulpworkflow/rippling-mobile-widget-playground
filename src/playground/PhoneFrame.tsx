@@ -117,7 +117,7 @@ export const StatusBarBlur = styled.div`
   height: 100px;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  z-index: 1999;
+  z-index: 3500;
   pointer-events: none;
   mask-image: linear-gradient(to bottom, black 0%, black 25%, transparent 60%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 25%, transparent 60%);
@@ -137,7 +137,7 @@ export const StatusBar = styled.div`
   font-weight: 600;
   letter-spacing: 0.2px;
   color: ${({ theme }) => (theme as any).colorOnSurface || '#000'};
-  z-index: 2000;
+  z-index: 3501;
   background: transparent;
 `;
 

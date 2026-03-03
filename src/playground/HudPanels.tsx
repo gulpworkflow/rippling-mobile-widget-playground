@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from '@emotion/styled';
+import { keyframes } from '@emotion/react';
 import type { PersonaId } from '@/data-models/types';
 import { ALL_APPS } from '@/data-models/apps';
 import {
@@ -9,71 +10,6 @@ import {
   getIntentSummary,
 } from '@/data-models/personas';
 
-export const HudToggle = styled.button<{ position: 'left' | 'right' }>`
-  position: fixed;
-  top: 16px;
-  ${({ position }) => position}: 16px;
-  height: 36px;
-  padding: 0 20px;
-  gap: 8px;
-  border-radius: 100px;
-  border: 1px solid var(--chrome-border);
-  background: var(--chrome-surface);
-  color: var(--chrome-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 20000;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: 0;
-  box-shadow: 0 2px 8px var(--chrome-shadow);
-  transition: opacity 0.2s ease, background 0.3s ease, color 0.3s ease;
-  &:hover {
-    opacity: 0.8;
-  }
-`;
-
-export const UserIntentWrapper = styled.div`
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 19998;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-`;
-
-export const UserIntentEyebrow = styled.span`
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--chrome-text-muted);
-  padding-left: 2px;
-`;
-
-export const UserIntentCard = styled.button`
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--chrome-border);
-  background: var(--chrome-surface);
-  color: var(--chrome-text);
-  cursor: pointer;
-  text-align: left;
-  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  transition: opacity 0.2s ease, background 0.3s ease, color 0.3s ease;
-  max-width: 280px;
-  box-shadow: 0 2px 8px var(--chrome-shadow);
-  &:hover {
-    opacity: 0.95;
-  }
-`;
 
 const UserIntentAvatar = styled.img`
   width: 32px;
@@ -81,44 +17,6 @@ const UserIntentAvatar = styled.img`
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-`;
-
-const UserIntentContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-`;
-
-const UserIntentPersona = styled.span`
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--chrome-text);
-  line-height: 1.2;
-`;
-
-const UserIntentRow = styled.span`
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--chrome-text-secondary);
-  line-height: 1.3;
-`;
-
-const UserIntentPills = styled.span`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 6px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: var(--chrome-text-muted);
-`;
-
-const UserIntentPill = styled.span`
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: var(--chrome-overlay);
 `;
 
 export const HudPanel = styled.div<{ position: 'left' | 'right'; open: boolean }>`
@@ -360,7 +258,137 @@ const HudEditButton = styled.button`
   }
 `;
 
-// --- User Intent Card Component ---
+// --- Shared HUD Chip Components ---
+
+const HudChipWrapper = styled.div<{ $position: 'left' | 'right' }>`
+  position: fixed;
+  top: 16px;
+  ${({ $position }) => $position}: 16px;
+  z-index: 19998;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const HudChipEyebrow = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--chrome-text-muted);
+  padding-left: 2px;
+`;
+
+const HudChipCard = styled.button`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--chrome-border);
+  background: var(--chrome-surface);
+  color: var(--chrome-text);
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: opacity 0.2s ease, background 0.3s ease, color 0.3s ease;
+  max-width: 280px;
+  box-shadow: 0 2px 8px var(--chrome-shadow);
+  &:hover {
+    opacity: 0.95;
+  }
+`;
+
+const HudChipIcon = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--chrome-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--chrome-text-secondary);
+`;
+
+const HudChipContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+`;
+
+const HudChipTitle = styled.span`
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--chrome-text);
+  line-height: 1.2;
+`;
+
+const HudChipRow = styled.span`
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--chrome-text-secondary);
+  line-height: 1.3;
+`;
+
+const HudChipPills = styled.span`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--chrome-text-muted);
+`;
+
+const HudChipPill = styled.span`
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--chrome-overlay);
+`;
+
+// --- System Status Chip ---
+
+interface SystemStatusSummaryProps {
+  leftToggleRef: React.Ref<HTMLButtonElement>;
+  onToggle: () => void;
+  darkMode: boolean;
+}
+
+export const SystemStatusSummary: React.FC<SystemStatusSummaryProps> = ({
+  leftToggleRef, onToggle, darkMode,
+}) => {
+  const cardStyle = {
+    background: darkMode ? '#1a1a1a' : '#ffffff',
+    color: darkMode ? '#fff' : '#1a1a1a',
+    borderColor: darkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)',
+  };
+  return (
+    <HudChipWrapper $position="left">
+      <HudChipEyebrow>System status</HudChipEyebrow>
+      <HudChipCard ref={leftToggleRef} onClick={onToggle} aria-label="Toggle System Display panel" style={cardStyle}>
+        <HudChipIcon style={{ background: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}>
+          <svg width="16" height="16" viewBox="0 0 384 512" fill="currentColor">
+            <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184 4 273.5c0 26.2 4.8 53.3 14.4 81.2 12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+          </svg>
+        </HudChipIcon>
+        <HudChipContent>
+          <HudChipTitle>iOS</HudChipTitle>
+          <HudChipPills>
+            <HudChipPill>{darkMode ? 'Dark mode' : 'Light mode'}</HudChipPill>
+          </HudChipPills>
+        </HudChipContent>
+      </HudChipCard>
+    </HudChipWrapper>
+  );
+};
+
+// --- User Intent Chip ---
 
 interface UserIntentSummaryProps {
   persona: PersonaId;
@@ -378,23 +406,28 @@ export const UserIntentSummary: React.FC<UserIntentSummaryProps> = ({
   const s = getIntentSummary(persona);
   let text = `${s.employment} \u2022 Manager: ${s.manager} \u2022 Admin: ${s.admin}`;
   if (s.owner) text += ` \u2022 Owner: ${s.owner}`;
+  const cardStyle = {
+    background: darkMode ? '#1a1a1a' : '#ffffff',
+    color: darkMode ? '#fff' : '#1a1a1a',
+    borderColor: darkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)',
+  };
   return (
-    <UserIntentWrapper>
-      <UserIntentEyebrow>User intent</UserIntentEyebrow>
-      <UserIntentCard ref={rightToggleRef} onClick={onToggle} aria-label="Toggle User Intent panel" style={{ background: darkMode ? '#1a1a1a' : '#ffffff', color: darkMode ? '#fff' : '#1a1a1a', borderColor: darkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)' }}>
+    <HudChipWrapper $position="right">
+      <HudChipEyebrow>User intent</HudChipEyebrow>
+      <HudChipCard ref={rightToggleRef} onClick={onToggle} aria-label="Toggle User Intent panel" style={cardStyle}>
         <UserIntentAvatar src={personaAvatar} alt="Persona" />
-        <UserIntentContent>
-          <UserIntentPersona>{PERSONA_OPTIONS.find(p => p.id === persona)?.label ?? 'Persona'}</UserIntentPersona>
-          <UserIntentRow>{text}</UserIntentRow>
+        <HudChipContent>
+          <HudChipTitle>{PERSONA_OPTIONS.find(p => p.id === persona)?.label ?? 'Persona'}</HudChipTitle>
+          <HudChipRow>{text}</HudChipRow>
           {HOURLY_PERSONAS.includes(persona) && (
-            <UserIntentPills>
-              <UserIntentPill>{onClock ? 'On clock' : 'Off clock'}</UserIntentPill>
-              <UserIntentPill>{shiftToday ? 'Shift today' : 'No shift today'}</UserIntentPill>
-            </UserIntentPills>
+            <HudChipPills>
+              <HudChipPill>{onClock ? 'On clock' : 'Off clock'}</HudChipPill>
+              <HudChipPill>{shiftToday ? 'Shift today' : 'No shift today'}</HudChipPill>
+            </HudChipPills>
           )}
-        </UserIntentContent>
-      </UserIntentCard>
-    </UserIntentWrapper>
+        </HudChipContent>
+      </HudChipCard>
+    </HudChipWrapper>
   );
 };
 
@@ -560,3 +593,177 @@ export const RightHudPanel: React.FC<RightHudPanelProps> = ({
     </HudFooter>
   </HudPanel>
 );
+
+// --- Mobile HUD Sheet ---
+
+const sheetSlideUp = keyframes`
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+`;
+
+const sheetFadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`;
+
+const MobileSheetBackdrop = styled.div<{ $isOpen: boolean }>`
+  display: none;
+  @media (max-width: 768px) {
+    display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
+  }
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 30000;
+  animation: ${sheetFadeIn} 0.2s ease-out;
+`;
+
+const MobileSheetPanel = styled.div`
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30001;
+  border-radius: 20px 20px 0 0;
+  padding: 12px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: ${sheetSlideUp} 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+`;
+
+const MobileSheetHandle = styled.div`
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--chrome-text-muted);
+  margin: 0 auto 4px;
+  opacity: 0.5;
+`;
+
+const MobileSheetSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+const MobileSheetChipCard = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--chrome-border-subtle);
+  background: var(--chrome-surface-card);
+  color: var(--chrome-text);
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: background 0.15s ease;
+  width: 100%;
+  &:active {
+    background: var(--chrome-overlay-hover);
+  }
+`;
+
+const MobileSheetChipContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+`;
+
+const MobileSheetChipTitle = styled.span`
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--chrome-text);
+  line-height: 1.2;
+`;
+
+const MobileSheetChipSub = styled.span`
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--chrome-text-secondary);
+  line-height: 1.3;
+`;
+
+const MobileSheetChevron = styled.span`
+  font-size: 18px;
+  color: var(--chrome-text-muted);
+  flex-shrink: 0;
+`;
+
+interface MobileHudSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  darkMode: boolean;
+  persona: PersonaId;
+  personaAvatar: string;
+  onClock: boolean;
+  shiftToday: boolean;
+  onOpenSystemPanel: () => void;
+  onOpenUserIntentPanel: () => void;
+}
+
+export const MobileHudSheet: React.FC<MobileHudSheetProps> = ({
+  isOpen, onClose, darkMode, persona, personaAvatar,
+  onClock, shiftToday, onOpenSystemPanel, onOpenUserIntentPanel,
+}) => {
+  const s = getIntentSummary(persona);
+  const personaLabel = PERSONA_OPTIONS.find(p => p.id === persona)?.label ?? 'Persona';
+  const isHourly = HOURLY_PERSONAS.includes(persona);
+
+  const systemSummary = `iOS \u00b7 ${darkMode ? 'Dark mode' : 'Light mode'}`;
+  let intentSummary = `${s.employment} \u00b7 ${s.manager ? 'Manager' : 'IC'}`;
+  if (isHourly) intentSummary += ` \u00b7 ${onClock ? 'On clock' : 'Off clock'}`;
+
+  const panelBg = darkMode ? '#1a1a1a' : '#ffffff';
+
+  const handleSystem = useCallback(() => {
+    onClose();
+    requestAnimationFrame(() => onOpenSystemPanel());
+  }, [onClose, onOpenSystemPanel]);
+
+  const handleIntent = useCallback(() => {
+    onClose();
+    requestAnimationFrame(() => onOpenUserIntentPanel());
+  }, [onClose, onOpenUserIntentPanel]);
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <MobileSheetBackdrop $isOpen={isOpen} onClick={onClose} />
+      <MobileSheetPanel style={{ background: panelBg }}>
+        <MobileSheetHandle />
+
+        <MobileSheetSection>
+          <HudChipEyebrow>Configuration</HudChipEyebrow>
+
+          <MobileSheetChipCard onClick={handleSystem}>
+            <HudChipIcon style={{ background: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}>
+              <svg width="16" height="16" viewBox="0 0 384 512" fill="currentColor">
+                <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184 4 273.5c0 26.2 4.8 53.3 14.4 81.2 12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+              </svg>
+            </HudChipIcon>
+            <MobileSheetChipContent>
+              <MobileSheetChipTitle>System Status</MobileSheetChipTitle>
+              <MobileSheetChipSub>{systemSummary}</MobileSheetChipSub>
+            </MobileSheetChipContent>
+            <MobileSheetChevron>›</MobileSheetChevron>
+          </MobileSheetChipCard>
+
+          <MobileSheetChipCard onClick={handleIntent}>
+            <UserIntentAvatar src={personaAvatar} alt="Persona" />
+            <MobileSheetChipContent>
+              <MobileSheetChipTitle>{personaLabel}</MobileSheetChipTitle>
+              <MobileSheetChipSub>{intentSummary}</MobileSheetChipSub>
+            </MobileSheetChipContent>
+            <MobileSheetChevron>›</MobileSheetChevron>
+          </MobileSheetChipCard>
+        </MobileSheetSection>
+      </MobileSheetPanel>
+    </>
+  );
+};

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styled from '@emotion/styled';
 import { usePebbleTheme } from '@/utils/theme';
 import type { PersonaId, ZoneMapping } from '@/data-models/types';
@@ -19,6 +19,8 @@ import BottomNavigation, { navItems } from '@/navigation/BottomNavigation';
 import HomeScreen from '@/screens/HomeScreen';
 import ActivityScreen from '@/screens/ActivityScreen';
 import ShortcutsSheet from '@/widgets/ShortcutsSheet';
+import WidgetReorderSheet from '@/widgets/WidgetReorderSheet';
+import TeamScheduleScreen from '@/screens/TeamScheduleScreen';
 
 const TabViewHeader = styled.div`
   display: flex;
@@ -59,14 +61,52 @@ export interface ThemedPhoneScreenProps {
   onboarding: boolean;
   personaAvatar: string;
   darkMode: boolean;
+  onAvatarTap?: () => void;
 }
 
 const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
-  activeNav, setActiveNav, zoneWidgets, enabledApps, persona, onboarding, personaAvatar, darkMode,
+  activeNav, setActiveNav, zoneWidgets, enabledApps, persona, onboarding, personaAvatar, darkMode, onAvatarTap,
 }) => {
   const [shortcutsSheetOpen, setShortcutsSheetOpen] = useState(false);
+  const [reorderSheetOpen, setReorderSheetOpen] = useState(false);
+  const [customWidgetOrder, setCustomWidgetOrder] = useState<string[] | null>(null);
+  const [screenStack, setScreenStack] = useState<string[]>([]);
+  const hasPushedScreen = screenStack.length > 0;
   const { theme } = usePebbleTheme();
   const skuFlags = enabledAppsToSkuFlags(enabledApps);
+
+  const defaultOrder = useMemo(() => [
+    ...zoneWidgets.primary,
+    ...zoneWidgets.core,
+    ...zoneWidgets.contextual,
+    ...zoneWidgets.discovery,
+  ], [zoneWidgets]);
+
+  const effectiveOrder = customWidgetOrder ?? defaultOrder;
+
+  useEffect(() => {
+    setCustomWidgetOrder(null);
+  }, [persona, onboarding]);
+
+  const reorderedZoneWidgets = useMemo((): ZoneMapping => {
+    if (!customWidgetOrder) return zoneWidgets;
+    const allWidgets = customWidgetOrder.filter(w => defaultOrder.includes(w));
+    const remaining = defaultOrder.filter(w => !allWidgets.includes(w));
+    const full = [...allWidgets, ...remaining];
+    const pCount = zoneWidgets.primary.length;
+    const coreCount = zoneWidgets.core.length;
+    const ctxCount = zoneWidgets.contextual.length;
+    return {
+      primary: full.slice(0, pCount),
+      core: full.slice(pCount, pCount + coreCount),
+      contextual: full.slice(pCount + coreCount, pCount + coreCount + ctxCount),
+      discovery: full.slice(pCount + coreCount + ctxCount),
+    };
+  }, [customWidgetOrder, zoneWidgets, defaultOrder]);
+
+  const handleReorderSave = useCallback((newOrder: string[]) => {
+    setCustomWidgetOrder(newOrder);
+  }, []);
   const iconColor = theme.colorOnSurface;
   const indicatorColor = theme.colorOnSurface;
 
@@ -91,24 +131,42 @@ const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
         </StatusIcons>
       </StatusBar>
 
-      <FloatingAvatar>
-        <AvatarCircle src={personaAvatar} alt="Profile" />
-      </FloatingAvatar>
+      {!hasPushedScreen && (
+        <FloatingAvatar onClick={onAvatarTap} style={{ cursor: onAvatarTap ? 'pointer' : undefined }}>
+          <AvatarCircle src={personaAvatar} alt="Profile" />
+        </FloatingAvatar>
+      )}
 
       <ContentArea key={activeNav}>
-        {(activeItem?.id ?? 'home') === 'home' && <HomeScreen theme={theme} zoneWidgets={zoneWidgets} enabledApps={enabledApps} persona={persona} onboarding={onboarding} darkMode={darkMode} onOpenShortcutsSheet={() => setShortcutsSheetOpen(true)} />}
+        {(activeItem?.id ?? 'home') === 'home' && (
+          <HomeScreen
+            theme={theme}
+            zoneWidgets={reorderedZoneWidgets}
+            enabledApps={enabledApps}
+            persona={persona}
+            onboarding={onboarding}
+            darkMode={darkMode}
+            onOpenShortcutsSheet={() => setShortcutsSheetOpen(true)}
+            onOpenReorderSheet={() => setReorderSheetOpen(true)}
+            onQuickActionTap={(actionId) => {
+              if (actionId === 'team_schedule') setScreenStack(s => [...s, 'team_schedule']);
+            }}
+          />
+        )}
         {activeItem?.id === 'activity' && <ActivityScreen />}
         {activeItem?.id === 'find' && <FindView />}
         {activeItem?.id === 'chat' && <ChatView />}
       </ContentArea>
 
-      <BottomNavigation
-        activeNav={activeNav}
-        setActiveNav={setActiveNav}
-        enabledApps={enabledApps}
-        darkMode={darkMode}
-        indicatorColor={indicatorColor}
-      />
+      {!hasPushedScreen && (
+        <BottomNavigation
+          activeNav={activeNav}
+          setActiveNav={setActiveNav}
+          enabledApps={enabledApps}
+          darkMode={darkMode}
+          indicatorColor={indicatorColor}
+        />
+      )}
 
       <ShortcutsSheet
         isOpen={shortcutsSheetOpen}
@@ -116,6 +174,20 @@ const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
         persona={persona}
         skuFlags={skuFlags}
         onboarding={onboarding}
+      />
+
+      <WidgetReorderSheet
+        isOpen={reorderSheetOpen}
+        onClose={() => setReorderSheetOpen(false)}
+        widgetOrder={effectiveOrder}
+        persona={persona}
+        onSave={handleReorderSave}
+      />
+
+      <TeamScheduleScreen
+        isOpen={screenStack.includes('team_schedule')}
+        onBack={() => setScreenStack(s => s.filter(id => id !== 'team_schedule'))}
+        onPush={(id) => setScreenStack(s => [...s, id])}
       />
     </PhoneScreen>
   );

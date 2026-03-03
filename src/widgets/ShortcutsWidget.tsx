@@ -97,10 +97,14 @@ export const PRODUCT_DISPLAY_NAMES: Record<string, string> = {
   Travel: 'Travel',
 };
 
-const ShortcutsContent: React.FC<{ actions: QuickAction[]; onSurface?: string }> = ({ actions, onSurface }) => (
+const ShortcutsContent: React.FC<{
+  actions: QuickAction[];
+  onSurface?: string;
+  onActionTap?: (actionId: QuickActionId) => void;
+}> = ({ actions, onSurface, onActionTap }) => (
   <ShortcutsGrid>
     {actions.map(a => (
-      <ShortcutItem key={a.id}>
+      <ShortcutItem key={a.id} style={{ cursor: onActionTap ? 'pointer' : 'default' }} onClick={() => onActionTap?.(a.id)}>
         <ShortcutIconCircle>
           <Icon type={QUICK_ACTION_ICONS[a.id]} size={20} color={onSurface || '#000'} />
         </ShortcutIconCircle>

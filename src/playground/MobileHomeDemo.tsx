@@ -8,7 +8,7 @@ import { PERSONA_OPTIONS, getZoneWidgets } from '@/data-models/personas';
 import { ALL_APPS, PERSONA_DEFAULT_SKUS } from '@/data-models/apps';
 import { Canvas, PhoneMockup } from '@/playground/PhoneFrame';
 import ThemedPhoneScreen from '@/playground/ThemedPhoneScreen';
-import { HudToggle, UserIntentSummary, LeftHudPanel, RightHudPanel } from '@/playground/HudPanels';
+import { SystemStatusSummary, UserIntentSummary, LeftHudPanel, RightHudPanel, MobileHudSheet } from '@/playground/HudPanels';
 import AppsModal from '@/playground/AppsModal';
 
 const MobileHomeDemo: React.FC = () => {
@@ -19,6 +19,7 @@ const MobileHomeDemo: React.FC = () => {
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [appsModalOpen, setAppsModalOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [mobileHudVisible, setMobileHudVisible] = useState(false);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const leftToggleRef = useRef<HTMLButtonElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
@@ -128,10 +129,11 @@ const MobileHomeDemo: React.FC = () => {
         `}
       />
 
-      <HudToggle ref={leftToggleRef} position="left" onClick={() => setLeftPanelOpen(prev => !prev)} aria-label="Toggle System Display panel" style={{ background: darkMode ? '#1a1a1a' : '#ffffff', color: darkMode ? '#fff' : '#1a1a1a', borderColor: darkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)' }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M8 21h8M12 17v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-        System Display
-      </HudToggle>
+      <SystemStatusSummary
+        leftToggleRef={leftToggleRef}
+        onToggle={() => setLeftPanelOpen(prev => !prev)}
+        darkMode={darkMode}
+      />
 
       <UserIntentSummary
         persona={persona}
@@ -141,6 +143,18 @@ const MobileHomeDemo: React.FC = () => {
         rightToggleRef={rightToggleRef}
         onToggle={() => setRightPanelOpen(prev => !prev)}
         darkMode={darkMode}
+      />
+
+      <MobileHudSheet
+        isOpen={mobileHudVisible}
+        onClose={() => setMobileHudVisible(false)}
+        darkMode={darkMode}
+        persona={persona}
+        personaAvatar={personaAvatar}
+        onClock={onClock}
+        shiftToday={shiftToday}
+        onOpenSystemPanel={() => setLeftPanelOpen(true)}
+        onOpenUserIntentPanel={() => setRightPanelOpen(true)}
       />
 
       <LeftHudPanel
@@ -193,6 +207,7 @@ const MobileHomeDemo: React.FC = () => {
               onboarding={onboarding}
               personaAvatar={personaAvatar}
               darkMode={darkMode}
+              onAvatarTap={() => setMobileHudVisible(prev => !prev)}
             />
           </ThemeProvider>
         </PhoneMockup>
