@@ -716,7 +716,7 @@ export const MobileHudSheet: React.FC<MobileHudSheetProps> = ({
 
   const systemSummary = `iOS \u00b7 ${darkMode ? 'Dark mode' : 'Light mode'}`;
   let intentSummary = `${s.employment} \u00b7 ${s.manager ? 'Manager' : 'IC'}`;
-  if (isHourly) intentSummary += ` \u00b7 ${onClock ? 'On clock' : 'Off clock'}`;
+  if (isHourly) intentSummary += ` \u00b7 ${onClock ? 'On clock' : 'Off clock'} \u00b7 ${shiftToday ? 'Shift today' : 'No shift'}`;
 
   const panelBg = darkMode ? '#1a1a1a' : '#ffffff';
 
