@@ -52,7 +52,18 @@ init().then(() => {
       <BrowserRouter>
         <ThemeProvider themeConfigs={THEME_CONFIGS} defaultTheme="berry" defaultColorMode="light">
           <GlobalStyle />
-          <Global styles={css`body { letter-spacing: normal; }`} />
+          <Global styles={css`
+  body { letter-spacing: normal; }
+  /* Native feel: remove tap flash, reduce 300ms delay */
+  button, a, [role="button"], [tabindex]:not([tabindex="-1"]) {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  /* Pressed state for instant feedback */
+  button:active, a:active, [role="button"]:active {
+    opacity: 0.9;
+  }
+`} />
           <Routes>
             {/* Main pages */}
             <Route path="/" element={<IndexPage />} />

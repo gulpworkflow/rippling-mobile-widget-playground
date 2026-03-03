@@ -66,6 +66,12 @@ const MobileHomeDemo: React.FC = () => {
   const zoneWidgets = getZoneWidgets(persona, onboarding, enabledApps);
   const personaAvatar = PERSONA_OPTIONS.find(p => p.id === persona)?.avatar ?? PERSONA_OPTIONS[0].avatar;
 
+  const anyOverlayOpen = leftPanelOpen || rightPanelOpen || appsModalOpen || mobileHudVisible;
+  useEffect(() => {
+    document.body.style.overflow = anyOverlayOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [anyOverlayOpen]);
+
   useEffect(() => {
     const root = document.documentElement;
     const vars: Record<string, [string, string]> = {

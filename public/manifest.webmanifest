@@ -1,0 +1,13 @@
+{
+  "name": "Rippling Mobile",
+  "short_name": "Rippling",
+  "description": "Rippling mobile home screen prototype",
+  "start_url": "/mobile-home-demo",
+  "display": "standalone",
+  "background_color": "#f0ede8",
+  "theme_color": "#f0ede8",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

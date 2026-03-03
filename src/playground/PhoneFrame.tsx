@@ -121,6 +121,9 @@ export const StatusBarBlur = styled.div`
   pointer-events: none;
   mask-image: linear-gradient(to bottom, black 0%, black 25%, transparent 60%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 25%, transparent 60%);
+  @media (max-width: 500px) {
+    display: none;
+  }
 `;
 
 export const StatusBar = styled.div`
@@ -139,6 +142,9 @@ export const StatusBar = styled.div`
   color: ${({ theme }) => (theme as any).colorOnSurface || '#000'};
   z-index: 3501;
   background: transparent;
+  @media (max-width: 500px) {
+    display: none;
+  }
 `;
 
 export const StatusIcons = styled.div`
@@ -152,6 +158,9 @@ export const FloatingAvatar = styled.div`
   top: 58px;
   right: 16px;
   z-index: 2000;
+  @media (max-width: 500px) {
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+  }
 `;
 
 export const AvatarCircle = styled.img`
@@ -164,9 +173,11 @@ export const AvatarCircle = styled.img`
   flex-shrink: 0;
 `;
 
-export const ContentArea = styled.div`
+export const ContentArea = styled.div<{ $scrollLocked?: boolean }>`
   flex: 1;
-  overflow-y: auto;
+  overflow-y: ${({ $scrollLocked }) => ($scrollLocked ? 'hidden' : 'auto')};
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 54px 0 0;
@@ -174,6 +185,9 @@ export const ContentArea = styled.div`
   flex-direction: column;
   position: relative;
   z-index: 1;
+  @media (max-width: 500px) {
+    padding-top: env(safe-area-inset-top, 12px);
+  }
 
   &::-webkit-scrollbar {
     display: none;

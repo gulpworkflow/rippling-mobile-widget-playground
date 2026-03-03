@@ -137,7 +137,7 @@ const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
         </FloatingAvatar>
       )}
 
-      <ContentArea key={activeNav}>
+      <ContentArea key={activeNav} $scrollLocked={shortcutsSheetOpen || reorderSheetOpen}>
         {(activeItem?.id ?? 'home') === 'home' && (
           <HomeScreen
             theme={theme}
