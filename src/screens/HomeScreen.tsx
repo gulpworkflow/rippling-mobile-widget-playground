@@ -49,7 +49,7 @@ const AppsButton = styled.button`
 const WidgetZones = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   padding: 0 16px 120px;
 `;
 
