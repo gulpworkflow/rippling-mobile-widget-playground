@@ -332,11 +332,11 @@ const IndexPage: React.FC = () => {
         <Eyebrow>Project Hub</Eyebrow>
         <Title>Creating composable surfaces: <TitleFaded>Mobile&nbsp;home</TitleFaded></Title>
         <Description>
-          Rippling's mobile home screen currently presents the same static
-          experience to every user, regardless of their role, responsibilities,
-          or which products their company has enabled. An hourly shift worker
-          sees the same layout as a Benefits Admin. A contractor sees the same
-          app grid as a company owner.
+          Today, our mobile home treats a shift worker, a manager, and a company
+          owner the same. That static foundation breaks unbundling — even if
+          we custom build standalone experiences that feel complete, when we
+          cross-sell into new logos, the experience fractures instead of
+          expanding seamlessly.
         </Description>
 
         <LinksGroup>

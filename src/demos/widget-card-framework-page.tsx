@@ -402,21 +402,29 @@ const OwnershipTitle = styled.h3`
   margin: 0 0 ${({ theme }: T) => theme.space400} 0;
 `;
 
-const OwnershipList = styled.ul`
+const OwnershipList = styled.div`
   margin: 0;
-  padding: 0 0 0 ${({ theme }: T) => theme.space600};
-  list-style: disc;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }: T) => theme.space200};
 `;
 
-const OwnershipItem = styled.li`
+const OwnershipItem = styled.div`
+  display: flex;
+  align-items: start;
+  gap: ${({ theme }: T) => theme.space300};
   ${({ theme }: T) => theme.typestyleV2BodyMedium};
   color: ${({ theme }: T) => theme.colorOnSurfaceVariant};
   line-height: 1.55;
-  &::marker {
-    color: ${({ theme }: T) => theme.colorOutlineVariant};
+
+  &::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #D8B4FE;
+    flex-shrink: 0;
+    margin-top: 6px;
   }
 `;
 
