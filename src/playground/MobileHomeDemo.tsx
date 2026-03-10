@@ -18,7 +18,7 @@ const MobileHomeDemo: React.FC = () => {
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [appsModalOpen, setAppsModalOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(searchParams.get('dark') === '1');
   const [mobileHudVisible, setMobileHudVisible] = useState(false);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const leftToggleRef = useRef<HTMLButtonElement>(null);
@@ -126,6 +126,15 @@ const MobileHomeDemo: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [leftPanelOpen, rightPanelOpen]);
 
+  const isEmbed = searchParams.get('embed') === '1';
+
+  useEffect(() => {
+    if (isEmbed) {
+      document.documentElement.classList.add('embed-mode');
+      return () => document.documentElement.classList.remove('embed-mode');
+    }
+  }, [isEmbed]);
+
   return (
     <>
       <Global
@@ -134,75 +143,81 @@ const MobileHomeDemo: React.FC = () => {
           body { margin: 0; padding: 0; overflow-x: hidden; }
         `}
       />
-
-      <SystemStatusSummary
-        leftToggleRef={leftToggleRef}
-        onToggle={() => setLeftPanelOpen(prev => !prev)}
-        darkMode={darkMode}
-      />
-
-      <UserIntentSummary
-        persona={persona}
-        personaAvatar={personaAvatar}
-        onClock={onClock}
-        shiftToday={shiftToday}
-        rightToggleRef={rightToggleRef}
-        onToggle={() => setRightPanelOpen(prev => !prev)}
-        darkMode={darkMode}
-      />
-
-      <MobileHudSheet
-        isOpen={mobileHudVisible}
-        onClose={() => setMobileHudVisible(false)}
-        darkMode={darkMode}
-        persona={persona}
-        personaAvatar={personaAvatar}
-        onClock={onClock}
-        shiftToday={shiftToday}
-        onOpenSystemPanel={() => setLeftPanelOpen(true)}
-        onOpenUserIntentPanel={() => setRightPanelOpen(true)}
-      />
-
-      <LeftHudPanel
-        panelRef={leftPanelRef}
-        open={leftPanelOpen}
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
-      />
-
-      <RightHudPanel
-        panelRef={rightPanelRef}
-        open={rightPanelOpen}
-        darkMode={darkMode}
-        persona={persona}
-        personaAvatar={personaAvatar}
-        enabledApps={enabledApps}
-        setEnabledApps={setEnabledApps}
-        onboarding={onboarding}
-        shiftToday={shiftToday}
-        setShiftToday={setShiftToday}
-        onClock={onClock}
-        setOnClock={setOnClock}
-        handlePersonaChange={handlePersonaChange}
-        handleOnboardingToggle={handleOnboardingToggle}
-        setAppsModalOpen={setAppsModalOpen}
-        updateParams={updateParams}
-      />
-
-      {appsModalOpen && (
-        <AppsModal
-          enabledApps={enabledApps}
-          setEnabledApps={setEnabledApps}
-          persona={persona}
-          onboarding={onboarding}
-          primaryColor={theme.colorPrimaryContainer}
-          updateParams={updateParams}
-          onClose={() => setAppsModalOpen(false)}
+      {isEmbed && (
+        <Global
+          styles={css`
+            body { overflow: hidden !important; }
+          `}
         />
       )}
 
+      {!isEmbed && (
+        <>
+          <SystemStatusSummary
+            leftToggleRef={leftToggleRef}
+            onToggle={() => setLeftPanelOpen(prev => !prev)}
+            darkMode={darkMode}
+          />
+          <UserIntentSummary
+            persona={persona}
+            personaAvatar={personaAvatar}
+            onClock={onClock}
+            shiftToday={shiftToday}
+            rightToggleRef={rightToggleRef}
+            onToggle={() => setRightPanelOpen(prev => !prev)}
+            darkMode={darkMode}
+          />
+          <MobileHudSheet
+            isOpen={mobileHudVisible}
+            onClose={() => setMobileHudVisible(false)}
+            darkMode={darkMode}
+            persona={persona}
+            personaAvatar={personaAvatar}
+            onClock={onClock}
+            shiftToday={shiftToday}
+            onOpenSystemPanel={() => setLeftPanelOpen(true)}
+            onOpenUserIntentPanel={() => setRightPanelOpen(true)}
+          />
+          <LeftHudPanel
+            panelRef={leftPanelRef}
+            open={leftPanelOpen}
+            darkMode={darkMode}
+            setDarkMode={setDarkMode}
+          />
+          <RightHudPanel
+            panelRef={rightPanelRef}
+            open={rightPanelOpen}
+            darkMode={darkMode}
+            persona={persona}
+            personaAvatar={personaAvatar}
+            enabledApps={enabledApps}
+            setEnabledApps={setEnabledApps}
+            onboarding={onboarding}
+            shiftToday={shiftToday}
+            setShiftToday={setShiftToday}
+            onClock={onClock}
+            setOnClock={setOnClock}
+            handlePersonaChange={handlePersonaChange}
+            handleOnboardingToggle={handleOnboardingToggle}
+            setAppsModalOpen={setAppsModalOpen}
+            updateParams={updateParams}
+          />
+          {appsModalOpen && (
+            <AppsModal
+              enabledApps={enabledApps}
+              setEnabledApps={setEnabledApps}
+              persona={persona}
+              onboarding={onboarding}
+              primaryColor={theme.colorPrimaryContainer}
+              updateParams={updateParams}
+              onClose={() => setAppsModalOpen(false)}
+            />
+          )}
+        </>
+      )}
+
       <Canvas style={{ background: darkMode ? '#292929' : '#f0ede8' }}>
-        <PhoneMockup isDark={darkMode}>
+        <PhoneMockup isDark={darkMode} style={isEmbed ? { width: '100%', height: '100%', borderRadius: 0, padding: 0 } : undefined}>
           <ThemeProvider themeConfigs={THEME_CONFIGS} defaultTheme="berry" colorMode={darkMode ? 'dark' : 'light'}>
             <ThemedPhoneScreen
               activeNav={activeNav}
@@ -213,7 +228,7 @@ const MobileHomeDemo: React.FC = () => {
               onboarding={onboarding}
               personaAvatar={personaAvatar}
               darkMode={darkMode}
-              onAvatarTap={() => setMobileHudVisible(prev => !prev)}
+              onAvatarTap={isEmbed ? undefined : () => setMobileHudVisible(prev => !prev)}
             />
           </ThemeProvider>
         </PhoneMockup>

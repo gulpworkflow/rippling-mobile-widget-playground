@@ -9,6 +9,17 @@ const OVERRIDE_DIR = path.resolve(__dirname, 'src/overrides');
 
 export default defineConfig({
   plugins: [
+    {
+      name: 'force-full-reload',
+      enforce: 'post',
+      handleHotUpdate({ file, server }) {
+        if (file.endsWith('.tsx') || file.endsWith('.ts') || file.endsWith('.css')) {
+          console.log(`  🔄 Full reload: ${path.basename(file)}`);
+          server.ws.send({ type: 'full-reload', path: '*' });
+          return [];
+        }
+      },
+    },
     react({
       jsxImportSource: '@emotion/react',
       babel: {
@@ -18,6 +29,13 @@ export default defineConfig({
   ],
   server: {
     port: 4201,
+    headers: {
+      'Cache-Control': 'no-store',
+    },
+    watch: {
+      usePolling: true,
+      interval: 500,
+    },
   },
   resolve: {
     alias: [

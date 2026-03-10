@@ -105,7 +105,8 @@ export const PhoneScreen = styled.div<{ surfaceDim?: string; surface?: string }>
     border-radius: 47px;
   }
   @media (max-width: 500px) {
-    border-radius: 0;
+    .embed-mode & { border-radius: 47px; }
+    :not(.embed-mode) & { border-radius: 0; }
   }
 `;
 
@@ -122,7 +123,8 @@ export const StatusBarBlur = styled.div`
   mask-image: linear-gradient(to bottom, black 0%, black 25%, transparent 60%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 25%, transparent 60%);
   @media (max-width: 500px) {
-    display: none;
+    .embed-mode & { display: block; }
+    :not(.embed-mode) & { display: none; }
   }
 `;
 
@@ -143,7 +145,8 @@ export const StatusBar = styled.div`
   z-index: 3501;
   background: transparent;
   @media (max-width: 500px) {
-    display: none;
+    .embed-mode & { display: flex; }
+    :not(.embed-mode) & { display: none; }
   }
 `;
 
@@ -159,7 +162,7 @@ export const FloatingAvatar = styled.div`
   right: 16px;
   z-index: 2000;
   @media (max-width: 500px) {
-    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    :not(.embed-mode) & { top: calc(env(safe-area-inset-top, 0px) + 12px); }
   }
 `;
 
@@ -186,7 +189,7 @@ export const ContentArea = styled.div<{ $scrollLocked?: boolean }>`
   position: relative;
   z-index: 1;
   @media (max-width: 500px) {
-    padding-top: env(safe-area-inset-top, 12px);
+    :not(.embed-mode) & { padding-top: env(safe-area-inset-top, 12px); }
   }
 
   &::-webkit-scrollbar {

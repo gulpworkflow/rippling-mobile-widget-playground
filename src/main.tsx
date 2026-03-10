@@ -8,9 +8,12 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import GlobalStyle from '@rippling/pebble/GlobalStyle';
 import { Global, css } from '@emotion/react';
 import MobileHomeDemo from './playground/MobileHomeDemo';
+import AdaptiveHomeArchitectureDemo from './demos/adaptive-home-architecture-demo';
 import IndexPage from './demos/index-page';
 import GettingStartedPage from './demos/getting-started-page';
 import DocViewerPage from './demos/doc-viewer-page';
+import PlaygroundArchivePage from './demos/playground-archive-page';
+import WidgetCardFrameworkPage from './demos/widget-card-framework-page';
 
 // Initialize @rippling/ui package
 oneUiService.init({} as any);
@@ -69,9 +72,12 @@ init().then(() => {
             <Route path="/" element={<IndexPage />} />
             <Route path="/getting-started" element={<GettingStartedPage />} />
             <Route path="/docs" element={<DocViewerPage />} />
+            <Route path="/playground-archive" element={<PlaygroundArchivePage />} />
             
             {/* Mobile Home Prototype */}
             <Route path="/mobile-home-demo" element={<MobileHomeDemo />} />
+            <Route path="/adaptive-home-architecture" element={<AdaptiveHomeArchitectureDemo />} />
+            <Route path="/widget-card-framework" element={<WidgetCardFrameworkPage />} />
             
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
