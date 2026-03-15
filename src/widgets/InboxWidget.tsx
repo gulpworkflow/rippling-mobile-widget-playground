@@ -2,6 +2,7 @@ import React from 'react';
 import styled from '@emotion/styled';
 import Icon from '@rippling/pebble/Icon';
 import { usePebbleTheme } from '@/utils/theme';
+import type { PersonaId } from '@/data-models/types';
 
 const InboxTaskRow = styled.div`
   display: flex;
@@ -25,6 +26,21 @@ const InboxTaskIcon = styled.div`
   flex-shrink: 0;
 `;
 
+const AvatarCircle = styled.div<{ $bg: string }>`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: ${({ $bg }) => $bg};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+`;
+
 const InboxTaskBody = styled.div`
   flex: 1;
   min-width: 0;
@@ -45,6 +61,37 @@ const InboxTaskSubtitle = styled.div`
   font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.4;
   margin-top: 2px;
+`;
+
+const InboxTaskMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+`;
+
+const MetaBadge = styled.span<{ $variant?: 'warning' | 'error' | 'neutral' }>`
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: ${({ $variant }) =>
+    $variant === 'error' ? '#fde8e8' :
+    $variant === 'warning' ? '#fef3cd' :
+    '#f0f0f0'};
+  color: ${({ $variant }) =>
+    $variant === 'error' ? '#c0392b' :
+    $variant === 'warning' ? '#856404' :
+    '#555'};
+`;
+
+const MetaCategory = styled.span`
+  font-size: 11px;
+  font-weight: 400;
+  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant || 'rgba(0,0,0,0.5)'};
+  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
 `;
 
 const InboxTaskDue = styled.div`
@@ -72,17 +119,95 @@ const InboxManageButton = styled.button`
   cursor: pointer;
 `;
 
-const INBOX_TASKS = [
+const EMPLOYEE_TASKS = [
   { id: '1', title: 'Training and courses', subtitle: '2 items', due: '5d', icon: Icon.TYPES.STAR_OUTLINE },
   { id: '2', title: 'Complete survey', subtitle: 'Onsite event feedback', due: '12d', icon: Icon.TYPES.SURVEY_NEUTRAL_OUTLINE },
 ];
 
-const InboxPreviewContent: React.FC = () => {
+const AVATAR_COLORS = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+interface AdminTask {
+  id: string;
+  name: string;
+  initials: string;
+  avatarColor: string;
+  description: string;
+  badges: { label: string; variant: 'warning' | 'error' | 'neutral' }[];
+  category: string;
+}
+
+const ADMIN_TASKS: AdminTask[] = [
+  {
+    id: '1',
+    name: 'Lisa Thompson',
+    initials: 'LT',
+    avatarColor: AVATAR_COLORS[0],
+    description: "Increase Robert Wilson's PTO balance to 20 days",
+    badges: [{ label: 'Due: Jul 16, 2025', variant: 'warning' }],
+    category: 'Time off approvals',
+  },
+  {
+    id: '2',
+    name: 'David Park',
+    initials: 'DP',
+    avatarColor: AVATAR_COLORS[1],
+    description: '8h 30m time entry on Oct 26',
+    badges: [],
+    category: 'Time and Attendance approvals',
+  },
+  {
+    id: '3',
+    name: 'Emily Rodriguez',
+    initials: 'ER',
+    avatarColor: AVATAR_COLORS[2],
+    description: 'Reimburse $30.00 (Alaska Airlines)',
+    badges: [],
+    category: 'Reimbursement approvals',
+  },
+  {
+    id: '4',
+    name: 'Sarah Johnson',
+    initials: 'SJ',
+    avatarColor: AVATAR_COLORS[3],
+    description: '13h 57m time entry on Oct 28',
+    badges: [{ label: 'Exceeds 12 hours', variant: 'error' }],
+    category: 'Time and Attendance approvals',
+  },
+];
+
+const ADMIN_PERSONAS: PersonaId[] = ['functional_admin', 'executive_owner'];
+
+const InboxPreviewContent: React.FC<{ persona?: PersonaId }> = ({ persona }) => {
   const { theme } = usePebbleTheme();
   const variantColor = theme.colorOnSurfaceVariant;
+  const isAdmin = persona && ADMIN_PERSONAS.includes(persona);
+
+  if (isAdmin) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        {ADMIN_TASKS.slice(0, 2).map(t => (
+          <InboxTaskRow key={t.id}>
+            <AvatarCircle $bg={t.avatarColor}>{t.initials}</AvatarCircle>
+            <InboxTaskBody>
+              <InboxTaskTitle>{t.name}</InboxTaskTitle>
+              <InboxTaskSubtitle>{t.description}</InboxTaskSubtitle>
+              <InboxTaskMeta>
+                {t.badges.map((b, i) => (
+                  <MetaBadge key={i} $variant={b.variant}>{b.label}</MetaBadge>
+                ))}
+                <MetaCategory>{t.category}</MetaCategory>
+              </InboxTaskMeta>
+            </InboxTaskBody>
+          </InboxTaskRow>
+        ))}
+        <InboxManageButton>View all approvals</InboxManageButton>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-      {INBOX_TASKS.map(t => (
+      {EMPLOYEE_TASKS.map(t => (
         <InboxTaskRow key={t.id}>
           <InboxTaskIcon>
             <Icon type={t.icon} size={20} color="#fff" />

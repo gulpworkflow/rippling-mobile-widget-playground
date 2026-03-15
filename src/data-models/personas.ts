@@ -42,15 +42,15 @@ const PERSONA_ZONE_MAP: Record<PersonaId, ZoneMapping> = {
     discovery: ['apps_list'],
   },
   functional_admin: {
-    primary: ['admin_insights'],
+    primary: ['inbox_preview'],
     core: ['quick_actions'],
-    contextual: ['inbox_preview'],
+    contextual: ['recently_visited'],
     discovery: ['apps_list'],
   },
   executive_owner: {
-    primary: ['admin_insights'],
+    primary: ['inbox_preview'],
     core: ['quick_actions'],
-    contextual: ['inbox_preview'],
+    contextual: ['recently_visited'],
     discovery: ['apps_list'],
   },
 };

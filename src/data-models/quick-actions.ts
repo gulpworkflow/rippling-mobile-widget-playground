@@ -421,16 +421,16 @@ export const DEFAULT_PERSONA_RANKINGS: Record<PersonaId, QuickActionId[]> = {
     'view_documents',
   ],
   functional_admin: [
+    'review_timesheets',
+    'view_pto_approvals',
+    'view_expense_approvals',
     'people_directory',
-    'request_time_off',
-    'view_documents',
-    'view_my_benefits',
   ],
   executive_owner: [
+    'view_expense_approvals',
+    'review_timesheets',
+    'view_pto_approvals',
     'people_directory',
-    'view_my_benefits',
-    'view_documents',
-    'request_time_off',
   ],
   contractor: [
     'submit_expense',

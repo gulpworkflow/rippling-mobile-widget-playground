@@ -12,6 +12,7 @@ import ShiftClockContent from '@/widgets/ShiftClockWidget';
 import InboxPreviewContent from '@/widgets/InboxWidget';
 import EarningsSummaryContent from '@/widgets/EarningsWidget';
 import ShortcutsContent from '@/widgets/ShortcutsWidget';
+import RecentlyVisitedContent from '@/widgets/RecentlyVisitedWidget';
 import DiscoveryAppList from '@/widgets/DiscoveryAppList';
 
 const AppHeader = styled.div`
@@ -63,8 +64,9 @@ const renderWidgetContent = (
 ) => {
   if (widgetId === 'quick_actions' && quickActions) return <ShortcutsContent actions={quickActions} onSurface={onSurface} onActionTap={onQuickActionTap} />;
   if (widgetId === 'shift_clock') return <ShiftClockContent />;
-  if (widgetId === 'inbox_preview') return <InboxPreviewContent />;
+  if (widgetId === 'inbox_preview') return <InboxPreviewContent persona={persona} />;
   if (widgetId === 'earnings_summary' && persona) return <EarningsSummaryContent persona={persona} />;
+  if (widgetId === 'recently_visited') return <RecentlyVisitedContent />;
   return <ContentSlot>Content slot</ContentSlot>;
 };
 
