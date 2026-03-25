@@ -11,6 +11,8 @@ interface ProfileDropdownProps {
   adminMode: boolean;
   currentMode: 'light' | 'dark';
   onAdminModeToggle: () => void;
+  onPersonaSelect?: () => void;
+  personaLabel?: string;
   theme: StyledTheme;
 }
 
@@ -69,36 +71,54 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   adminMode,
   currentMode,
   onAdminModeToggle,
+  onPersonaSelect,
+  personaLabel,
   theme,
 }) => {
   const { changeMode } = useThemeSettings();
 
+  const menuItems: any[] = [
+    {
+      label: currentMode === 'light' ? 'Light Mode \u2713' : 'Light Mode',
+      leftIconType: Icon.TYPES.SUN_OUTLINE,
+      value: 'light',
+    },
+    {
+      label: currentMode === 'dark' ? 'Dark Mode \u2713' : 'Dark Mode',
+      leftIconType: Icon.TYPES.OVERNIGHT_OUTLINE,
+      value: 'dark',
+    },
+  ];
+
+  if (onPersonaSelect) {
+    menuItems.push(
+      { isSeparator: true },
+      {
+        label: personaLabel ? `Persona: ${personaLabel}` : 'Switch persona',
+        leftIconType: Icon.TYPES.PEOPLE_GROUP_OUTLINE,
+        value: 'persona',
+      },
+    );
+  }
+
+  menuItems.push(
+    { isSeparator: true },
+    {
+      label: adminMode ? 'Turn off Admin Mode' : 'Turn on Admin Mode',
+      leftIconType: Icon.TYPES.LOCK_OUTLINE,
+      value: 'admin',
+    },
+  );
+
   return (
     <Dropdown
-      list={[
-        {
-          label: currentMode === 'light' ? 'Light Mode ✓' : 'Light Mode',
-          leftIconType: Icon.TYPES.SUN_OUTLINE,
-          value: 'light',
-        },
-        {
-          label: currentMode === 'dark' ? 'Dark Mode ✓' : 'Dark Mode',
-          leftIconType: Icon.TYPES.OVERNIGHT_OUTLINE,
-          value: 'dark',
-        },
-        {
-          isSeparator: true,
-        },
-        {
-          label: adminMode ? 'Turn off Admin Mode' : 'Turn on Admin Mode',
-          leftIconType: Icon.TYPES.LOCK_OUTLINE,
-          value: 'admin',
-        },
-      ]}
+      list={menuItems}
       maxHeight={400}
       onChange={value => {
         if (value === 'admin') {
           onAdminModeToggle();
+        } else if (value === 'persona') {
+          onPersonaSelect?.();
         } else if (value === 'light' || value === 'dark') {
           changeMode(value);
         }

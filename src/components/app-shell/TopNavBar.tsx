@@ -19,6 +19,8 @@ interface TopNavBarProps {
   onLogoClick?: () => void;
   showNotificationBadge?: boolean;
   notificationCount?: number;
+  onPersonaSelect?: () => void;
+  personaLabel?: string;
   theme: StyledTheme;
 }
 
@@ -87,8 +89,14 @@ const RightSection = styled.div`
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   height: 100%;
+  position: relative;
+`;
+
+const SearchCenter = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: center;
 `;
 
 const ActionsContainer = styled.div`
@@ -150,6 +158,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
   onLogoClick,
   showNotificationBadge = false,
   notificationCount = 0,
+  onPersonaSelect,
+  personaLabel,
   theme,
 }) => {
   return (
@@ -162,15 +172,16 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
             onClick={onLogoClick}
           />
         </LogoContainer>
-        <VerticalDivider theme={theme} adminMode={adminMode} />
       </LeftSection>
 
       <RightSection theme={theme}>
-        <SearchBar 
-          placeholder={searchPlaceholder} 
-          adminMode={adminMode} 
-          theme={theme} 
-        />
+        <SearchCenter>
+          <SearchBar 
+            placeholder={searchPlaceholder} 
+            adminMode={adminMode} 
+            theme={theme} 
+          />
+        </SearchCenter>
 
         <ActionsContainer theme={theme}>
           <TopNavActions theme={theme} adminMode={adminMode}>
@@ -214,6 +225,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
             adminMode={adminMode}
             currentMode={currentMode}
             onAdminModeToggle={onAdminModeToggle}
+            onPersonaSelect={onPersonaSelect}
+            personaLabel={personaLabel}
             theme={theme}
           />
         </ActionsContainer>

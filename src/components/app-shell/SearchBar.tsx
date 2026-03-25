@@ -17,7 +17,7 @@ const StyledSearchBar = styled.div<{ adminMode?: boolean }>`
   opacity: 0.75;
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   padding: ${({ theme }) =>
-    `${(theme as StyledTheme).space200} ${(theme as StyledTheme).space300}`};
+    `${(theme as StyledTheme).space300} ${(theme as StyledTheme).space400}`};
   display: flex;
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space200};

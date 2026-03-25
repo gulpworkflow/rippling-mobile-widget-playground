@@ -11,7 +11,8 @@ interface AppShellLayoutProps {
   children: React.ReactNode;
 
   // Page config
-  pageTitle: string;
+  pageTitle?: string;
+  hidePageHeader?: boolean;
   pageTabs?: string[];
   defaultActiveTab?: number;
   onTabChange?: (index: number) => void;
@@ -28,6 +29,8 @@ interface AppShellLayoutProps {
   onLogoClick?: () => void;
   showNotificationBadge?: boolean;
   notificationCount?: number;
+  onPersonaSelect?: () => void;
+  personaLabel?: string;
 }
 
 const AppContainer = styled.div`
@@ -96,19 +99,20 @@ const TabsWrapper = styled.div`
   }
 `;
 
-const PageContent = styled.div`
-  background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
-  padding: ${({ theme }) =>
-    `${(theme as StyledTheme).space800} ${(theme as StyledTheme).space1400}`};
+const PageContent = styled.div<{ $flush?: boolean }>`
+  background-color: ${({ $flush }) => $flush ? 'transparent' : ({ theme }) => (theme as StyledTheme).colorSurface};
+  padding: ${({ $flush, theme }) =>
+    $flush ? '0' : `${(theme as StyledTheme).space800} ${(theme as StyledTheme).space1400}`};
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => (theme as StyledTheme).space600};
+  gap: ${({ $flush }) => $flush ? '0' : ({ theme }) => (theme as StyledTheme).space600};
   flex: 1;
 `;
 
 export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   children,
   pageTitle,
+  hidePageHeader = false,
   pageTabs,
   defaultActiveTab = 0,
   onTabChange,
@@ -121,11 +125,13 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   onLogoClick,
   showNotificationBadge = false,
   notificationCount = 0,
+  onPersonaSelect,
+  personaLabel,
 }) => {
   const { theme, mode: currentMode } = usePebbleTheme();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
-  const [adminMode, setAdminMode] = useState(false);
+  const [adminMode, setAdminMode] = useState(true);
 
   const handleTabChange = (index: number) => {
     setActiveTab(index);
@@ -145,6 +151,8 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
         onLogoClick={onLogoClick}
         showNotificationBadge={showNotificationBadge}
         notificationCount={notificationCount}
+        onPersonaSelect={onPersonaSelect}
+        personaLabel={personaLabel}
         theme={theme}
       />
 
@@ -161,37 +169,38 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
       <MainContent theme={theme} sidebarCollapsed={sidebarCollapsed}>
         <PageContentContainer theme={theme}>
           {/* Page Header with Actions and Tabs */}
-          <PageHeaderContainer theme={theme}>
-            <PageHeaderWrapper theme={theme}>
-              <Page.Header
-                title={pageTitle}
-                shouldBeUnderlined={false}
-                size={Page.Header.SIZES.FLUID}
-                actions={
-                  pageActions ? (
-                    <PageHeaderActions theme={theme}>{pageActions}</PageHeaderActions>
-                  ) : undefined
-                }
-              />
-            </PageHeaderWrapper>
+          {!hidePageHeader && (
+            <PageHeaderContainer theme={theme}>
+              <PageHeaderWrapper theme={theme}>
+                <Page.Header
+                  title={pageTitle ?? ''}
+                  shouldBeUnderlined={false}
+                  size={Page.Header.SIZES.FLUID}
+                  actions={
+                    pageActions ? (
+                      <PageHeaderActions theme={theme}>{pageActions}</PageHeaderActions>
+                    ) : undefined
+                  }
+                />
+              </PageHeaderWrapper>
 
-            {/* Tabs integrated in header */}
-            {pageTabs && pageTabs.length > 0 && (
-              <TabsWrapper theme={theme}>
-                <Tabs.LINK
-                  activeIndex={activeTab}
-                  onChange={index => handleTabChange(Number(index))}
-                >
-                  {pageTabs.map((tab, index) => (
-                    <Tabs.Tab key={`tab-${index}`} title={tab} />
-                  ))}
-                </Tabs.LINK>
-              </TabsWrapper>
-            )}
-          </PageHeaderContainer>
+              {pageTabs && pageTabs.length > 0 && (
+                <TabsWrapper theme={theme}>
+                  <Tabs.LINK
+                    activeIndex={activeTab}
+                    onChange={index => handleTabChange(Number(index))}
+                  >
+                    {pageTabs.map((tab, index) => (
+                      <Tabs.Tab key={`tab-${index}`} title={tab} />
+                    ))}
+                  </Tabs.LINK>
+                </TabsWrapper>
+              )}
+            </PageHeaderContainer>
+          )}
 
           {/* Page Content */}
-          <PageContent theme={theme}>{children}</PageContent>
+          <PageContent theme={theme} $flush={hidePageHeader}>{children}</PageContent>
         </PageContentContainer>
       </MainContent>
     </AppContainer>

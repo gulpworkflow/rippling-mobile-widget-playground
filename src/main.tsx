@@ -14,6 +14,7 @@ import GettingStartedPage from './demos/getting-started-page';
 import DocViewerPage from './demos/doc-viewer-page';
 import PlaygroundArchivePage from './demos/playground-archive-page';
 import WidgetCardFrameworkPage from './demos/widget-card-framework-page';
+import DesktopHomeDemo from './demos/desktop-home-demo';
 
 // Initialize @rippling/ui package
 oneUiService.init({} as any);
@@ -78,6 +79,7 @@ init().then(() => {
             <Route path="/mobile-home-demo" element={<MobileHomeDemo />} />
             <Route path="/adaptive-home-architecture" element={<AdaptiveHomeArchitectureDemo />} />
             <Route path="/widget-card-framework" element={<WidgetCardFrameworkPage />} />
+            <Route path="/desktop-home-demo" element={<DesktopHomeDemo />} />
             
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
