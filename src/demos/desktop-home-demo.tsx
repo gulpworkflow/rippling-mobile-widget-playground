@@ -394,23 +394,24 @@ const QUICK_ACTION_ICONS: Record<string, string> = {
   book_travel: Icon.TYPES.LOCATION_OUTLINE,
 };
 
-const QuickActionsRow = styled.div`
+const ShortcutsStrip = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin-top: ${({ theme }) => (theme as StyledTheme).space800};
-  margin-bottom: 24px;
-  width: 100%;
+  gap: 0;
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space400} 32px;
 `;
 
 const QATile = styled.a`
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 10px 14px 8px;
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  margin-left: 8px;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -422,20 +423,38 @@ const QATile = styled.a`
 `;
 
 const QAIconBox = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceDim};
   display: grid;
   place-items: center;
   flex-shrink: 0;
 `;
 
-const QALabel = styled.div`
+const QALabel = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  white-space: nowrap;
+`;
+
+
+const QAMore = styled.a`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
+  cursor: pointer;
+  text-decoration: none;
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  text-align: center;
-  white-space: nowrap;
+  transition: background 0.12s;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  }
 `;
 
 const PersonaHud = styled.div<{ $visible: boolean }>`
@@ -529,14 +548,14 @@ const CardGrid = styled.div`
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   width: 100%;
-  max-width: 1300px;
+  max-width: 1200px;
   margin: 0 auto ${({ theme }) => (theme as StyledTheme).space800};
 `;
 
 const Card = styled.div`
-  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  background: color-mix(in srgb, ${({ theme }) => (theme as StyledTheme).colorSurfaceDim} 30%, transparent);
   border-radius: 14px;
-  padding: 24px 28px;
+  padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.03);
   min-width: 0;
   display: flex;
@@ -640,7 +659,6 @@ const RecentIconCircle = styled.div<{ $bg: string }>`
 
 const RecentName = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  font-weight: 500;
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   flex: 1;
   overflow: hidden;
@@ -692,7 +710,6 @@ const TaskBody = styled.div`
 
 const TaskTitle = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  font-weight: 500;
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   overflow: hidden;
   text-overflow: ellipsis;
@@ -773,14 +790,6 @@ const ToastHeader = styled.div`
   margin-bottom: 8px;
 `;
 
-const ToastLabel = styled.div`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  flex: 1;
-`;
-
 const ToastDismiss = styled.button`
   width: 20px;
   height: 20px;
@@ -812,9 +821,64 @@ const ToastDesc = styled.div`
   margin-bottom: 12px;
 `;
 
-const ToastCta = styled.a`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+
+
+// ── What's New ──────────────────────────────────────────────────────────────
+
+const WhatsNewSection = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space1200};
+`;
+
+const WhatsNewHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
+const WhatsNewTitle = styled.div`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   font-weight: 600;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const WhatsNewLink = styled.a`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  }
+`;
+
+const WhatsNewRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  padding: 6px 0;
+`;
+
+const WhatsNewDot = styled.span`
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  flex-shrink: 0;
+  position: relative;
+  top: -1px;
+`;
+
+const WhatsNewText = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const WhatsNewHighlight = styled.a`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
   color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
   text-decoration: none;
   cursor: pointer;
@@ -838,28 +902,28 @@ const ANALYTICS_ITEMS: AnalyticsItem[] = [
   {
     icon: Icon.TYPES.PEO_OUTLINE,
     title: 'Headcount',
-    insight: '+8% vs plan this quarter',
+    insight: 'Last edited 2 days ago',
     points: [8, 9, 10, 10, 11, 12, 13, 14, 15, 17],
     strokeColor: 'primary',
   },
   {
     icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
     title: 'Payroll cost',
-    insight: '$1.2M this period, steady',
+    insight: 'Last edited 5 days ago',
     points: [11, 12, 11, 12, 13, 12, 12, 11, 12, 12],
     strokeColor: 'primary',
   },
   {
     icon: Icon.TYPES.TIME_OUTLINE,
-    title: 'Overtime',
-    insight: 'Trending up 15% this pay period',
+    title: 'Initiatives Tracker',
+    insight: 'Last edited 1 week ago',
     points: [3, 4, 4, 5, 6, 8, 10, 13, 15, 18],
     strokeColor: 'error',
   },
   {
     icon: Icon.TYPES.BAR_CHART_OUTLINE,
-    title: 'Turnover rate',
-    insight: '4.2% — down from 5.1% last quarter',
+    title: 'Attendance Data',
+    insight: 'Last edited 2 weeks ago',
     points: [16, 15, 14, 14, 12, 11, 10, 9, 8, 7],
     strokeColor: 'success',
   },
@@ -894,7 +958,7 @@ const AnalyticsRow = styled.div`
 const AnalyticsIconCircle = styled.div<{ $bg: string }>`
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   background: ${({ $bg }) => $bg};
   display: grid;
   place-items: center;
@@ -908,7 +972,6 @@ const AnalyticsBody = styled.div`
 
 const AnalyticsTitle = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  font-weight: 500;
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   display: block;
 `;
@@ -936,7 +999,7 @@ const HomeContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space800};
+  padding: ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space800} 0;
   padding-top: 48px;
   position: relative;
   max-width: 960px;
@@ -952,7 +1015,7 @@ const PromptHeading = styled.h1`
 
 const PromptCard = styled.div`
   width: 100%;
-  max-width: 640px;
+  max-width: 830px;
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
@@ -1006,6 +1069,10 @@ const DesktopHomeDemo: React.FC = () => {
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [cardMenu, setCardMenu] = useState<string | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [qaDrawerOpen, setQaDrawerOpen] = useState(false);
+  const [qaSearch, setQaSearch] = useState('');
+  const [qaSortBy, setQaSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
+  const [qaSortMenuOpen, setQaSortMenuOpen] = useState(false);
   const [bannerVisible, setBannerVisible] = useState(false);
 
   useEffect(() => {
@@ -1018,12 +1085,17 @@ const DesktopHomeDemo: React.FC = () => {
   const user = SAMPLE_USERS[userIdx];
   const enabledApps = useMemo(() => new Set(user.enabledApps ?? []), [user.enabledApps]);
   const skuFlags = enabledAppsToSkuFlags(enabledApps);
-  const { actions: quickActions } = getQuickActions({
+  const { actions: quickActions, all: allQuickActionsRaw } = getQuickActions({
     persona: user.persona,
     skuFlags,
     onboarding: user.onboarding ?? false,
-    maxCount: 8,
+    maxCount: 4,
   });
+
+  const [qaFavorites, setQaFavorites] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    setQaFavorites(new Set(quickActions.map(a => a.id)));
+  }, [user.persona]);
 
   useEffect(() => {
     promptRef.current?.focus();
@@ -1042,6 +1114,18 @@ const DesktopHomeDemo: React.FC = () => {
     }
     return apps;
   }, [search, sortBy]);
+
+  const filteredQA = useMemo(() => {
+    let actions = [...allQuickActionsRaw];
+    if (qaSearch.trim()) {
+      const q = qaSearch.toLowerCase();
+      actions = actions.filter(a => a.label.toLowerCase().includes(q));
+    }
+    if (qaSortBy === 'alpha') {
+      actions.sort((a, b) => a.label.localeCompare(b.label));
+    }
+    return actions;
+  }, [allQuickActionsRaw, qaSearch, qaSortBy]);
 
   const orgChartSection: NavSectionData = {
     items: [
@@ -1170,6 +1254,82 @@ const DesktopHomeDemo: React.FC = () => {
       </Drawer>
 
       <Drawer
+        isVisible={qaDrawerOpen}
+        onCancel={() => { setQaDrawerOpen(false); setQaSearch(''); setQaSortMenuOpen(false); }}
+        title="Shortcuts"
+        width={520}
+      >
+        <DrawerToolbar>
+          <DrawerSearchInput>
+            <Icon type={Icon.TYPES.SEARCH_OUTLINE} size={16} color={(theme as any).colorOnSurfaceVariant} />
+            <input
+              placeholder="Search actions..."
+              value={qaSearch}
+              onChange={e => setQaSearch(e.target.value)}
+            />
+          </DrawerSearchInput>
+          <SortWrap>
+            <Button.Icon
+              icon={Icon.TYPES.FILTER}
+              aria-label="Sort"
+              appearance={Button.APPEARANCES.GHOST}
+              size={Button.SIZES.S}
+              onClick={() => setQaSortMenuOpen(prev => !prev)}
+            />
+            {qaSortMenuOpen && (
+              <SortMenu>
+                <SortMenuLabel>Sort by</SortMenuLabel>
+                {([['recent', 'Most used'], ['used', 'Suggested'], ['alpha', 'Alphabetical']] as const).map(([key, label]) => (
+                  <SortMenuItem
+                    key={key}
+                    $active={qaSortBy === key}
+                    onClick={() => { setQaSortBy(key); setQaSortMenuOpen(false); }}
+                  >
+                    {label}
+                  </SortMenuItem>
+                ))}
+              </SortMenu>
+            )}
+          </SortWrap>
+        </DrawerToolbar>
+
+        {filteredQA.length > 0 ? (
+          <DrawerList>
+            {filteredQA.map(action => {
+              const isFav = qaFavorites.has(action.id);
+              return (
+                <DrawerAppRow key={action.id}>
+                  <DrawerAppIcon style={{ background: (theme as any).colorSurfaceDim }}>
+                    <Icon type={QUICK_ACTION_ICONS[action.id] || Icon.TYPES.LINK_OUTLET} size={16} color={(theme as any).colorOnSurface} />
+                  </DrawerAppIcon>
+                  <DrawerAppBody>
+                    <DrawerAppName>{action.label}</DrawerAppName>
+                    <DrawerAppDesc>{action.product}</DrawerAppDesc>
+                  </DrawerAppBody>
+                  <Button.Icon
+                    icon={isFav ? Icon.TYPES.STAR_FILLED : Icon.TYPES.STAR_OUTLINE}
+                    aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                    tip={isFav ? 'Remove from home' : 'Pin to home'}
+                    appearance={Button.APPEARANCES.GHOST}
+                    size={Button.SIZES.XS}
+                    onClick={() => {
+                      setQaFavorites(prev => {
+                        const next = new Set(prev);
+                        if (next.has(action.id)) next.delete(action.id); else next.add(action.id);
+                        return next;
+                      });
+                    }}
+                  />
+                </DrawerAppRow>
+              );
+            })}
+          </DrawerList>
+        ) : (
+          <DrawerEmpty>No actions match "{qaSearch}"</DrawerEmpty>
+        )}
+      </Drawer>
+
+      <Drawer
         isVisible={aiModalOpen}
         onCancel={() => setAiModalOpen(false)}
         title="Resolve with AI"
@@ -1223,22 +1383,24 @@ const DesktopHomeDemo: React.FC = () => {
             rows={2}
           />
         </PromptCard>
-
-        <QuickActionsRow>
-          {quickActions.map(action => (
-            <QATile key={action.id}>
-              <QAIconBox>
-                <Icon
-                  type={QUICK_ACTION_ICONS[action.id] || Icon.TYPES.LINK_OUTLET}
-                  size={18}
-                  color={(theme as any).colorOnSurface}
-                />
-              </QAIconBox>
-              <QALabel>{action.label}</QALabel>
-            </QATile>
-          ))}
-        </QuickActionsRow>
       </HomeContent>
+
+      <ShortcutsStrip>
+        {quickActions.slice(0, 4).map(action => (
+          <QATile key={action.id}>
+            <QAIconBox>
+              <Icon
+                type={QUICK_ACTION_ICONS[action.id] || Icon.TYPES.LINK_OUTLET}
+                size={16}
+                color={(theme as any).colorOnSurface}
+              />
+            </QAIconBox>
+            <QALabel>{action.label}</QALabel>
+            <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
+          </QATile>
+        ))}
+        <QAMore onClick={() => setQaDrawerOpen(true)}>+{allQuickActionsRaw.length - 4} more</QAMore>
+      </ShortcutsStrip>
 
       <CardGrid>
         {/* Card 1: Recently visited */}
@@ -1318,7 +1480,7 @@ const DesktopHomeDemo: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitleButton>
-              Analytics
+              Dashboards
               <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
             </CardTitleButton>
             <CardMenuWrap>
@@ -1350,7 +1512,7 @@ const DesktopHomeDemo: React.FC = () => {
               {(() => {
                 const { line, area } = sparklinePaths(item.points, 48, 18);
                 return (
-                  <svg width="48" height="18" viewBox="0 0 48 18" fill="none" style={{ flexShrink: 0 }}>
+                  <svg width="48" height="18" viewBox="0 0 48 18" fill="none" style={{ flexShrink: 0, display: 'none' }}>
                     <polygon points={area} fill={(theme as any).colorPrimaryVariant} />
                     <polyline
                       points={line}

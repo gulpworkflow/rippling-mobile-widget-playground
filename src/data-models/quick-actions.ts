@@ -414,11 +414,11 @@ export const DEFAULT_PERSONA_RANKINGS: Record<PersonaId, QuickActionId[]> = {
     'request_time_off',
   ],
   people_manager: [
+    'view_paystubs',
     'request_time_off',
     'submit_expense',
     'view_my_benefits',
     'book_travel',
-    'view_documents',
   ],
   functional_admin: [
     'review_timesheets',
