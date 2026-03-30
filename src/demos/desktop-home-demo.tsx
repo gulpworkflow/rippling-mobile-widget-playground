@@ -1,10 +1,14 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import styled from '@emotion/styled';
+import { keyframes } from '@emotion/react';
+import { css } from '@emotion/css';
 import { StyledTheme } from '@/utils/theme';
 import { useTheme } from '@rippling/pebble/theme';
 import Icon from '@rippling/pebble/Icon';
 import Button from '@rippling/pebble/Button';
 import Drawer from '@rippling/pebble/Drawer';
+import Modal from '@rippling/pebble/Modal';
+import Input from '@rippling/pebble/Inputs';
 
 import Atoms from '@rippling/pebble/Atoms';
 import { AppShellLayout, NavSectionData } from '@/components/app-shell';
@@ -13,6 +17,17 @@ import { SAMPLE_USERS } from '@/data-models/sample-users';
 import { PERSONA_OPTIONS } from '@/data-models/personas';
 import { getQuickActions } from '@/data-models/quick-actions';
 import { enabledAppsToSkuFlags } from '@/widgets/framework/widget-helpers';
+
+// ── Custom Shortcuts ─────────────────────────────────────────────────────────
+
+interface CustomShortcut {
+  id: string;
+  label: string;
+  url: string;
+}
+
+const isValidRipplingUrl = (url: string) =>
+  /^https:\/\/(app|www)\.rippling\.com/.test(url.trim());
 
 // ── SSO Data ────────────────────────────────────────────────────────────────
 
@@ -211,6 +226,17 @@ const SSOMoreWrap = styled.button`
   }
 `;
 
+const compactDrawerClass = css`
+  header {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
+  }
+  [data-testid="drawer-body"] {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
+  }
+`;
+
 // ── Drawer Grid ─────────────────────────────────────────────────────────────
 
 const DrawerToolbar = styled.div`
@@ -397,14 +423,28 @@ const QUICK_ACTION_ICONS: Record<string, string> = {
 const ShortcutsStrip = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0;
-  max-width: 1200px;
-  margin: 24px auto;
-  padding: 0 ${({ theme }) => (theme as StyledTheme).space400} 32px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  row-gap: 8px;
+  width: 100%;
+  max-width: 830px;
+  margin: 20px 0 0;
+  margin-left: -8px;
+  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space800} 0;
 `;
 
-const QATile = styled.a`
+const chipFadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const QATile = styled.a<{ $index?: number }>`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -416,6 +456,9 @@ const QATile = styled.a`
   text-decoration: none;
   color: inherit;
   transition: background 0.12s;
+  opacity: 0;
+  animation: ${chipFadeIn} 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: ${({ $index = 0 }) => 200 + $index * 50}ms;
 
   &:hover {
     background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
@@ -549,7 +592,7 @@ const CardGrid = styled.div`
   gap: 16px;
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto ${({ theme }) => (theme as StyledTheme).space800};
+  margin: 32px auto 16px;
 `;
 
 const Card = styled.div`
@@ -765,60 +808,70 @@ const AiModalText = styled.div`
   line-height: 1.6;
 `;
 
-// ── Toast Notification ──────────────────────────────────────────────────────
+// ── Create Shortcut Modal ────────────────────────────────────────────────────
 
-const Toast = styled.div<{ $visible: boolean }>`
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 50;
-  width: 320px;
-  border-radius: 16px;
-  padding: 16px 18px;
-  background: ${({ theme }) => (theme as StyledTheme).colorSurface};
-  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  transform: translateY(${({ $visible }) => $visible ? '0' : 'calc(100% + 40px)'});
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: ${({ $visible }) => $visible ? 'auto' : 'none'};
-`;
-
-const ToastHeader = styled.div`
+const CreateModalBody = styled.div`
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  flex-direction: column;
+  gap: ${({ theme }) => (theme as StyledTheme).space600};
+  padding: ${({ theme }) => (theme as StyledTheme).space600};
 `;
 
-const ToastDismiss = styled.button`
-  width: 20px;
-  height: 20px;
-  border: none;
+const CreateModalField = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+`;
+
+const CreateModalFieldLabel = styled.label`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+const CreateModalError = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorError};
+`;
+
+const CreateShortcutLink = styled.button`
   background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space300};
   cursor: pointer;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  border-radius: 4px;
-  display: grid;
-  place-items: center;
+  transition: color 0.1s;
+  text-align: left;
 
   &:hover {
-    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   }
 `;
 
-const ToastTitle = styled.div`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  font-weight: 600;
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  line-height: 1.35;
-  margin-bottom: 4px;
+// ── Inline Ad (AdWords-style) ───────────────────────────────────────────────
+
+const InlineAd = styled.div`
+  text-align: center;
+  padding: 16px ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space600};
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
-const ToastDesc = styled.div`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+const InlineAdText = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  line-height: 1.4;
-  margin-bottom: 12px;
+`;
+
+const InlineAdLink = styled.a`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 
@@ -1010,21 +1063,31 @@ const PromptHeading = styled.h1`
   ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   text-align: center;
-  margin: 120px 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
+  margin: 100px 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
 `;
 
-const PromptCard = styled.div`
+const PromptCard = styled.div<{ $dropdownOpen?: boolean }>`
   width: 100%;
-  max-width: 830px;
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
-  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: ${({ $dropdownOpen, theme }) =>
+    $dropdownOpen
+      ? `${(theme as StyledTheme).shapeCorner2xl} ${(theme as StyledTheme).shapeCorner2xl} 0 0`
+      : (theme as StyledTheme).shapeCorner2xl};
+  box-shadow: ${({ $dropdownOpen }) =>
+    $dropdownOpen
+      ? '0 12px 32px rgba(0, 0, 0, 0.1)'
+      : '0px 1px 2px rgba(0, 0, 0, 0.1)'};
+  clip-path: ${({ $dropdownOpen }) =>
+    $dropdownOpen ? 'inset(-40px -40px 0 -40px)' : 'none'};
+  ${({ $dropdownOpen }) => $dropdownOpen && 'border-bottom-color: transparent;'}
   padding: ${({ theme }) => (theme as StyledTheme).space400};
   display: flex;
   align-items: flex-start;
   gap: ${({ theme }) => (theme as StyledTheme).space200};
   cursor: text;
+  box-sizing: border-box;
+  transition: border-radius 0.15s ease, box-shadow 0.15s ease;
 `;
 
 const PromptInput = styled.textarea`
@@ -1046,6 +1109,364 @@ const PromptInput = styled.textarea`
 
   &:focus {
     outline: none;
+  }
+`;
+
+// ── Prompt Dropdown ─────────────────────────────────────────────────────────
+
+const SUGGESTIONS_BY_PERSONA: Record<string, string[]> = {
+  'hourly-employee': [
+    'How much overtime did I work this month?',
+    'When is my next scheduled shift?',
+    'How much PTO do I have left?',
+    'Can I swap my shift this Friday?',
+    'What holidays are coming up?',
+    'Show me my recent timecards',
+    'How do I update my availability?',
+  ],
+  'salaried-employee': [
+    'What does my benefits plan cover?',
+    'How do I add my newborn to my insurance?',
+    'What is my member ID?',
+    'When is open enrollment?',
+    'How much PTO do I have left?',
+    'Show me my recent paystubs',
+    'How do I update my tax withholdings?',
+  ],
+  'manager': [
+    'Which teams have the highest attrition this quarter?',
+    'Are there any pay equity gaps across departments?',
+    'Who on my team is out today?',
+    'Show me pending time-off requests',
+    'How do I run a performance review cycle?',
+    'What open headcount do I have?',
+    'Summarize my team\u2019s overtime this month',
+  ],
+  'admin': [
+    'What compliance tasks are overdue?',
+    'Show me headcount trends by department',
+    'When is the next payroll deadline?',
+    'Are there any open onboarding tasks?',
+    'Which employees are missing tax documents?',
+    'Show me benefits enrollment status',
+    'Generate a turnover report for Q1',
+  ],
+};
+
+const DEFAULT_SUGGESTIONS: string[] = [
+  'What does my benefits plan cover?',
+  'How do I add a dependent to my insurance?',
+  'When is open enrollment?',
+  'How much PTO do I have left?',
+  'Show me my recent paystubs',
+  'How do I update my tax withholdings?',
+  'What holidays are coming up?',
+];
+
+const PromptWrap = styled.div`
+  position: relative;
+  width: 100%;
+  max-width: 830px;
+  box-sizing: border-box;
+`;
+
+const PromptDropdown = styled.div<{ $visible: boolean }>`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-top: none;
+  border-radius: 0 0 ${({ theme }) => (theme as StyledTheme).shapeCorner2xl} ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+  clip-path: inset(0 -40px -40px -40px);
+  padding: ${({ theme }) => (theme as StyledTheme).space200} 0;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  pointer-events: ${({ $visible }) => ($visible ? 'auto' : 'none')};
+  transition: opacity 0.15s ease;
+`;
+
+const PromptDivider = styled.div`
+  height: 1px;
+  background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  margin: 0 ${({ theme }) => (theme as StyledTheme).space400};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space200};
+`;
+
+const DropdownRow = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  width: 100%;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+  }
+`;
+
+const DropdownRowIcon = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const DropdownRowText = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+// ── Company Feed ─────────────────────────────────────────────────────────────
+
+const CompanyPulseWrap = styled.div`
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 50;
+`;
+
+const PulseSection = styled.div`
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const PulseSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space300};
+`;
+
+const PulseSectionTitle = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const PulseSectionCount = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const PulseRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  padding: 8px 0;
+`;
+
+const PulseAvatar = styled.div<{ $bg?: string }>`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: ${({ $bg, theme }) => $bg || (theme as StyledTheme).colorSurfaceDim};
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const PulseRowBody = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const PulseRowName = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+const PulseRowMeta = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const PulseViewAll = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const PulseCarousel = styled.div`
+  display: flex;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin: 0 -36px ${({ theme }) => (theme as StyledTheme).space600};
+  padding-left: 36px;
+  padding-right: 36px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+`;
+
+const PulseCategoryCard = styled.div`
+  flex-shrink: 0;
+  width: 280px;
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
+  padding: ${({ theme }) => (theme as StyledTheme).space400};
+  display: flex;
+  flex-direction: column;
+`;
+
+const PulseCategoryHeader = styled.div`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
+const PulseCategoryRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  padding: 6px 0;
+`;
+
+const PulseCategoryRowBody = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const PulseCategoryRowName = styled.div`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const PulseCategoryRowMeta = styled.div`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const PulseCategoryViewAll = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 8px 0 0;
+  margin-top: auto;
+  cursor: pointer;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+
+  &:hover {
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  }
+`;
+
+const PulseDivider = styled.div`
+  height: 1px;
+  background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  margin: ${({ theme }) => (theme as StyledTheme).space400} 0;
+`;
+
+const PulsePostBox = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  padding: ${({ theme }) => (theme as StyledTheme).space300};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  cursor: text;
+`;
+
+const PulsePostPlaceholder = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  flex: 1;
+`;
+
+const PulsePost = styled.div`
+  padding: ${({ theme }) => (theme as StyledTheme).space400} 0;
+  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const PulsePostHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space200};
+`;
+
+const PulsePostAuthor = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+const PulsePostTime = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const PulsePostBody = styled.div`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  line-height: 1.5;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space200};
+`;
+
+const PulsePostActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space400};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const PulsePostAction = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+
+  &:hover {
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   }
 `;
 
@@ -1073,14 +1494,16 @@ const DesktopHomeDemo: React.FC = () => {
   const [qaSearch, setQaSearch] = useState('');
   const [qaSortBy, setQaSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
   const [qaSortMenuOpen, setQaSortMenuOpen] = useState(false);
-  const [bannerVisible, setBannerVisible] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setBannerVisible(true), 800);
-    return () => clearTimeout(timer);
-  }, []);
   const [userIdx, setUserIdx] = useState(3);
   const [personaHudOpen, setPersonaHudOpen] = useState(false);
+
+  const [customShortcuts, setCustomShortcuts] = useState<CustomShortcut[]>([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createUrl, setCreateUrl] = useState('');
+  const [createName, setCreateName] = useState('');
+  const [createUrlError, setCreateUrlError] = useState('');
+  const [createUrlTouched, setCreateUrlTouched] = useState(false);
+  const [pulseDrawerOpen, setPulseDrawerOpen] = useState(false);
 
   const user = SAMPLE_USERS[userIdx];
   const enabledApps = useMemo(() => new Set(user.enabledApps ?? []), [user.enabledApps]);
@@ -1092,13 +1515,79 @@ const DesktopHomeDemo: React.FC = () => {
     maxCount: 4,
   });
 
-  const [qaFavorites, setQaFavorites] = useState<Set<string>>(() => new Set());
+  const [promptValue, setPromptValue] = useState('');
+  const [promptFocused, setPromptFocused] = useState(false);
+  const promptWrapRef = useRef<HTMLDivElement>(null);
+
+  const [qaFavorites, setQaFavorites] = useState<Set<string>>(() => new Set(quickActions.map(a => a.id)));
   useEffect(() => {
     setQaFavorites(new Set(quickActions.map(a => a.id)));
   }, [user.persona]);
 
+  const suggestions = SUGGESTIONS_BY_PERSONA[user.persona] ?? DEFAULT_SUGGESTIONS;
+
+  const handleOpenCreateModal = () => {
+    setCreateUrl('');
+    setCreateName('');
+    setCreateUrlError('');
+    setCreateUrlTouched(false);
+    setShowCreateModal(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false);
+  };
+
+  const handleCreateUrlBlur = () => {
+    setCreateUrlTouched(true);
+    if (createUrl.trim() && !isValidRipplingUrl(createUrl)) {
+      setCreateUrlError('Only Rippling URLs are supported');
+    } else {
+      setCreateUrlError('');
+    }
+  };
+
+  const handleCreateUrlChange = (val: string) => {
+    setCreateUrl(val);
+    if (createUrlTouched) {
+      if (val.trim() && !isValidRipplingUrl(val)) {
+        setCreateUrlError('Only Rippling URLs are supported');
+      } else {
+        setCreateUrlError('');
+      }
+    }
+  };
+
+  const isCreateFormValid = createName.trim().length > 0 && createUrl.trim().length > 0 && isValidRipplingUrl(createUrl);
+
+  const handleSaveShortcut = () => {
+    if (!isCreateFormValid) return;
+    const id = `custom_${Date.now()}`;
+    const newShortcut: CustomShortcut = { id, label: createName.trim(), url: createUrl.trim() };
+    setCustomShortcuts(prev => [...prev, newShortcut]);
+    setQaFavorites(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    setShowCreateModal(false);
+  };
+
+  const handleDropdownItemClick = (text: string) => {
+    setPromptValue(text);
+    setPromptFocused(false);
+    promptRef.current?.blur();
+  };
+
+
   useEffect(() => {
-    promptRef.current?.focus();
+    const handleClickOutside = (e: MouseEvent) => {
+      if (promptWrapRef.current && !promptWrapRef.current.contains(e.target as Node)) {
+        setPromptFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const filteredApps = useMemo(() => {
@@ -1126,6 +1615,18 @@ const DesktopHomeDemo: React.FC = () => {
     }
     return actions;
   }, [allQuickActionsRaw, qaSearch, qaSortBy]);
+
+  const filteredCustomQA = useMemo(() => {
+    let shortcuts = [...customShortcuts];
+    if (qaSearch.trim()) {
+      const q = qaSearch.toLowerCase();
+      shortcuts = shortcuts.filter(s => s.label.toLowerCase().includes(q));
+    }
+    if (qaSortBy === 'alpha') {
+      shortcuts.sort((a, b) => a.label.localeCompare(b.label));
+    }
+    return shortcuts;
+  }, [customShortcuts, qaSearch, qaSortBy]);
 
   const orgChartSection: NavSectionData = {
     items: [
@@ -1201,6 +1702,7 @@ const DesktopHomeDemo: React.FC = () => {
         onCancel={() => { setDrawerOpen(false); setSearch(''); setSortMenuOpen(false); }}
         title="Quick sign-in"
         width={520}
+        overlayClassName={compactDrawerClass}
       >
         <DrawerToolbar>
           <DrawerSearchInput>
@@ -1256,8 +1758,9 @@ const DesktopHomeDemo: React.FC = () => {
       <Drawer
         isVisible={qaDrawerOpen}
         onCancel={() => { setQaDrawerOpen(false); setQaSearch(''); setQaSortMenuOpen(false); }}
-        title="Shortcuts"
+        title="Edit shortcuts"
         width={520}
+        overlayClassName={compactDrawerClass}
       >
         <DrawerToolbar>
           <DrawerSearchInput>
@@ -1292,9 +1795,53 @@ const DesktopHomeDemo: React.FC = () => {
             )}
           </SortWrap>
         </DrawerToolbar>
+        <CreateShortcutLink onClick={handleOpenCreateModal}>+ Custom shortcut</CreateShortcutLink>
 
-        {filteredQA.length > 0 ? (
+        {(filteredQA.length > 0 || filteredCustomQA.length > 0) ? (
           <DrawerList>
+            {filteredCustomQA.map(shortcut => {
+              const isFav = qaFavorites.has(shortcut.id);
+              return (
+                <DrawerAppRow key={shortcut.id}>
+                  <DrawerAppIcon style={{ background: (theme as any).colorSurfaceDim }}>
+                    <Icon type={Icon.TYPES.LINK_OUTLET} size={16} color={(theme as any).colorOnSurface} />
+                  </DrawerAppIcon>
+                  <DrawerAppBody>
+                    <DrawerAppName>{shortcut.label}</DrawerAppName>
+                    <DrawerAppDesc>Custom</DrawerAppDesc>
+                  </DrawerAppBody>
+                  <Button.Icon
+                    icon={Icon.TYPES.TRASH_OUTLINE}
+                    aria-label="Delete shortcut"
+                    tip="Delete shortcut"
+                    appearance={Button.APPEARANCES.GHOST}
+                    size={Button.SIZES.XS}
+                    onClick={() => {
+                      setCustomShortcuts(prev => prev.filter(s => s.id !== shortcut.id));
+                      setQaFavorites(prev => {
+                        const next = new Set(prev);
+                        next.delete(shortcut.id);
+                        return next;
+                      });
+                    }}
+                  />
+                  <Button.Icon
+                    icon={isFav ? Icon.TYPES.STAR_FILLED : Icon.TYPES.STAR_OUTLINE}
+                    aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                    tip={isFav ? 'Remove from home' : 'Pin to home'}
+                    appearance={Button.APPEARANCES.GHOST}
+                    size={Button.SIZES.XS}
+                    onClick={() => {
+                      setQaFavorites(prev => {
+                        const next = new Set(prev);
+                        if (next.has(shortcut.id)) next.delete(shortcut.id); else next.add(shortcut.id);
+                        return next;
+                      });
+                    }}
+                  />
+                </DrawerAppRow>
+              );
+            })}
             {filteredQA.map(action => {
               const isFav = qaFavorites.has(action.id);
               return (
@@ -1325,9 +1872,59 @@ const DesktopHomeDemo: React.FC = () => {
             })}
           </DrawerList>
         ) : (
-          <DrawerEmpty>No actions match "{qaSearch}"</DrawerEmpty>
+          <DrawerEmpty>No actions match &ldquo;{qaSearch}&rdquo;</DrawerEmpty>
         )}
       </Drawer>
+
+      <Modal
+        isVisible={showCreateModal}
+        onCancel={handleCloseCreateModal}
+        title="Create a custom shortcut"
+        width={480}
+        shouldCloseOnBackdropClick
+        theme={Modal.THEMES.NO_PADDING}
+      >
+        <CreateModalBody>
+          <CreateModalField>
+            <CreateModalFieldLabel>Rippling URL</CreateModalFieldLabel>
+            <Input.Text
+              value={createUrl}
+              onChange={(e: any) => handleCreateUrlChange(e?.target?.value ?? e)}
+              onBlur={handleCreateUrlBlur}
+              placeholder="https://app.rippling.com/..."
+              size={Input.Text.SIZES.M}
+              autoFocus
+            />
+            {createUrlError && <CreateModalError>{createUrlError}</CreateModalError>}
+          </CreateModalField>
+          <CreateModalField>
+            <CreateModalFieldLabel>Shortcut name</CreateModalFieldLabel>
+            <Input.Text
+              value={createName}
+              onChange={(e: any) => setCreateName(e?.target?.value ?? e)}
+              placeholder="e.g. Run Payroll"
+              size={Input.Text.SIZES.M}
+            />
+          </CreateModalField>
+        </CreateModalBody>
+        <Modal.Footer>
+          <Button
+            appearance={Button.APPEARANCES.OUTLINE}
+            onClick={handleCloseCreateModal}
+            size={Button.SIZES.M}
+          >
+            Cancel
+          </Button>
+          <Button
+            appearance={Button.APPEARANCES.PRIMARY}
+            onClick={handleSaveShortcut}
+            size={Button.SIZES.M}
+            isDisabled={!isCreateFormValid}
+          >
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Drawer
         isVisible={aiModalOpen}
@@ -1372,35 +1969,75 @@ const DesktopHomeDemo: React.FC = () => {
 
       <HomeContent>
         <PromptHeading>What are you working on {getGreeting()}?</PromptHeading>
-        <PromptCard onClick={() => document.getElementById('home-prompt')?.focus()}>
-          <svg width="20" height="20" viewBox="0 0 26 26" fill="none" style={{ flexShrink: 0 }}>
-            <path d="M6.46408 13.0041C10.4723 12.3102 13.7947 9.62068 15.3717 5.99496C14.2054 4.2129 13.3799 2.18447 13.0021 0C11.8563 6.62731 6.62835 11.8544 0 13.0041C6.62835 14.1539 11.8563 19.381 13.0062 26.0083C13.384 23.8238 14.2095 21.7954 15.3758 20.0133C13.7947 16.3876 10.4764 13.6981 6.46819 13.0041H6.46408ZM18.4682 5.46527C17.8029 9.30862 14.7721 12.3389 10.9282 13.0041C14.7721 13.6693 17.7988 16.6997 18.4682 20.543C19.1335 16.6997 22.1643 13.6693 26.0083 13.0041C22.1643 12.3389 19.1376 9.30862 18.4682 5.46527Z" fill={(theme as any).colorPrimary} />
-          </svg>
-          <PromptInput
-            ref={promptRef}
-            id="home-prompt"
-            placeholder="Describe what you want to get done..."
-            rows={2}
-          />
-        </PromptCard>
+        <PromptWrap ref={promptWrapRef}>
+          <PromptCard $dropdownOpen={promptFocused && !promptValue} onClick={() => promptRef.current?.focus()}>
+            <svg width="20" height="20" viewBox="0 0 26 26" fill="none" style={{ flexShrink: 0 }}>
+              <path d="M6.46408 13.0041C10.4723 12.3102 13.7947 9.62068 15.3717 5.99496C14.2054 4.2129 13.3799 2.18447 13.0021 0C11.8563 6.62731 6.62835 11.8544 0 13.0041C6.62835 14.1539 11.8563 19.381 13.0062 26.0083C13.384 23.8238 14.2095 21.7954 15.3758 20.0133C13.7947 16.3876 10.4764 13.6981 6.46819 13.0041H6.46408ZM18.4682 5.46527C17.8029 9.30862 14.7721 12.3389 10.9282 13.0041C14.7721 13.6693 17.7988 16.6997 18.4682 20.543C19.1335 16.6997 22.1643 13.6693 26.0083 13.0041C22.1643 12.3389 19.1376 9.30862 18.4682 5.46527Z" fill={(theme as any).colorPrimary} />
+            </svg>
+            <PromptInput
+              ref={promptRef}
+              id="home-prompt"
+              placeholder="Describe what you want to get done..."
+              rows={1}
+              value={promptValue}
+              onChange={e => setPromptValue(e.target.value)}
+              onFocus={() => setPromptFocused(true)}
+            />
+            <Button.Icon
+              icon={Icon.TYPES.UPLOAD}
+              aria-label="Submit"
+              appearance={Button.APPEARANCES.PRIMARY}
+              size={Button.SIZES.S}
+              onClick={(e: React.MouseEvent) => { e.stopPropagation(); }}
+            />
+          </PromptCard>
+          <PromptDropdown $visible={promptFocused && !promptValue}>
+            <PromptDivider />
+            {suggestions.map(text => (
+              <DropdownRow key={text} onClick={() => handleDropdownItemClick(text)}>
+                <DropdownRowIcon>
+                  ↪
+                </DropdownRowIcon>
+                <DropdownRowText>{text}</DropdownRowText>
+              </DropdownRow>
+            ))}
+          </PromptDropdown>
+        </PromptWrap>
+
+        <ShortcutsStrip>
+        {[
+          ...allQuickActionsRaw.filter(a => qaFavorites.has(a.id)).map(a => ({ id: a.id, label: a.label, icon: QUICK_ACTION_ICONS[a.id] || Icon.TYPES.LINK_OUTLET, url: undefined as string | undefined })),
+          ...customShortcuts.filter(s => qaFavorites.has(s.id)).map(s => ({ id: s.id, label: s.label, icon: Icon.TYPES.LINK_OUTLET, url: s.url })),
+        ].map((item, i) => (
+          <QATile key={item.id} $index={i} href={item.url} target={item.url ? '_blank' : undefined} rel={item.url ? 'noopener noreferrer' : undefined}>
+            <QAIconBox>
+                <Icon
+                  type={item.icon}
+                  size={16}
+                  color={(theme as any).colorOnSurface}
+                />
+              </QAIconBox>
+              <QALabel>{item.label}</QALabel>
+              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
+            </QATile>
+          ))}
+          <span style={{ marginLeft: 8, opacity: 0.5 }}>
+            <Button.Icon
+              icon={Icon.TYPES.EDIT_OUTLINE}
+              aria-label="Edit shortcuts"
+              tip="Edit shortcuts"
+              appearance={Button.APPEARANCES.GHOST}
+              size={Button.SIZES.S}
+              onClick={() => setQaDrawerOpen(true)}
+            />
+          </span>
+        </ShortcutsStrip>
       </HomeContent>
 
-      <ShortcutsStrip>
-        {quickActions.slice(0, 4).map(action => (
-          <QATile key={action.id}>
-            <QAIconBox>
-              <Icon
-                type={QUICK_ACTION_ICONS[action.id] || Icon.TYPES.LINK_OUTLET}
-                size={16}
-                color={(theme as any).colorOnSurface}
-              />
-            </QAIconBox>
-            <QALabel>{action.label}</QALabel>
-            <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
-          </QATile>
-        ))}
-        <QAMore onClick={() => setQaDrawerOpen(true)}>+{allQuickActionsRaw.length - 4} more</QAMore>
-      </ShortcutsStrip>
+      <InlineAd>
+        <InlineAdText>Employee classification change? HR Services automates compliance. </InlineAdText>
+        <InlineAdLink href="#">Learn more →</InlineAdLink>
+      </InlineAd>
 
       <CardGrid>
         {/* Card 1: Recently visited */}
@@ -1529,25 +2166,236 @@ const DesktopHomeDemo: React.FC = () => {
           ))}
         </Card>
       </CardGrid>
-      </PageGradient>
 
-      <Toast $visible={bannerVisible}>
-        <ToastHeader>
-          <ToastTitle style={{ flex: 1, marginBottom: 0 }}>Recent employee classification change?</ToastTitle>
-          <ToastDismiss onClick={() => setBannerVisible(false)} aria-label="Dismiss">
-            <Icon type={Icon.TYPES.CLOSE} size={14} color="currentColor" />
-          </ToastDismiss>
-        </ToastHeader>
-        <ToastDesc>
-          This can trigger new compliance requirements. Let an HR expert show you how HR Services automates filings and trainings.
-        </ToastDesc>
+      <CompanyPulseWrap>
         <Button
-          appearance={Button.APPEARANCES.OUTLINE}
+          variant={Button.VARIANTS.TEXT}
+          appearance={Button.APPEARANCES.GHOST}
+          icon={Icon.TYPES.PEOPLE_HEART_OUTLINE}
           size={Button.SIZES.XS}
+          onClick={() => setPulseDrawerOpen(true)}
         >
-          Book a call
+          Company feed
+          <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
         </Button>
-      </Toast>
+      </CompanyPulseWrap>
+
+      <Drawer
+        isVisible={pulseDrawerOpen}
+        onCancel={() => setPulseDrawerOpen(false)}
+        title="Company feed"
+        width={620}
+        overlayClassName={compactDrawerClass}
+      >
+        <PulseCarousel>
+          <PulseCategoryCard>
+            <PulseCategoryHeader>Out of Office (4)</PulseCategoryHeader>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.1 200)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Alex Kim</PulseCategoryRowName>
+                <PulseCategoryRowMeta>Mon–Wed</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.15 330)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1534751516642-a1af1ef26a56?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Jordan Lee</PulseCategoryRowName>
+                <PulseCategoryRowMeta>All week</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.1 150)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Aman Kumar</PulseCategoryRowName>
+                <PulseCategoryRowMeta>Thu–Fri</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryViewAll>View all</PulseCategoryViewAll>
+          </PulseCategoryCard>
+
+          <PulseCategoryCard>
+            <PulseCategoryHeader>New Hires (3)</PulseCategoryHeader>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(60% 0.12 280)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Sarah Chen</PulseCategoryRowName>
+                <PulseCategoryRowMeta>Engineering · Starts today</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.1 50)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Tom Park</PulseCategoryRowName>
+                <PulseCategoryRowMeta>Sales · Starts today</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.12 200)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Kausik Ghatak</PulseCategoryRowName>
+                <PulseCategoryRowMeta>HR Products · Starts today</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryViewAll>View all</PulseCategoryViewAll>
+          </PulseCategoryCard>
+
+          <PulseCategoryCard>
+            <PulseCategoryHeader>Work Anniversaries (4)</PulseCategoryHeader>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.1 200)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Kyle Boston</PulseCategoryRowName>
+                <PulseCategoryRowMeta>6 years today</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.15 330)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Emer McCormack</PulseCategoryRowName>
+                <PulseCategoryRowMeta>1 year on 03/31</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.1 150)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Karan Miglani</PulseCategoryRowName>
+                <PulseCategoryRowMeta>1 year on 03/31</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryViewAll>View all</PulseCategoryViewAll>
+          </PulseCategoryCard>
+
+          <PulseCategoryCard>
+            <PulseCategoryHeader>Birthdays (3)</PulseCategoryHeader>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.1 50)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Minesh Patel</PulseCategoryRowName>
+                <PulseCategoryRowMeta>Today</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.12 280)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Prashant Saraswat</PulseCategoryRowName>
+                <PulseCategoryRowMeta>Today</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryRow>
+              <PulseAvatar $bg="oklch(55% 0.1 200)" style={{ width: 36, height: 36 }}><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <PulseCategoryRowBody>
+                <PulseCategoryRowName>Lisa Thompson</PulseCategoryRowName>
+                <PulseCategoryRowMeta>Tomorrow</PulseCategoryRowMeta>
+              </PulseCategoryRowBody>
+            </PulseCategoryRow>
+            <PulseCategoryViewAll>View all</PulseCategoryViewAll>
+          </PulseCategoryCard>
+        </PulseCarousel>
+
+        <PulseDivider />
+
+        <PulseSection>
+          <PulsePostBox>
+            <PulseAvatar $bg="oklch(55% 0.1 200)" style={{ width: 28, height: 28 }}>
+              <span style={{ fontSize: 11 }}>{user.name.charAt(0)}</span>
+            </PulseAvatar>
+            <PulsePostPlaceholder>Share a post...</PulsePostPlaceholder>
+          </PulsePostBox>
+
+          <PulsePost>
+            <PulsePostHeader>
+              <PulseAvatar $bg="oklch(55% 0.1 150)" style={{ width: 28, height: 28 }}><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <div>
+                <PulsePostAuthor>Nick Sloggett</PulsePostAuthor>
+                <br /><PulsePostTime>5 days ago</PulsePostTime>
+              </div>
+            </PulsePostHeader>
+            <PulsePostBody>Just wrapped our Q1 team offsite — huge shoutout to everyone who helped organize. Energy was unreal.</PulsePostBody>
+            <PulsePostActions>
+              <PulsePostAction><Icon type={Icon.TYPES.HEART_OUTLINE} size={14} color="currentColor" /> 1 like</PulsePostAction>
+              <PulsePostAction><Icon type={Icon.TYPES.COMMENTS_OUTLINE} size={14} color="currentColor" /> Comment</PulsePostAction>
+            </PulsePostActions>
+          </PulsePost>
+
+          <PulsePost>
+            <PulsePostHeader>
+              <PulseAvatar $bg="oklch(55% 0.12 50)" style={{ width: 28, height: 28 }}><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <div>
+                <PulsePostAuthor>Ramon Garcia</PulsePostAuthor>
+                <br /><PulsePostTime>2 weeks ago</PulsePostTime>
+              </div>
+            </PulsePostHeader>
+            <PulsePostBody>Noticed an uptick in Rippling Athletic Club requests in Strava. A few of us are here. Join up!</PulsePostBody>
+            <PulsePostActions>
+              <PulsePostAction><Icon type={Icon.TYPES.HEART_OUTLINE} size={14} color="currentColor" /> 5 likes</PulsePostAction>
+              <PulsePostAction><Icon type={Icon.TYPES.COMMENTS_OUTLINE} size={14} color="currentColor" /> 2 comments</PulsePostAction>
+            </PulsePostActions>
+          </PulsePost>
+
+          <PulsePost>
+            <PulsePostHeader>
+              <PulseAvatar $bg="oklch(60% 0.12 280)" style={{ width: 28, height: 28 }}><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <div>
+                <PulsePostAuthor>Sarah Chen</PulsePostAuthor>
+                <br /><PulsePostTime>2 weeks ago</PulsePostTime>
+              </div>
+            </PulsePostHeader>
+            <PulsePostBody>First day at Rippling! So excited to join the engineering team. Already blown away by the onboarding experience. If you see me looking lost in the SF office, say hi 👋</PulsePostBody>
+            <PulsePostActions>
+              <PulsePostAction><Icon type={Icon.TYPES.HEART_OUTLINE} size={14} color="currentColor" /> 12 likes</PulsePostAction>
+              <PulsePostAction><Icon type={Icon.TYPES.COMMENTS_OUTLINE} size={14} color="currentColor" /> 8 comments</PulsePostAction>
+            </PulsePostActions>
+          </PulsePost>
+
+          <PulsePost>
+            <PulsePostHeader>
+              <PulseAvatar $bg="oklch(55% 0.1 200)" style={{ width: 28, height: 28 }}><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <div>
+                <PulsePostAuthor>Kyle Boston</PulsePostAuthor>
+                <br /><PulsePostTime>3 weeks ago</PulsePostTime>
+              </div>
+            </PulsePostHeader>
+            <PulsePostBody>Anyone else going to the product management meetup downtown next Thursday? Would be great to see some Rippling faces there.</PulsePostBody>
+            <PulsePostActions>
+              <PulsePostAction><Icon type={Icon.TYPES.HEART_OUTLINE} size={14} color="currentColor" /> 3 likes</PulsePostAction>
+              <PulsePostAction><Icon type={Icon.TYPES.COMMENTS_OUTLINE} size={14} color="currentColor" /> 4 comments</PulsePostAction>
+            </PulsePostActions>
+          </PulsePost>
+
+          <PulsePost>
+            <PulsePostHeader>
+              <PulseAvatar $bg="oklch(55% 0.15 330)" style={{ width: 28, height: 28 }}><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <div>
+                <PulsePostAuthor>Emer McCormack</PulsePostAuthor>
+                <br /><PulsePostTime>1 month ago</PulsePostTime>
+              </div>
+            </PulsePostHeader>
+            <PulsePostBody>Huge thanks to the IT team for the seamless laptop refresh. New M4 MacBook Pro is a beast. Setup took literally 10 minutes with Rippling MDM.</PulsePostBody>
+            <PulsePostActions>
+              <PulsePostAction><Icon type={Icon.TYPES.HEART_OUTLINE} size={14} color="currentColor" /> 18 likes</PulsePostAction>
+              <PulsePostAction><Icon type={Icon.TYPES.COMMENTS_OUTLINE} size={14} color="currentColor" /> 6 comments</PulsePostAction>
+            </PulsePostActions>
+          </PulsePost>
+
+          <PulsePost>
+            <PulsePostHeader>
+              <PulseAvatar $bg="oklch(55% 0.1 50)" style={{ width: 28, height: 28 }}><img src="https://images.unsplash.com/photo-1534751516642-a1af1ef26a56?w=80&h=80&fit=crop&crop=face" alt="" /></PulseAvatar>
+              <div>
+                <PulsePostAuthor>Jordan Lee</PulsePostAuthor>
+                <br /><PulsePostTime>1 month ago</PulsePostTime>
+              </div>
+            </PulsePostHeader>
+            <PulsePostBody>PSA: The new cold brew tap on the 3rd floor is incredible. You're welcome.</PulsePostBody>
+            <PulsePostActions>
+              <PulsePostAction><Icon type={Icon.TYPES.HEART_OUTLINE} size={14} color="currentColor" /> 24 likes</PulsePostAction>
+              <PulsePostAction><Icon type={Icon.TYPES.COMMENTS_OUTLINE} size={14} color="currentColor" /> 11 comments</PulsePostAction>
+            </PulsePostActions>
+          </PulsePost>
+        </PulseSection>
+      </Drawer>
+
+      </PageGradient>
     </AppShellLayout>
   );
 };

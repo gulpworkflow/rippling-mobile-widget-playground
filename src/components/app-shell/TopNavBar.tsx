@@ -6,6 +6,7 @@ import Icon from '@rippling/pebble/Icon';
 import Button from '@rippling/pebble/Button';
 import RipplingLogoBlack from '@/assets/rippling-logo-black.svg';
 import RipplingLogoWhite from '@/assets/rippling-logo-white.svg';
+import RipplingAiSpark from '@/assets/rippling-ai-spark.svg';
 import { SearchBar } from './SearchBar';
 import { ProfileDropdown } from './ProfileDropdown';
 
@@ -21,6 +22,8 @@ interface TopNavBarProps {
   notificationCount?: number;
   onPersonaSelect?: () => void;
   personaLabel?: string;
+  onAiToggle?: () => void;
+  aiPanelOpen?: boolean;
   theme: StyledTheme;
 }
 
@@ -141,6 +144,32 @@ const NotificationBadge = styled.div`
   align-items: center;
   justify-content: center;
   pointer-events: none;
+`;
+
+const AiButton = styled.button<{ $active?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  cursor: pointer;
+  background: ${({ $active, theme }) =>
+    $active ? (theme as StyledTheme).colorPrimaryContainer : 'transparent'};
+  transition: background 0.12s;
+
+  &:hover {
+    background: ${({ $active, theme }) =>
+      $active
+        ? (theme as StyledTheme).colorPrimaryContainer
+        : (theme as StyledTheme).colorSurfaceContainerLow};
+  }
+
+  img {
+    width: 20px;
+    height: 20px;
+  }
 `;
 
 const ProfileDivider = styled.div`

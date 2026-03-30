@@ -34,7 +34,7 @@ const HeaderRight = styled.div`
   gap: 3px;
 `;
 
-const AppsButton = styled.button`
+const ChatButtonWrap = styled.button`
   width: 36px;
   height: 36px;
   display: flex;
@@ -44,7 +44,24 @@ const AppsButton = styled.button`
   border: none;
   cursor: pointer;
   padding: 0;
-  color: #1a1a1a;
+  position: relative;
+`;
+
+const ChatBadge = styled.span`
+  position: absolute;
+  top: 2px;
+  right: 1px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 100px;
+  background: ${({ theme }) => (theme as any).colorError};
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
 `;
 
 const WidgetZones = styled.div`
@@ -90,9 +107,10 @@ const HomeScreen: React.FC<{
       <AppHeader>
         <LogoImage src={darkMode ? RipplingLogoWhite : RipplingLogoBlack} alt="Rippling" />
         <HeaderRight>
-          <AppsButton aria-label="Reorder widgets" onClick={onOpenReorderSheet}>
-            <Icon type={Icon.TYPES.APPS_OUTLINE} size={22} color={sv} />
-          </AppsButton>
+          <ChatButtonWrap aria-label="Chat">
+            <Icon type={Icon.TYPES.COMMENTS_OUTLINE} size={22} color={sv} />
+            <ChatBadge>3</ChatBadge>
+          </ChatButtonWrap>
         </HeaderRight>
       </AppHeader>
       <WidgetZones>
