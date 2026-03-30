@@ -572,11 +572,19 @@ const PersonaHudSelect = styled.select`
 // ── Card Grid ───────────────────────────────────────────────────────────────
 
 const RECENT_ITEMS = [
-  { avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face', name: 'Alex Kim — Profile', time: '1h ago', color: 'oklch(55% 0.1 200)' },
-  { icon: Icon.TYPES.CALENDAR_FILLED, name: 'Time Management', time: '2h ago' },
-  { icon: Icon.TYPES.DOLLAR_CIRCLE_FILLED, name: 'Run Payroll — March', time: '3h ago' },
-  { icon: Icon.TYPES.BAR_CHART_FILLED, name: 'Headcount Report Q1', time: 'Yesterday' },
-  { icon: Icon.TYPES.TIME_FILLED, name: 'Time & Attendance Summary', time: '2 days ago' },
+  { avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face', name: 'Alex Kim — Profile', meta: '1h ago', color: 'oklch(55% 0.1 200)' },
+  { icon: Icon.TYPES.CALENDAR_FILLED, name: 'Time Management', meta: '2h ago' },
+  { icon: Icon.TYPES.DOLLAR_CIRCLE_FILLED, name: 'Run Payroll — March', meta: '3h ago' },
+  { icon: Icon.TYPES.BAR_CHART_FILLED, name: 'Headcount Report Q1', meta: 'Yesterday' },
+  { icon: Icon.TYPES.TIME_FILLED, name: 'Time & Attendance Summary', meta: '2 days ago' },
+];
+
+const MOST_VISITED_ITEMS = [
+  { icon: Icon.TYPES.DOLLAR_CIRCLE_FILLED, name: 'Run Payroll — March' },
+  { icon: Icon.TYPES.TIME_FILLED, name: 'Time & Attendance Summary' },
+  { icon: Icon.TYPES.CALENDAR_FILLED, name: 'Time Management' },
+  { icon: Icon.TYPES.BAR_CHART_FILLED, name: 'Headcount Report Q1' },
+  { avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face', name: 'Alex Kim — Profile', color: 'oklch(55% 0.1 200)' },
 ];
 
 const TASK_ITEMS = [
@@ -1489,6 +1497,7 @@ const DesktopHomeDemo: React.FC = () => {
   const [sortBy, setSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [cardMenu, setCardMenu] = useState<string | null>(null);
+  const [recentCardSort, setRecentCardSort] = useState<'recent' | 'visited'>('recent');
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [qaDrawerOpen, setQaDrawerOpen] = useState(false);
   const [qaSearch, setQaSearch] = useState('');
@@ -2040,11 +2049,11 @@ const DesktopHomeDemo: React.FC = () => {
       </InlineAd>
 
       <CardGrid>
-        {/* Card 1: Recently visited */}
+        {/* Card 1: Recently visited / Most visited */}
         <Card>
           <CardHeader>
             <CardTitleButton>
-              Recently visited
+              {recentCardSort === 'recent' ? 'Recently visited' : 'Most visited'}
               <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
             </CardTitleButton>
             <CardMenuWrap>
@@ -2057,20 +2066,25 @@ const DesktopHomeDemo: React.FC = () => {
               />
               {cardMenu === 'recent' && (
                 <CardMenu>
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Sort by most visited</CardMenuItem>
+                  <CardMenuItem onClick={() => {
+                    setRecentCardSort(recentCardSort === 'recent' ? 'visited' : 'recent');
+                    setCardMenu(null);
+                  }}>
+                    {recentCardSort === 'recent' ? 'Sort by most visited' : 'Sort by recently visited'}
+                  </CardMenuItem>
                   <CardMenuDivider />
                   <CardMenuItem onClick={() => setCardMenu(null)}>Clear history</CardMenuItem>
                 </CardMenu>
               )}
             </CardMenuWrap>
           </CardHeader>
-          {RECENT_ITEMS.map(item => (
+          {(recentCardSort === 'recent' ? RECENT_ITEMS : MOST_VISITED_ITEMS).map(item => (
             <RecentRow key={item.name}>
               <RecentIconCircle $bg={item.avatar ? (item.color ?? 'transparent') : (theme as any).colorPrimary}>
                 {item.avatar ? <img src={item.avatar} alt="" /> : <Icon type={item.icon!} size={13} color="white" />}
               </RecentIconCircle>
               <RecentName>{item.name}</RecentName>
-              <RecentTime>{item.time}</RecentTime>
+              <RecentTime>{item.meta}</RecentTime>
             </RecentRow>
           ))}
         </Card>
