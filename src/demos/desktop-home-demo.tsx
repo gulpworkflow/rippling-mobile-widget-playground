@@ -863,23 +863,29 @@ const CreateShortcutLink = styled.button`
 
 const ResourcesFooter = styled.div`
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 80px auto 0;
   padding: ${({ theme }) => (theme as StyledTheme).space600} 0 ${({ theme }) => (theme as StyledTheme).space800};
-`;
-
-const ResourcesLabel = styled.div`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  text-transform: uppercase;
-  letter-spacing: 1.1px;
-  margin-bottom: ${({ theme }) => (theme as StyledTheme).space300};
-`;
-
-const ResourcesRow = styled.div`
+  border-top: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space600};
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+`;
+
+const ResourcesLabel = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  font-weight: 600;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  white-space: nowrap;
+  padding-right: ${({ theme }) => (theme as StyledTheme).space200};
+`;
+
+const ResourcesDivider = styled.div`
+  width: 1px;
+  height: 20px;
+  background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  margin: 0 ${({ theme }) => (theme as StyledTheme).space300};
+  flex-shrink: 0;
 `;
 
 const ResourceLink = styled.a`
@@ -890,15 +896,8 @@ const ResourceLink = styled.a`
   transition: color 0.1s;
   white-space: nowrap;
 
-  &::after {
-    content: ' \u2197';
-    font-size: 10px;
-    color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-    opacity: 0.6;
-  }
-
   &:hover {
-    color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   }
 `;
 
@@ -2286,11 +2285,12 @@ const DesktopHomeDemo: React.FC = () => {
 
       <ResourcesFooter>
         <ResourcesLabel>Company resources</ResourcesLabel>
-        <ResourcesRow>
-          <ResourceLink onClick={() => setPulseDrawerOpen(true)} style={{ cursor: 'pointer' }}>Company Feed</ResourceLink>
-          <ResourceLink href="#">Employee Handbook</ResourceLink>
-          <ResourceLink href="#">Help Desk</ResourceLink>
-        </ResourcesRow>
+        <ResourcesDivider />
+        <ResourceLink onClick={() => setPulseDrawerOpen(true)} style={{ cursor: 'pointer' }}>Company Feed</ResourceLink>
+        <ResourcesDivider />
+        <ResourceLink href="#">Employee Handbook</ResourceLink>
+        <ResourcesDivider />
+        <ResourceLink href="#">Help Desk</ResourceLink>
       </ResourcesFooter>
 
       <Drawer

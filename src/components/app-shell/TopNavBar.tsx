@@ -100,6 +100,8 @@ const SearchCenter = styled.div`
   flex: 1;
   display: flex;
   justify-content: center;
+  position: relative;
+  left: 60px;
 `;
 
 const ActionsContainer = styled.div`
