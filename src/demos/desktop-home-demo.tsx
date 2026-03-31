@@ -1115,7 +1115,8 @@ const PromptHeading = styled.h1`
   ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   text-align: center;
-  margin: ${({ theme }) => (theme as StyledTheme).space2400} 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
+  margin: 70px 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
+  opacity: 0;
 `;
 
 const PromptCard = styled.div<{ $dropdownOpen?: boolean }>`
