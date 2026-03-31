@@ -1005,30 +1005,30 @@ interface AnalyticsItem {
 
 const ANALYTICS_ITEMS: AnalyticsItem[] = [
   {
-    icon: Icon.TYPES.PEO_OUTLINE,
+    icon: Icon.TYPES.DASHBOARD,
     title: 'Headcount',
-    insight: 'Last edited 2 days ago',
+    insight: '12 minutes ago',
     points: [8, 9, 10, 10, 11, 12, 13, 14, 15, 17],
     strokeColor: 'primary',
   },
   {
-    icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
+    icon: Icon.TYPES.COLUMN_BAR_CHART_OUTLINE,
     title: 'Payroll cost',
-    insight: 'Last edited 5 days ago',
+    insight: '45 minutes ago',
     points: [11, 12, 11, 12, 13, 12, 12, 11, 12, 12],
     strokeColor: 'primary',
   },
   {
-    icon: Icon.TYPES.TIME_OUTLINE,
+    icon: Icon.TYPES.DASHBOARD,
     title: 'Initiatives Tracker',
-    insight: 'Last edited 1 week ago',
+    insight: '5 days ago',
     points: [3, 4, 4, 5, 6, 8, 10, 13, 15, 18],
     strokeColor: 'error',
   },
   {
-    icon: Icon.TYPES.BAR_CHART_OUTLINE,
+    icon: Icon.TYPES.COLUMN_BAR_CHART_OUTLINE,
     title: 'Attendance Data',
-    insight: 'Last edited 2 weeks ago',
+    insight: 'Yesterday',
     points: [16, 15, 14, 14, 12, 11, 10, 9, 8, 7],
     strokeColor: 'success',
   },
