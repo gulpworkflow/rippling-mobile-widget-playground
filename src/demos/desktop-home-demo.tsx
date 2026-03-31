@@ -9,6 +9,7 @@ import Button from '@rippling/pebble/Button';
 import Drawer from '@rippling/pebble/Drawer';
 import Modal from '@rippling/pebble/Modal';
 import Input from '@rippling/pebble/Inputs';
+import Tip from '@rippling/pebble/Tip';
 
 import Atoms from '@rippling/pebble/Atoms';
 import { AppShellLayout, NavSectionData } from '@/components/app-shell';
@@ -75,12 +76,12 @@ const SSOStrip = styled.div`
   top: 0;
   left: 0;
   right: 0;
-  height: 48px;
+  height: ${({ theme }) => (theme as StyledTheme).space1200};
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
-  padding: 0 24px;
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space600};
   border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   background: transparent;
   z-index: 1;
@@ -91,14 +92,14 @@ const SSOLabel = styled.span`
   font-weight: 600;
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   white-space: nowrap;
-  padding-right: 8px;
+  padding-right: ${({ theme }) => (theme as StyledTheme).space200};
 `;
 
 const SSODivider = styled.div`
   width: 1px;
   height: 20px;
   background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  margin: 0 12px;
+  margin: 0 ${({ theme }) => (theme as StyledTheme).space300};
   flex-shrink: 0;
 `;
 
@@ -115,9 +116,9 @@ const SSOItemWrap = styled.div`
 const SSOItem = styled.a`
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 12px;
-  border-radius: 7px;
+  gap: ${({ theme }) => (theme as StyledTheme).space175};
+  padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space300};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   cursor: pointer;
@@ -133,9 +134,9 @@ const SSOItem = styled.a`
 
 const SSOHoverCard = styled.div`
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + ${({ theme }) => (theme as StyledTheme).space200});
   left: 50%;
-  transform: translateX(-50%) translateY(4px);
+  transform: translateX(-50%) translateY(${({ theme }) => (theme as StyledTheme).space100});
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
@@ -191,7 +192,7 @@ const SSOHoverDesc = styled.div`
 const SSOIcon = styled.span`
   width: 24px;
   height: 24px;
-  border-radius: 6px;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerMd};
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   display: grid;
@@ -208,9 +209,9 @@ const SSOIcon = styled.span`
 const SSOMoreWrap = styled.button`
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 7px;
+  gap: ${({ theme }) => (theme as StyledTheme).space150};
+  padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space300};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   font-size: 13px;
   font-weight: 500;
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
@@ -282,13 +283,13 @@ const SortWrap = styled.div`
 
 const SortMenu = styled.div`
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + ${({ theme }) => (theme as StyledTheme).space100});
   right: 0;
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  padding: 4px 0;
+  padding: ${({ theme }) => (theme as StyledTheme).space100} 0;
   min-width: 160px;
   z-index: 10;
 `;
@@ -298,13 +299,13 @@ const SortMenuLabel = styled.div`
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 8px 14px 4px;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space350} ${({ theme }) => (theme as StyledTheme).space100};
 `;
 
 const SortMenuItem = styled.button<{ $active?: boolean }>`
   display: block;
   width: 100%;
-  padding: 8px 14px;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space350};
   border: none;
   background: ${({ $active, theme }) => $active ? (theme as StyledTheme).colorSurfaceContainerLow : 'none'};
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
@@ -327,8 +328,9 @@ const DrawerAppRow = styled.a`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space300};
-  padding: 10px ${({ theme }) => (theme as StyledTheme).space300};
+  padding: ${({ theme }) => (theme as StyledTheme).space250} ${({ theme }) => (theme as StyledTheme).space300};
   margin: 0 -${({ theme }) => (theme as StyledTheme).space300};
+
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   cursor: pointer;
   text-decoration: none;
@@ -425,11 +427,11 @@ const ShortcutsStrip = styled.div`
   align-items: center;
   justify-content: flex-start;
   flex-wrap: wrap;
-  row-gap: 8px;
+  row-gap: ${({ theme }) => (theme as StyledTheme).space200};
   width: 100%;
   max-width: 830px;
-  margin: 20px 0 0;
-  margin-left: -8px;
+  margin: ${({ theme }) => (theme as StyledTheme).space500} 0 0;
+  margin-left: -${({ theme }) => (theme as StyledTheme).space200};
   padding: 0 0 ${({ theme }) => (theme as StyledTheme).space800} 0;
 `;
 
@@ -447,9 +449,9 @@ const chipFadeIn = keyframes`
 const QATile = styled.a<{ $index?: number }>`
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 12px 6px 6px;
-  margin-left: 8px;
+  gap: ${({ theme }) => (theme as StyledTheme).space250};
+  padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space150};
+  margin-left: ${({ theme }) => (theme as StyledTheme).space200};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   cursor: pointer;
@@ -485,8 +487,8 @@ const QALabel = styled.span`
 const QAMore = styled.a`
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 14px;
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space350};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
   cursor: pointer;
   text-decoration: none;
@@ -502,8 +504,8 @@ const QAMore = styled.a`
 
 const PersonaHud = styled.div<{ $visible: boolean }>`
   position: fixed;
-  top: 64px;
-  right: 16px;
+  top: ${({ theme }) => (theme as StyledTheme).space1600};
+  right: ${({ theme }) => (theme as StyledTheme).space400};
   z-index: 200;
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
@@ -559,7 +561,7 @@ const PersonaHudLabel = styled.div`
 
 const PersonaHudSelect = styled.select`
   width: 100%;
-  padding: 8px 10px;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space250};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   background: ${({ theme }) => (theme as StyledTheme).colorSurface};
@@ -597,16 +599,16 @@ const TASK_ITEMS = [
 const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: ${({ theme }) => (theme as StyledTheme).space400};
   width: 100%;
   max-width: 1200px;
-  margin: 32px auto 16px;
+  margin: ${({ theme }) => (theme as StyledTheme).space800} auto ${({ theme }) => (theme as StyledTheme).space400};
 `;
 
 const Card = styled.div`
   background: color-mix(in srgb, ${({ theme }) => (theme as StyledTheme).colorSurfaceDim} 30%, transparent);
-  border-radius: 14px;
-  padding: 20px;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
+  padding: ${({ theme }) => (theme as StyledTheme).space500};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.03);
   min-width: 0;
   display: flex;
@@ -617,13 +619,13 @@ const CardHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space350};
 `;
 
 const CardTitleButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
   background: none;
   border: none;
   padding: 0;
@@ -643,13 +645,13 @@ const CardMenuWrap = styled.div`
 
 const CardMenu = styled.div`
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + ${({ theme }) => (theme as StyledTheme).space100});
   right: 0;
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  padding: 4px 0;
+  padding: ${({ theme }) => (theme as StyledTheme).space100} 0;
   min-width: 180px;
   z-index: 10;
 `;
@@ -657,13 +659,13 @@ const CardMenu = styled.div`
 const CardMenuDivider = styled.div`
   height: 1px;
   background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  margin: 4px 0;
+  margin: ${({ theme }) => (theme as StyledTheme).space100} 0;
 `;
 
 const CardMenuItem = styled.button`
   display: block;
   width: 100%;
-  padding: 8px 14px;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space350};
   border: none;
   background: none;
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
@@ -680,8 +682,8 @@ const CardMenuItem = styled.button`
 const RecentRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 0;
+  gap: ${({ theme }) => (theme as StyledTheme).space250};
+  padding: ${({ theme }) => (theme as StyledTheme).space225} 0;
   border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   cursor: pointer;
 
@@ -726,8 +728,8 @@ const RecentTime = styled.span`
 const TaskRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 0;
+  gap: ${({ theme }) => (theme as StyledTheme).space250};
+  padding: ${({ theme }) => (theme as StyledTheme).space225} 0;
   border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   cursor: pointer;
 
@@ -770,7 +772,7 @@ const TaskTitle = styled.span`
 const TaskMeta = styled.div`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  margin-top: 1px;
+  margin-top: ${({ theme }) => (theme as StyledTheme).space25};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -779,15 +781,15 @@ const TaskMeta = styled.div`
 const AiResolveLine = styled.div`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  margin-top: -8px;
-  margin-bottom: 10px;
+  margin-top: -${({ theme }) => (theme as StyledTheme).space200};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space250};
   cursor: pointer;
 
   span {
     text-decoration: underline;
     text-decoration-style: dotted;
     text-decoration-color: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-    text-underline-offset: 3px;
+    text-underline-offset: ${({ theme }) => (theme as StyledTheme).space75};
   }
 
   &:hover span {
@@ -857,11 +859,54 @@ const CreateShortcutLink = styled.button`
   }
 `;
 
+// ── Company Resources Footer ─────────────────────────────────────────────────
+
+const ResourcesFooter = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: ${({ theme }) => (theme as StyledTheme).space600} 0 ${({ theme }) => (theme as StyledTheme).space800};
+`;
+
+const ResourcesLabel = styled.div`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space300};
+`;
+
+const ResourcesRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space600};
+  flex-wrap: wrap;
+`;
+
+const ResourceLink = styled.a`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.1s;
+  white-space: nowrap;
+
+  &::after {
+    content: ' \u2197';
+    font-size: 10px;
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+    opacity: 0.6;
+  }
+
+  &:hover {
+    color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
+  }
+`;
+
 // ── Inline Ad (AdWords-style) ───────────────────────────────────────────────
 
 const InlineAd = styled.div`
   text-align: center;
-  padding: 16px ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space600};
+  padding: ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space600};
   max-width: 1200px;
   margin: 0 auto;
 `;
@@ -920,7 +965,7 @@ const WhatsNewRow = styled.div`
   display: flex;
   align-items: baseline;
   gap: ${({ theme }) => (theme as StyledTheme).space300};
-  padding: 6px 0;
+  padding: ${({ theme }) => (theme as StyledTheme).space150} 0;
 `;
 
 const WhatsNewDot = styled.span`
@@ -1008,8 +1053,8 @@ function sparklinePaths(points: number[], width: number, height: number): { line
 const AnalyticsRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 0;
+  gap: ${({ theme }) => (theme as StyledTheme).space250};
+  padding: ${({ theme }) => (theme as StyledTheme).space250} 0;
   border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   cursor: pointer;
 
@@ -1061,7 +1106,7 @@ const HomeContent = styled.div`
   flex-direction: column;
   align-items: center;
   padding: ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space800} 0;
-  padding-top: 48px;
+  padding-top: ${({ theme }) => (theme as StyledTheme).space1200};
   position: relative;
   max-width: 960px;
   margin: 0 auto;
@@ -1071,7 +1116,7 @@ const PromptHeading = styled.h1`
   ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   text-align: center;
-  margin: 100px 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
+  margin: ${({ theme }) => (theme as StyledTheme).space2400} 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
 `;
 
 const PromptCard = styled.div<{ $dropdownOpen?: boolean }>`
@@ -1105,7 +1150,7 @@ const PromptInput = styled.textarea`
   resize: none;
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  min-height: 48px;
+  min-height: ${({ theme }) => (theme as StyledTheme).space1200};
   padding: 0;
   margin: 0;
 
@@ -1178,6 +1223,50 @@ const PromptWrap = styled.div`
   box-sizing: border-box;
 `;
 
+const CreditNotice = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 830px;
+  box-sizing: border-box;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+  border-radius: 0 0 ${({ theme }) => (theme as StyledTheme).shapeCornerLg} ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  background: color-mix(in srgb, ${({ theme }) => (theme as StyledTheme).colorSurfaceDim} 30%, transparent);
+  position: relative;
+  z-index: 1;
+`;
+
+const CreditNoticeText = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+const CreditNoticeUnderline = styled.span`
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: ${({ theme }) => (theme as StyledTheme).colorOutline};
+  text-underline-offset: ${({ theme }) => (theme as StyledTheme).space75};
+  cursor: help;
+`;
+
+const CreditNoticeLink = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space50};
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const PromptDropdown = styled.div<{ $visible: boolean }>`
   position: absolute;
   top: 100%;
@@ -1239,8 +1328,8 @@ const DropdownRowText = styled.span`
 
 const CompanyPulseWrap = styled.div`
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: ${({ theme }) => (theme as StyledTheme).space600};
+  right: ${({ theme }) => (theme as StyledTheme).space600};
   z-index: 50;
 `;
 
@@ -1275,7 +1364,7 @@ const PulseRow = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space300};
-  padding: 8px 0;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} 0;
 `;
 
 const PulseAvatar = styled.div<{ $bg?: string }>`
@@ -1330,10 +1419,10 @@ const PulseCarousel = styled.div`
   display: flex;
   gap: ${({ theme }) => (theme as StyledTheme).space300};
   overflow-x: auto;
-  padding-bottom: 4px;
-  margin: 0 -36px ${({ theme }) => (theme as StyledTheme).space600};
-  padding-left: 36px;
-  padding-right: 36px;
+  padding-bottom: ${({ theme }) => (theme as StyledTheme).space100};
+  margin: 0 -${({ theme }) => (theme as StyledTheme).space900} ${({ theme }) => (theme as StyledTheme).space600};
+  padding-left: ${({ theme }) => (theme as StyledTheme).space900};
+  padding-right: ${({ theme }) => (theme as StyledTheme).space900};
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 `;
@@ -1360,7 +1449,7 @@ const PulseCategoryRow = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space300};
-  padding: 6px 0;
+  padding: ${({ theme }) => (theme as StyledTheme).space150} 0;
 `;
 
 const PulseCategoryRowBody = styled.div`
@@ -1385,10 +1474,10 @@ const PulseCategoryViewAll = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
   background: none;
   border: none;
-  padding: 8px 0 0;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} 0 0;
   margin-top: auto;
   cursor: pointer;
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
@@ -1465,7 +1554,7 @@ const PulsePostActions = styled.div`
 const PulsePostAction = styled.button`
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
   background: none;
   border: none;
   padding: 0;
@@ -2012,6 +2101,19 @@ const DesktopHomeDemo: React.FC = () => {
             ))}
           </PromptDropdown>
         </PromptWrap>
+        <CreditNotice>
+          <CreditNoticeText>
+            No credits remaining &middot;{' '}
+            <Tip content="Help center, navigation, and basic product questions still work. Advanced features like deep analysis and workflow creation are paused." placement={Tip.PLACEMENTS.BOTTOM}>
+              <CreditNoticeUnderline>Basic mode</CreditNoticeUnderline>
+            </Tip>
+            {' '}until April 1
+          </CreditNoticeText>
+          <CreditNoticeLink>
+            Request upgrade
+            <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
+          </CreditNoticeLink>
+        </CreditNotice>
 
         <ShortcutsStrip>
         {[
@@ -2043,10 +2145,12 @@ const DesktopHomeDemo: React.FC = () => {
         </ShortcutsStrip>
       </HomeContent>
 
+      {/* InlineAd hidden for now
       <InlineAd>
         <InlineAdText>Employee classification change? HR Services automates compliance. </InlineAdText>
         <InlineAdLink href="#">Learn more →</InlineAdLink>
       </InlineAd>
+      */}
 
       <CardGrid>
         {/* Card 1: Recently visited / Most visited */}
@@ -2084,7 +2188,7 @@ const DesktopHomeDemo: React.FC = () => {
                 {item.avatar ? <img src={item.avatar} alt="" /> : <Icon type={item.icon!} size={13} color="white" />}
               </RecentIconCircle>
               <RecentName>{item.name}</RecentName>
-              <RecentTime>{item.meta}</RecentTime>
+              {'meta' in item && (item as any).meta && <RecentTime>{(item as any).meta}</RecentTime>}
             </RecentRow>
           ))}
         </Card>
@@ -2113,7 +2217,6 @@ const DesktopHomeDemo: React.FC = () => {
               )}
             </CardMenuWrap>
           </CardHeader>
-          <AiResolveLine onClick={() => setAiModalOpen(true)}>&#8618; <span>Resolve with AI</span></AiResolveLine>
           {TASK_ITEMS.map(item => (
             <TaskRow key={item.name}>
               <TaskIconCircle $bg={item.color}>
@@ -2131,7 +2234,7 @@ const DesktopHomeDemo: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitleButton>
-              Dashboards
+              Analytics
               <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
             </CardTitleButton>
             <CardMenuWrap>
@@ -2144,7 +2247,7 @@ const DesktopHomeDemo: React.FC = () => {
               />
               {cardMenu === 'analytics' && (
                 <CardMenu>
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Customize dashboards</CardMenuItem>
+                  <CardMenuItem onClick={() => setCardMenu(null)}>Customize analytics</CardMenuItem>
                   <CardMenuDivider />
                   <CardMenuItem onClick={() => setCardMenu(null)}>Hide card</CardMenuItem>
                 </CardMenu>
@@ -2181,18 +2284,14 @@ const DesktopHomeDemo: React.FC = () => {
         </Card>
       </CardGrid>
 
-      <CompanyPulseWrap>
-        <Button
-          variant={Button.VARIANTS.TEXT}
-          appearance={Button.APPEARANCES.GHOST}
-          icon={Icon.TYPES.PEOPLE_HEART_OUTLINE}
-          size={Button.SIZES.XS}
-          onClick={() => setPulseDrawerOpen(true)}
-        >
-          Company feed
-          <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
-        </Button>
-      </CompanyPulseWrap>
+      <ResourcesFooter>
+        <ResourcesLabel>Company resources</ResourcesLabel>
+        <ResourcesRow>
+          <ResourceLink onClick={() => setPulseDrawerOpen(true)} style={{ cursor: 'pointer' }}>Company Feed</ResourceLink>
+          <ResourceLink href="#">Employee Handbook</ResourceLink>
+          <ResourceLink href="#">Help Desk</ResourceLink>
+        </ResourcesRow>
+      </ResourcesFooter>
 
       <Drawer
         isVisible={pulseDrawerOpen}
