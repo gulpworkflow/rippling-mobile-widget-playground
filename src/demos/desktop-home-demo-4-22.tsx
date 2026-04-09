@@ -2735,7 +2735,12 @@ const DesktopHomeDemo422: React.FC = () => {
               {f.label}
             </SplitButton>
           ))}
-          <DashboardAddFilterButton>+ Filter</DashboardAddFilterButton>
+          <Button
+            appearance={Button.APPEARANCES.GHOST}
+            size={Button.SIZES.XS}
+          >
+            + Filter
+          </Button>
         </DashboardFiltersRow>
 
         <DashboardGrid>
