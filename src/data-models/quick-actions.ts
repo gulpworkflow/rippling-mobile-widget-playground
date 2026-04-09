@@ -53,7 +53,9 @@ export type QuickActionId =
   | 'view_cards'
   | 'view_notifications'
   | 'view_profile'
-  | 'book_travel';
+  | 'book_travel'
+  | 'run_payroll'
+  | 'finance_overview';
 
 export type SkuId =
   | 'time_off'
@@ -247,7 +249,7 @@ export const ACTION_REGISTRY: Record<QuickActionId, QuickAction> = {
   },
   view_pto_approvals: {
     id: 'view_pto_approvals',
-    label: 'PTO Approvals',
+    label: 'PTO approvals',
     route: 'pto/Approvals',
     product: 'Time',
     requiredSkus: ['time_off'],
@@ -311,7 +313,7 @@ export const ACTION_REGISTRY: Record<QuickActionId, QuickAction> = {
   },
   view_expense_approvals: {
     id: 'view_expense_approvals',
-    label: 'Expense Approvals',
+    label: 'Expense approvals',
     route: 'spend_management/ApprovalsList',
     product: 'Spend',
     requiredSkus: ['spend_management'],
@@ -344,6 +346,22 @@ export const ACTION_REGISTRY: Record<QuickActionId, QuickAction> = {
     route: 'travel/Book',
     product: 'Travel',
     requiredSkus: ['travel'],
+  },
+  run_payroll: {
+    id: 'run_payroll',
+    label: 'Payroll run',
+    route: 'payroll/RunPayroll',
+    product: 'Payroll',
+    requiredSkus: ['my_pay'],
+    managerOnly: true,
+  },
+  finance_overview: {
+    id: 'finance_overview',
+    label: 'Scheduled bills',
+    route: 'finance/Overview',
+    product: 'Finance',
+    requiredSkus: ['spend_management'],
+    managerOnly: true,
   },
 };
 
@@ -427,10 +445,10 @@ export const DEFAULT_PERSONA_RANKINGS: Record<PersonaId, QuickActionId[]> = {
     'people_directory',
   ],
   executive_owner: [
+    'run_payroll',
+    'finance_overview',
     'view_expense_approvals',
-    'review_timesheets',
     'view_pto_approvals',
-    'people_directory',
   ],
   contractor: [
     'submit_expense',

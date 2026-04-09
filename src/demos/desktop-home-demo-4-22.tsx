@@ -411,6 +411,8 @@ const QUICK_ACTION_ICONS: Record<string, string> = {
   view_shift_summary: Icon.TYPES.BAR_CHART_OUTLINE,
   time_entry_change_request: Icon.TYPES.TIME_OUTLINE,
   view_pto_approvals: Icon.TYPES.CHECKBOX_WITHCHECK_OUTLINE,
+  run_payroll: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
+  finance_overview: Icon.TYPES.BAR_CHART_OUTLINE,
   view_company_holidays: Icon.TYPES.CALENDAR_OUTLINE,
   view_team_ooo: Icon.TYPES.PEO_OUTLINE,
   view_pay: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
@@ -424,6 +426,13 @@ const QUICK_ACTION_ICONS: Record<string, string> = {
   view_notifications: Icon.TYPES.NOTIFICATION_OUTLINE,
   view_profile: Icon.TYPES.MY_ACCOUNT_SETTINGS_OUTLINE,
   book_travel: Icon.TYPES.LOCATION_OUTLINE,
+};
+
+const QUICK_ACTION_META: Record<string, string> = {
+  view_expense_approvals: '3 pending',
+  view_pto_approvals: '2 requests',
+  run_payroll: '4/1–4/15',
+  finance_overview: '5 total',
 };
 
 const ShortcutsSection = styled.div`
@@ -544,14 +553,27 @@ const QAIconBox = styled.div`
   flex-shrink: 0;
 `;
 
+const QALabelWrap = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+`;
+
 const QALabel = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
-  min-width: 0;
+`;
+
+const QAMeta = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 
@@ -1227,8 +1249,7 @@ const AnalyticsSection = styled.div`
   width: 100%;
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  border-bottom: none;
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner3xl} ${({ theme }) => (theme as StyledTheme).shapeCorner3xl} 0 0;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner3xl};
 `;
 
 const AnalyticsTitleAndTabs = styled.div`
@@ -2096,7 +2117,7 @@ const DesktopHomeDemo422: React.FC = () => {
   const [qaSearch, setQaSearch] = useState('');
   const [qaSortBy, setQaSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
   const [qaSortMenuOpen, setQaSortMenuOpen] = useState(false);
-  const [userIdx, setUserIdx] = useState(2);
+  const [userIdx, setUserIdx] = useState(5);
   const [personaHudOpen, setPersonaHudOpen] = useState(false);
 
   const [customShortcuts, setCustomShortcuts] = useState<CustomShortcut[]>([]);
@@ -2643,7 +2664,10 @@ const DesktopHomeDemo422: React.FC = () => {
                     color={(theme as any).colorOnSurface}
                   />
                 </QAIconBox>
+                <QALabelWrap>
                 <QALabel>{item.label}</QALabel>
+                {QUICK_ACTION_META[item.id] && <QAMeta>{QUICK_ACTION_META[item.id]}</QAMeta>}
+              </QALabelWrap>
                 <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
               </QATile>
             ))}
