@@ -10,11 +10,14 @@ import Drawer from '@rippling/pebble/Drawer';
 import Modal from '@rippling/pebble/Modal';
 import Input from '@rippling/pebble/Inputs';
 import Tip from '@rippling/pebble/Tip';
+import Tabs from '@rippling/pebble/Tabs';
 import SplitButton from '@rippling/pebble/Button/SplitButton/SplitButton';
 
 import Atoms from '@rippling/pebble/Atoms';
 import { AppShellLayout, NavSectionData } from '@/components/app-shell';
 import RipplingAiSpark from '@/assets/rippling-ai-spark.svg';
+import ShiftClockContent from '@/widgets/ShiftClockWidget';
+import EarningsSummaryContent from '@/widgets/EarningsWidget';
 import { SAMPLE_USERS } from '@/data-models/sample-users';
 import { PERSONA_OPTIONS } from '@/data-models/personas';
 import { getQuickActions } from '@/data-models/quick-actions';
@@ -423,17 +426,80 @@ const QUICK_ACTION_ICONS: Record<string, string> = {
   book_travel: Icon.TYPES.LOCATION_OUTLINE,
 };
 
-const ShortcutsStrip = styled.div`
+const ShortcutsSection = styled.div`
+  width: 100%;
+  max-width: 960px;
+  margin: ${({ theme }) => (theme as StyledTheme).space1000} 0 0;
+  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space800} 0;
+`;
+
+const ShortcutsHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  row-gap: ${({ theme }) => (theme as StyledTheme).space200};
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+  position: relative;
+`;
+
+const ShortcutsLabel = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  white-space: nowrap;
+`;
+
+const ShortcutsDropdownToggle = styled.button`
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: ${({ theme }) => (theme as StyledTheme).space100};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerSm};
+  cursor: pointer;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  transition: background 0.1s, color 0.1s;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  }
+`;
+
+const ShortcutsDropdownMenu = styled.div`
+  position: absolute;
+  top: calc(100% + ${({ theme }) => (theme as StyledTheme).space100});
+  left: 0;
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: ${({ theme }) => (theme as StyledTheme).space100} 0;
+  min-width: 180px;
+  z-index: 10;
+`;
+
+const ShortcutsDropdownItem = styled.button<{ $active?: boolean }>`
+  display: block;
   width: 100%;
-  max-width: 830px;
-  margin: ${({ theme }) => (theme as StyledTheme).space500} 0 0;
-  margin-left: -${({ theme }) => (theme as StyledTheme).space200};
-  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space800} 0;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space350};
+  border: none;
+  background: ${({ $active, theme }) => $active ? (theme as StyledTheme).colorSurfaceContainerLow : 'none'};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  font-weight: ${({ $active }) => $active ? 600 : 400};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+  }
+`;
+
+const ShortcutsStrip = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+  width: 100%;
+  margin: 8px 0 0;
+  position: relative;
 `;
 
 const chipFadeIn = keyframes`
@@ -452,7 +518,6 @@ const QATile = styled.a<{ $index?: number }>`
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space250};
   padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space150};
-  margin-left: ${({ theme }) => (theme as StyledTheme).space200};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   cursor: pointer;
@@ -462,6 +527,7 @@ const QATile = styled.a<{ $index?: number }>`
   opacity: 0;
   animation: ${chipFadeIn} 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: ${({ $index = 0 }) => 200 + $index * 50}ms;
+  min-width: 0;
 
   &:hover {
     background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
@@ -469,8 +535,8 @@ const QATile = styled.a<{ $index?: number }>`
 `;
 
 const QAIconBox = styled.div`
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceDim};
   display: grid;
@@ -482,8 +548,25 @@ const QALabel = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 `;
 
+
+const ShortcutsEditButton = styled.span`
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
 
 const QAMore = styled.a`
   display: flex;
@@ -599,19 +682,32 @@ const TASK_ITEMS = [
 
 const CardGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: ${({ theme }) => (theme as StyledTheme).space400};
   width: 100%;
-  max-width: 1200px;
+  max-width: 960px;
   margin: ${({ theme }) => (theme as StyledTheme).space800} auto ${({ theme }) => (theme as StyledTheme).space400};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space800};
+  box-sizing: border-box;
+`;
+
+const EditWidgetsRow = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 960px;
+  margin: ${({ theme }) => (theme as StyledTheme).space800} auto ${({ theme }) => (theme as StyledTheme).space800};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space800};
+  box-sizing: border-box;
 `;
 
 const Card = styled.div`
-  background: color-mix(in srgb, ${({ theme }) => (theme as StyledTheme).colorSurfaceDim} 30%, transparent);
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
   padding: ${({ theme }) => (theme as StyledTheme).space500};
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.03);
   min-width: 0;
+  min-height: 270px;
   display: flex;
   flex-direction: column;
 `;
@@ -623,6 +719,13 @@ const CardHeader = styled.div`
   margin-bottom: ${({ theme }) => (theme as StyledTheme).space350};
 `;
 
+const CardActionFooter = styled.div`
+  display: flex;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  margin-top: auto;
+  padding-top: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
 const CardTitleButton = styled.button`
   display: flex;
   align-items: center;
@@ -631,12 +734,11 @@ const CardTitleButton = styled.button`
   border: none;
   padding: 0;
   cursor: pointer;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleSmall};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  letter-spacing: -0.2px;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
 
   &:hover {
-    color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   }
 `;
 
@@ -694,7 +796,7 @@ const RecentRow = styled.div`
 const RecentIconCircle = styled.div<{ $bg: string }>`
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   background: ${({ $bg }) => $bg};
   display: grid;
   place-items: center;
@@ -712,7 +814,7 @@ const RecentIconCircle = styled.div<{ $bg: string }>`
 `;
 
 const RecentName = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   flex: 1;
   overflow: hidden;
@@ -763,7 +865,7 @@ const TaskBody = styled.div`
 `;
 
 const TaskTitle = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   overflow: hidden;
   text-overflow: ellipsis;
@@ -863,14 +965,15 @@ const CreateShortcutLink = styled.button`
 // ── Company Resources Footer ─────────────────────────────────────────────────
 
 const ResourcesFooter = styled.div`
-  max-width: 1200px;
+  max-width: 960px;
   margin: 80px auto 0;
-  padding: ${({ theme }) => (theme as StyledTheme).space600} 0 ${({ theme }) => (theme as StyledTheme).space800};
+  padding: ${({ theme }) => (theme as StyledTheme).space600} ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space800};
   border-top: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
+  box-sizing: border-box;
 `;
 
 const ResourcesLabel = styled.span`
@@ -906,9 +1009,10 @@ const ResourceLink = styled.a`
 
 const InlineAd = styled.div`
   text-align: center;
-  padding: ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space600};
-  max-width: 1200px;
+  padding: ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space600};
+  max-width: 960px;
   margin: 0 auto;
+  box-sizing: border-box;
 `;
 
 const InlineAdText = styled.span`
@@ -932,9 +1036,10 @@ const InlineAdLink = styled.a`
 // ── What's New ──────────────────────────────────────────────────────────────
 
 const WhatsNewSection = styled.div`
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 0 ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space1200};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space1200};
+  box-sizing: border-box;
 `;
 
 const WhatsNewHeader = styled.div`
@@ -1035,212 +1140,6 @@ const ANALYTICS_ITEMS: AnalyticsItem[] = [
   },
 ];
 
-// ── Dashboards Section ─────────────────────────────────────────────────────
-
-interface DashboardFilter {
-  id: string;
-  label: string;
-}
-
-interface DashboardTab {
-  id: string;
-  name: string;
-  lastEdited: string;
-  filters: DashboardFilter[];
-}
-
-const DASHBOARD_TABS: DashboardTab[] = [
-  {
-    id: 'headcount',
-    name: 'Q1 Headcount by Department',
-    lastEdited: 'Just now',
-    filters: [
-      { id: 'dept', label: 'Department: Sales' },
-      { id: 'region', label: 'Region equals West' },
-      { id: 'start', label: 'Start date' },
-      { id: 'owner', label: 'Owner' },
-    ],
-  },
-  {
-    id: 'revenue',
-    name: 'Revenue Overview',
-    lastEdited: '2h ago',
-    filters: [
-      { id: 'period', label: 'Period: Q1 2026' },
-      { id: 'segment', label: 'Segment: Enterprise' },
-    ],
-  },
-  {
-    id: 'hiring',
-    name: 'Hiring Funnel',
-    lastEdited: 'Yesterday',
-    filters: [
-      { id: 'dept', label: 'Department: Engineering' },
-      { id: 'stage', label: 'Stage: All' },
-      { id: 'source', label: 'Source' },
-    ],
-  },
-];
-
-const DashboardsWrap = styled.div`
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto ${({ theme }) => (theme as StyledTheme).space800};
-`;
-
-const DashboardTabBar = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0;
-  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  padding: 0;
-`;
-
-const DashboardTabItem = styled.button<{ $active?: boolean }>`
-  position: relative;
-  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
-  border: none;
-  background: ${({ $active, theme }) =>
-    $active ? (theme as StyledTheme).colorSurfaceContainerLow : 'none'};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg} ${({ theme }) => (theme as StyledTheme).shapeCornerLg} 0 0;
-  cursor: pointer;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  font-weight: ${({ $active }) => ($active ? 600 : 400)};
-  color: ${({ $active, theme }) =>
-    $active
-      ? (theme as StyledTheme).colorOnSurface
-      : (theme as StyledTheme).colorOnSurfaceVariant};
-  white-space: nowrap;
-  transition: background 0.1s, color 0.1s;
-
-  &:hover {
-    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  }
-
-  ${({ $active, theme }) =>
-    $active
-      ? `&::after {
-          content: '';
-          position: absolute;
-          bottom: -1px;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: ${(theme as StyledTheme).colorOnSurface};
-        }`
-      : ''}
-`;
-
-const DashboardTabAdd = styled.button`
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
-  transition: background 0.1s;
-
-  &:hover {
-    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-  }
-`;
-
-const DashboardTabSpacer = styled.div`
-  flex: 1;
-`;
-
-const DashboardTabActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space200};
-`;
-
-const DashboardAllButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space100};
-  padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space350};
-  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
-  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
-  cursor: pointer;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  white-space: nowrap;
-  transition: background 0.1s;
-
-  &:hover {
-    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-  }
-`;
-
-const DashboardHeaderRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => (theme as StyledTheme).space400} 0 ${({ theme }) => (theme as StyledTheme).space200};
-`;
-
-const DashboardTitleText = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleMedium};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-`;
-
-const DashboardHeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space200};
-`;
-
-const DashboardTimestamp = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  white-space: nowrap;
-`;
-
-const DashboardFiltersRow = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => (theme as StyledTheme).space200};
-  padding-bottom: ${({ theme }) => (theme as StyledTheme).space400};
-`;
-
-const DashboardAddFilter = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space100};
-  padding: ${({ theme }) => (theme as StyledTheme).space100} ${({ theme }) => (theme as StyledTheme).space300};
-  border: 1px dashed ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
-  background: none;
-  cursor: pointer;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  transition: background 0.1s, color 0.1s;
-
-  &:hover {
-    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-    border-style: solid;
-  }
-`;
-
-const DashboardPlaceholder = styled.div`
-  width: 100%;
-  height: 320px;
-  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
-  display: grid;
-  place-items: center;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-`;
-
 function sparklinePaths(points: number[], width: number, height: number): { line: string; area: string } {
   const max = Math.max(...points);
   const min = Math.min(...points);
@@ -1283,7 +1182,7 @@ const AnalyticsBody = styled.div`
 `;
 
 const AnalyticsTitle = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   display: block;
 `;
@@ -1310,19 +1209,418 @@ const PageGradient = styled.div`
 const HomeContent = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space800} 0;
-  padding-top: ${({ theme }) => (theme as StyledTheme).space1200};
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space800};
   position: relative;
   max-width: 960px;
   margin: 0 auto;
+  box-sizing: border-box;
+  min-height: 60vh;
 `;
+
+const AnalyticsSection = styled.div`
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 6px;
+  box-sizing: border-box;
+  width: 100%;
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-bottom: none;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner3xl} ${({ theme }) => (theme as StyledTheme).shapeCorner3xl} 0 0;
+`;
+
+const AnalyticsTitleAndTabs = styled.div`
+  background: color-mix(in srgb, #e1d8d2 30%, transparent);
+  padding: 32px;
+  padding-bottom: 12px;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+
+  [data-active="true"] {
+    background: #e1d8d2 !important;
+    border-color: #e1d8d2 !important;
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface} !important;
+  }
+`;
+
+const DashboardContentWrap = styled.div`
+  padding: 32px;
+`;
+
+const AnalyticsSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
+const AnalyticsSectionTitle = styled.h2`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin: 0;
+`;
+
+const AnalyticsSectionActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+`;
+
+const AnalyticsSwitcher = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const AnalyticsTabRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
+const AnalyticsTabActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+`;
+
+const AnalyticsTab = styled.button<{ $active?: boolean }>`
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
+  border: 1px solid ${({ $active, theme }) =>
+    $active ? (theme as StyledTheme).colorOnSurface : (theme as StyledTheme).colorOutlineVariant};
+  background: ${({ $active, theme }) =>
+    $active ? (theme as StyledTheme).colorOnSurface : 'transparent'};
+  color: ${({ $active, theme }) =>
+    $active ? (theme as StyledTheme).colorSurface : (theme as StyledTheme).colorOnSurface};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  cursor: pointer;
+  transition: all 0.12s;
+
+  &:hover {
+    border-color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  }
+`;
+
+const AnalyticsAddTab = styled.button`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  transition: all 0.12s;
+
+  &:hover {
+    border-color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  }
+`;
+
+const DashboardAllButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+  padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space350};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  cursor: pointer;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  white-space: nowrap;
+  transition: background 0.1s;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+  }
+`;
+
+const DashboardHeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space100};
+`;
+
+const DashboardHeaderTitle = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleMedium};
+  font-size: 18px;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space300};
+`;
+
+const DashboardHeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+`;
+
+const DashboardHeaderTimestamp = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  white-space: nowrap;
+`;
+
+const DashboardFiltersRow = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+  padding-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
+const DashboardAddFilterButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+  padding: ${({ theme }) => (theme as StyledTheme).space100} ${({ theme }) => (theme as StyledTheme).space300};
+  height: 32px;
+  border: 1px dashed ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
+  background: none;
+  cursor: pointer;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  transition: background 0.1s, color 0.1s;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+    border-style: solid;
+  }
+`;
+
+const DashboardGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
+const ChartCard = styled.div<{ $span?: number }>`
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
+  background: white;
+  padding: ${({ theme }) => (theme as StyledTheme).space500};
+  grid-column: ${({ $span }) => $span ? `span ${$span}` : 'auto'};
+  display: flex;
+  flex-direction: column;
+`;
+
+const ChartHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
+const ChartTitle = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+`;
+
+const ChartDot = styled.span<{ $color: string }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${({ $color }) => $color};
+`;
+
+const ChartArea = styled.div`
+  flex: 1;
+  min-height: 180px;
+  position: relative;
+`;
+
+const ChartYAxis = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  padding-right: ${({ theme }) => (theme as StyledTheme).space200};
+`;
+
+const ChartXAxis = styled.div`
+  position: absolute;
+  left: 48px;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const ChartBody = styled.div`
+  position: absolute;
+  left: 48px;
+  top: 0;
+  right: 0;
+  bottom: 24px;
+  border-left: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+`;
+
+const ChartGridLine = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  opacity: 0.5;
+`;
+
+const LineChartSvg: React.FC<{ color: string; data: number[] }> = ({ color, data }) => {
+  const w = 100;
+  const h = 100;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const points = data.map((v, i) =>
+    `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h * 0.85 - h * 0.05}`
+  ).join(' ');
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+};
+
+const BarChartSvg: React.FC<{ color: string; data: number[] }> = ({ color, data }) => {
+  const w = 100;
+  const h = 100;
+  const max = Math.max(...data);
+  const barW = w / data.length * 0.7;
+  const gap = w / data.length * 0.3;
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+      {data.map((v, i) => {
+        const barH = (v / max) * h * 0.9;
+        const x = i * (barW + gap) + gap / 2;
+        return <rect key={i} x={x} y={h - barH} width={barW} height={barH} fill={color} opacity={0.7} />;
+      })}
+    </svg>
+  );
+};
+
+const ScatterChartSvg: React.FC<{ color: string; data: [number, number][] }> = ({ color, data }) => {
+  const w = 100;
+  const h = 100;
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+      {data.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={h - y} r="1.2" fill={color} opacity={0.6} />
+      ))}
+    </svg>
+  );
+};
+
+const HEADCOUNT_DATA = [42, 45, 44, 48, 51, 50, 53, 56, 55, 58, 61, 60, 52, 48, 50, 54, 57, 62, 65, 63, 60, 58, 61, 64];
+const REVENUE_DATA = [120, 135, 128, 142, 155, 148, 162, 170, 165, 178, 190, 185, 195, 210, 205, 220, 235, 225, 240, 250, 245, 260, 270, 265];
+const ATTRITION_DATA: [number, number][] = Array.from({ length: 60 }, () => [Math.random() * 95 + 2, Math.random() * 80 + 10]);
+
+interface DashboardFilterDef {
+  id: string;
+  label: string;
+}
+
+const DASHBOARD_TAB_FILTERS: Record<string, { lastEdited: string; filters: DashboardFilterDef[] }> = {
+  0: {
+    lastEdited: 'Just now',
+    filters: [
+      { id: 'dept', label: 'Department: Sales' },
+      { id: 'region', label: 'Region equals West' },
+      { id: 'start', label: 'Start date' },
+      { id: 'owner', label: 'Owner' },
+    ],
+  },
+  1: {
+    lastEdited: '2h ago',
+    filters: [
+      { id: 'period', label: 'Period: Q1 2026' },
+      { id: 'segment', label: 'Segment: Enterprise' },
+    ],
+  },
+  2: {
+    lastEdited: 'Yesterday',
+    filters: [
+      { id: 'dept', label: 'Department: Engineering' },
+      { id: 'stage', label: 'Stage: All' },
+      { id: 'source', label: 'Source' },
+    ],
+  },
+};
+
+const DASHBOARD_TAB_NAMES = ['Q1 Headcount by Department', 'Revenue Overview', 'Sales Pipeline'];
+
+const DashboardTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+`;
+
+const DashboardTh = styled.th`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  text-align: left;
+  padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space400};
+  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  white-space: nowrap;
+`;
+
+const DashboardTd = styled.td`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space400};
+  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  white-space: nowrap;
+`;
+
+const DashboardTdMuted = styled(DashboardTd)`
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const TrendBadge = styled.span<{ $positive?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  color: ${({ $positive, theme }) =>
+    $positive ? (theme as StyledTheme).colorSuccess : (theme as StyledTheme).colorError};
+`;
+
+const DEPT_TABLE_DATA = [
+  { dept: 'Engineering', headcount: 142, newHires: 8, attrition: 3, openRoles: 12, trend: +5.2 },
+  { dept: 'Sales', headcount: 98, newHires: 6, attrition: 4, openRoles: 9, trend: +2.1 },
+  { dept: 'Product', headcount: 45, newHires: 3, attrition: 1, openRoles: 5, trend: +4.5 },
+  { dept: 'Design', headcount: 32, newHires: 2, attrition: 0, openRoles: 3, trend: +6.7 },
+  { dept: 'Customer Success', headcount: 67, newHires: 4, attrition: 2, openRoles: 6, trend: -1.5 },
+  { dept: 'Finance', headcount: 28, newHires: 1, attrition: 1, openRoles: 2, trend: 0 },
+  { dept: 'People Ops', headcount: 18, newHires: 2, attrition: 0, openRoles: 1, trend: +12.5 },
+  { dept: 'Legal', headcount: 12, newHires: 0, attrition: 0, openRoles: 1, trend: 0 },
+];
 
 const PromptHeading = styled.h1`
   ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  text-align: center;
-  margin: ${({ theme }) => (theme as StyledTheme).space2400} 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
+  text-align: left;
+  margin: ${({ theme }) => (theme as StyledTheme).space2400} 0 20px 0;
 `;
 
 const PromptCard = styled.div<{ $dropdownOpen?: boolean }>`
@@ -1342,7 +1640,7 @@ const PromptCard = styled.div<{ $dropdownOpen?: boolean }>`
   ${({ $dropdownOpen }) => $dropdownOpen && 'border-bottom-color: transparent;'}
   padding: ${({ theme }) => (theme as StyledTheme).space400};
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space200};
   cursor: text;
   box-sizing: border-box;
@@ -1356,7 +1654,7 @@ const PromptInput = styled.textarea`
   resize: none;
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  min-height: ${({ theme }) => (theme as StyledTheme).space1200};
+  min-height: 1lh;
   padding: 0;
   margin: 0;
 
@@ -1425,7 +1723,7 @@ const DEFAULT_SUGGESTIONS: string[] = [
 const PromptWrap = styled.div`
   position: relative;
   width: 100%;
-  max-width: 830px;
+  max-width: 960px;
   box-sizing: border-box;
 `;
 
@@ -1434,7 +1732,7 @@ const CreditNotice = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 830px;
+  max-width: 960px;
   box-sizing: border-box;
   padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
   border-radius: 0 0 ${({ theme }) => (theme as StyledTheme).shapeCornerLg} ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
@@ -1784,7 +2082,7 @@ function getGreeting(): string {
 
 // ── Component ───────────────────────────────────────────────────────────────
 
-const DesktopHomeDemo: React.FC = () => {
+const DesktopHomeDemo422: React.FC = () => {
   const { theme } = useTheme();
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -1798,7 +2096,7 @@ const DesktopHomeDemo: React.FC = () => {
   const [qaSearch, setQaSearch] = useState('');
   const [qaSortBy, setQaSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
   const [qaSortMenuOpen, setQaSortMenuOpen] = useState(false);
-  const [userIdx, setUserIdx] = useState(3);
+  const [userIdx, setUserIdx] = useState(2);
   const [personaHudOpen, setPersonaHudOpen] = useState(false);
 
   const [customShortcuts, setCustomShortcuts] = useState<CustomShortcut[]>([]);
@@ -1808,9 +2106,10 @@ const DesktopHomeDemo: React.FC = () => {
   const [createUrlError, setCreateUrlError] = useState('');
   const [createUrlTouched, setCreateUrlTouched] = useState(false);
   const [pulseDrawerOpen, setPulseDrawerOpen] = useState(false);
-  const [activeDashboard, setActiveDashboard] = useState(DASHBOARD_TABS[0].id);
-  const [dashboardFilters, setDashboardFilters] = useState<Record<string, DashboardFilter[]>>(
-    () => Object.fromEntries(DASHBOARD_TABS.map(t => [t.id, [...t.filters]])),
+  const [shortcutsDropdownOpen, setShortcutsDropdownOpen] = useState(false);
+  const [activeAnalyticsTab, setActiveAnalyticsTab] = useState(0);
+  const [analyticsFilters, setAnalyticsFilters] = useState<Record<number, DashboardFilterDef[]>>(
+    () => Object.fromEntries(Object.entries(DASHBOARD_TAB_FILTERS).map(([k, v]) => [Number(k), [...v.filters]])),
   );
 
   const user = SAMPLE_USERS[userIdx];
@@ -2292,7 +2591,7 @@ const DesktopHomeDemo: React.FC = () => {
               onFocus={() => setPromptFocused(true)}
             />
             <Button.Icon
-              icon={Icon.TYPES.UPLOAD}
+              icon={Icon.TYPES.ARROW_UP}
               aria-label="Submit"
               appearance={Button.APPEARANCES.PRIMARY}
               size={Button.SIZES.S}
@@ -2311,284 +2610,241 @@ const DesktopHomeDemo: React.FC = () => {
             ))}
           </PromptDropdown>
         </PromptWrap>
-        <CreditNotice>
-          <CreditNoticeText>
-            No credits remaining &middot;{' '}
-            <Tip content="Help center, navigation, and basic product questions still work. Advanced features like deep analysis and workflow creation are paused." placement={Tip.PLACEMENTS.BOTTOM}>
-              <CreditNoticeUnderline>Basic mode</CreditNoticeUnderline>
-            </Tip>
-            {' '}until April 1
-          </CreditNoticeText>
-          <CreditNoticeLink>
-            Request upgrade
-            <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
-          </CreditNoticeLink>
-        </CreditNotice>
-
-        <ShortcutsStrip>
-        {[
-          ...allQuickActionsRaw.filter(a => qaFavorites.has(a.id)).map(a => ({ id: a.id, label: a.label, icon: QUICK_ACTION_ICONS[a.id] || Icon.TYPES.LINK_OUTLET, url: undefined as string | undefined })),
-          ...customShortcuts.filter(s => qaFavorites.has(s.id)).map(s => ({ id: s.id, label: s.label, icon: Icon.TYPES.LINK_OUTLET, url: s.url })),
-        ].map((item, i) => (
-          <QATile key={item.id} $index={i} href={item.url} target={item.url ? '_blank' : undefined} rel={item.url ? 'noopener noreferrer' : undefined}>
-            <QAIconBox>
-                <Icon
-                  type={item.icon}
-                  size={16}
-                  color={(theme as any).colorOnSurface}
-                />
-              </QAIconBox>
-              <QALabel>{item.label}</QALabel>
-              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
-            </QATile>
-          ))}
-          <span style={{ marginLeft: 8, opacity: 0.5 }}>
-            <Button.Icon
-              icon={Icon.TYPES.EDIT_OUTLINE}
-              aria-label="Edit shortcuts"
-              tip="Edit shortcuts"
-              appearance={Button.APPEARANCES.GHOST}
-              size={Button.SIZES.S}
-              onClick={() => setQaDrawerOpen(true)}
-            />
-          </span>
-        </ShortcutsStrip>
+        <ShortcutsSection>
+          <ShortcutsHeader>
+            <ShortcutsLabel>Recently visited</ShortcutsLabel>
+            <ShortcutsDropdownToggle onClick={() => setShortcutsDropdownOpen(prev => !prev)}>
+              <Icon type={Icon.TYPES.DOUBLE_CHEVRON} size={16} color="currentColor" />
+            </ShortcutsDropdownToggle>
+            {shortcutsDropdownOpen && (
+              <ShortcutsDropdownMenu>
+                <ShortcutsDropdownItem $active onClick={() => setShortcutsDropdownOpen(false)}>
+                  Recently visited
+                </ShortcutsDropdownItem>
+                <ShortcutsDropdownItem onClick={() => setShortcutsDropdownOpen(false)}>
+                  Most visited
+                </ShortcutsDropdownItem>
+                <ShortcutsDropdownItem onClick={() => setShortcutsDropdownOpen(false)}>
+                  Pinned shortcuts
+                </ShortcutsDropdownItem>
+              </ShortcutsDropdownMenu>
+            )}
+          </ShortcutsHeader>
+          <ShortcutsStrip>
+          {[
+            ...allQuickActionsRaw.filter(a => qaFavorites.has(a.id)).map(a => ({ id: a.id, label: a.label, icon: QUICK_ACTION_ICONS[a.id] || Icon.TYPES.LINK_OUTLET, url: undefined as string | undefined })),
+            ...customShortcuts.filter(s => qaFavorites.has(s.id)).map(s => ({ id: s.id, label: s.label, icon: Icon.TYPES.LINK_OUTLET, url: s.url })),
+          ].map((item, i) => (
+            <QATile key={item.id} $index={i} href={item.url} target={item.url ? '_blank' : undefined} rel={item.url ? 'noopener noreferrer' : undefined}>
+              <QAIconBox>
+                  <Icon
+                    type={item.icon}
+                    size={16}
+                    color={(theme as any).colorOnSurface}
+                  />
+                </QAIconBox>
+                <QALabel>{item.label}</QALabel>
+                <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
+              </QATile>
+            ))}
+            <ShortcutsEditButton>
+              <Button.Icon
+                icon={Icon.TYPES.LIST_OUTLINE}
+                aria-label="View all recently visited"
+                tip="View all recently visited"
+                appearance={Button.APPEARANCES.GHOST}
+                size={Button.SIZES.S}
+                onClick={() => setQaDrawerOpen(true)}
+              />
+            </ShortcutsEditButton>
+          </ShortcutsStrip>
+        </ShortcutsSection>
       </HomeContent>
 
-      {/* InlineAd hidden for now
-      <InlineAd>
-        <InlineAdText>Employee classification change? HR Services automates compliance. </InlineAdText>
-        <InlineAdLink href="#">Learn more →</InlineAdLink>
-      </InlineAd>
-      */}
-
-      <CardGrid>
-        {/* Card 1: Recently visited / Most visited */}
-        <Card>
-          <CardHeader>
-            <CardTitleButton>
-              {recentCardSort === 'recent' ? 'Recently visited' : 'Most visited'}
-              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
-            </CardTitleButton>
-            <CardMenuWrap>
+      <AnalyticsSection>
+        <AnalyticsTitleAndTabs>
+          <AnalyticsSectionHeader>
+            <AnalyticsSectionTitle>Analytics</AnalyticsSectionTitle>
+            <AnalyticsSectionActions>
               <Button.Icon
-                icon={Icon.TYPES.MORE_HORIZONTAL}
-                aria-label="More options"
+                icon={Icon.TYPES.SETTINGS_OUTLINE}
+                aria-label="Dashboard settings"
                 appearance={Button.APPEARANCES.GHOST}
-                size={Button.SIZES.XS}
-                onClick={() => setCardMenu(cardMenu === 'recent' ? null : 'recent')}
+                size={Button.SIZES.S}
               />
-              {cardMenu === 'recent' && (
-                <CardMenu>
-                  <CardMenuItem onClick={() => {
-                    setRecentCardSort(recentCardSort === 'recent' ? 'visited' : 'recent');
-                    setCardMenu(null);
-                  }}>
-                    {recentCardSort === 'recent' ? 'Sort by most visited' : 'Sort by recently visited'}
-                  </CardMenuItem>
-                  <CardMenuDivider />
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Clear history</CardMenuItem>
-                </CardMenu>
-              )}
-            </CardMenuWrap>
-          </CardHeader>
-          {(recentCardSort === 'recent' ? RECENT_ITEMS : MOST_VISITED_ITEMS).map(item => (
-            <RecentRow key={item.name}>
-              <RecentIconCircle $bg={item.avatar ? (item.color ?? 'transparent') : (theme as any).colorPrimary}>
-                {item.avatar ? <img src={item.avatar} alt="" /> : <Icon type={item.icon!} size={13} color="white" />}
-              </RecentIconCircle>
-              <RecentName>{item.name}</RecentName>
-              {'meta' in item && (item as any).meta && <RecentTime>{(item as any).meta}</RecentTime>}
-            </RecentRow>
-          ))}
-        </Card>
+              <Button
+                appearance={Button.APPEARANCES.OUTLINE}
+                size={Button.SIZES.S}
+              >
+                All dashboards
+              </Button>
+            </AnalyticsSectionActions>
+          </AnalyticsSectionHeader>
+          <AnalyticsTabRow>
+          <Tabs activeIndex={activeAnalyticsTab} onChange={(idx: number) => setActiveAnalyticsTab(idx)}>
+            <Tabs.Tab title="Q1 Headcount by Department" />
+            <Tabs.Tab title="Revenue Overview" />
+            <Tabs.Tab title="Sales Pipeline" />
+            <Tabs.Tab title="+" />
+          </Tabs>
+        </AnalyticsTabRow>
+        </AnalyticsTitleAndTabs>
 
-        {/* Card 2: Needs your attention */}
-        <Card>
-          <CardHeader>
-            <CardTitleButton>
-              Priority to-dos
-              <span style={{ marginLeft: 2, position: 'relative', top: -2 }}><Atoms.Badge text="7" appearance={Atoms.Badge.APPEARANCES.PRIMARY_LIGHT} size={Atoms.Badge.SIZES.S} /></span>
-              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
-            </CardTitleButton>
-            <CardMenuWrap>
-              <Button.Icon
-                icon={Icon.TYPES.MORE_HORIZONTAL}
-                aria-label="More options"
-                appearance={Button.APPEARANCES.GHOST}
-                size={Button.SIZES.XS}
-                onClick={() => setCardMenu(cardMenu === 'tasks' ? null : 'tasks')}
-              />
-              {cardMenu === 'tasks' && (
-                <CardMenu>
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Mark all as read</CardMenuItem>
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Filter by type</CardMenuItem>
-                </CardMenu>
-              )}
-            </CardMenuWrap>
-          </CardHeader>
-          {TASK_ITEMS.map(item => (
-            <TaskRow key={item.name}>
-              <TaskIconCircle $bg={item.color}>
-                <img src={item.avatar} alt="" />
-              </TaskIconCircle>
-              <TaskBody>
-                <TaskTitle>{item.name}</TaskTitle>
-                <TaskMeta>{item.meta}</TaskMeta>
-              </TaskBody>
-            </TaskRow>
-          ))}
-        </Card>
-
-        {/* Card 3: Analytics */}
-        <Card>
-          <CardHeader>
-            <CardTitleButton>
-              Analytics
-              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
-            </CardTitleButton>
-            <CardMenuWrap>
-              <Button.Icon
-                icon={Icon.TYPES.MORE_HORIZONTAL}
-                aria-label="More options"
-                appearance={Button.APPEARANCES.GHOST}
-                size={Button.SIZES.XS}
-                onClick={() => setCardMenu(cardMenu === 'analytics' ? null : 'analytics')}
-              />
-              {cardMenu === 'analytics' && (
-                <CardMenu>
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Customize analytics</CardMenuItem>
-                  <CardMenuDivider />
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Hide card</CardMenuItem>
-                </CardMenu>
-              )}
-            </CardMenuWrap>
-          </CardHeader>
-          {ANALYTICS_ITEMS.map(item => (
-            <AnalyticsRow key={item.title}>
-              <AnalyticsIconCircle $bg={(theme as any).colorSurfaceDim}>
-                <Icon type={item.icon} size={13} color={(theme as any).colorOnSurfaceVariant} />
-              </AnalyticsIconCircle>
-              <AnalyticsBody>
-                <AnalyticsTitle>{item.title}</AnalyticsTitle>
-                <AnalyticsInsight>{item.insight}</AnalyticsInsight>
-              </AnalyticsBody>
-              {(() => {
-                const { line, area } = sparklinePaths(item.points, 48, 18);
-                return (
-                  <svg width="48" height="18" viewBox="0 0 48 18" fill="none" style={{ flexShrink: 0, display: 'none' }}>
-                    <polygon points={area} fill={(theme as any).colorPrimaryVariant} />
-                    <polyline
-                      points={line}
-                      stroke={(theme as any).colorPrimary}
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                    />
-                  </svg>
-                );
-              })()}
-            </AnalyticsRow>
-          ))}
-        </Card>
-      </CardGrid>
-
-      <DashboardsWrap>
-        <DashboardTabBar>
-          {DASHBOARD_TABS.map(tab => (
-            <DashboardTabItem
-              key={tab.id}
-              $active={activeDashboard === tab.id}
-              onClick={() => setActiveDashboard(tab.id)}
-            >
-              {tab.name}
-            </DashboardTabItem>
-          ))}
-          <DashboardTabAdd aria-label="Add dashboard">
-            <Icon type={Icon.TYPES.ADD} size={16} color="currentColor" />
-          </DashboardTabAdd>
-          <DashboardTabSpacer />
-          <DashboardTabActions>
+        <DashboardContentWrap>
+        <DashboardHeaderRow>
+          <DashboardHeaderTitle>{DASHBOARD_TAB_NAMES[activeAnalyticsTab]}</DashboardHeaderTitle>
+          <DashboardHeaderRight>
+            <DashboardHeaderTimestamp>{DASHBOARD_TAB_FILTERS[activeAnalyticsTab]?.lastEdited ?? ''}</DashboardHeaderTimestamp>
             <Button.Icon
-              icon={Icon.TYPES.SETTINGS_OUTLINE}
-              aria-label="Dashboard settings"
+              icon={Icon.TYPES.REFRESH_OUTLINE}
+              aria-label="Refresh"
               appearance={Button.APPEARANCES.GHOST}
               size={Button.SIZES.S}
             />
-            <DashboardAllButton>All dashboards</DashboardAllButton>
-          </DashboardTabActions>
-        </DashboardTabBar>
+            <Button.Icon
+              icon={Icon.TYPES.FILTER}
+              aria-label="Filters"
+              appearance={Button.APPEARANCES.GHOST}
+              size={Button.SIZES.S}
+            />
+            <Button.Icon
+              icon={Icon.TYPES.MORE_HORIZONTAL}
+              aria-label="More options"
+              appearance={Button.APPEARANCES.GHOST}
+              size={Button.SIZES.S}
+            />
+          </DashboardHeaderRight>
+        </DashboardHeaderRow>
 
-        {(() => {
-          const tab = DASHBOARD_TABS.find(t => t.id === activeDashboard) ?? DASHBOARD_TABS[0];
-          const filters = dashboardFilters[tab.id] ?? [];
-          return (
-            <>
-              <DashboardHeaderRow>
-                <DashboardTitleText>{tab.name}</DashboardTitleText>
-                <DashboardHeaderRight>
-                  <DashboardTimestamp>{tab.lastEdited}</DashboardTimestamp>
-                  <Button.Icon
-                    icon={Icon.TYPES.REFRESH}
-                    aria-label="Refresh"
-                    appearance={Button.APPEARANCES.GHOST}
-                    size={Button.SIZES.S}
-                  />
-                  <Button.Icon
-                    icon={Icon.TYPES.FILTER}
-                    aria-label="Filters"
-                    appearance={Button.APPEARANCES.GHOST}
-                    size={Button.SIZES.S}
-                  />
-                  <Button.Icon
-                    icon={Icon.TYPES.MORE_HORIZONTAL}
-                    aria-label="More options"
-                    appearance={Button.APPEARANCES.GHOST}
-                    size={Button.SIZES.S}
-                  />
-                </DashboardHeaderRight>
-              </DashboardHeaderRow>
+        <DashboardFiltersRow>
+          {(analyticsFilters[activeAnalyticsTab] ?? []).map(f => (
+            <SplitButton
+              key={f.id}
+              appearance={SplitButton.APPEARANCES.OUTLINE}
+              size={SplitButton.SIZES.XS}
+              dropdownIcon={Icon.TYPES.CLOSE}
+              dropdownList={[{ label: 'Remove filter', value: f.id }]}
+              onDropdownChange={() => {
+                setAnalyticsFilters(prev => ({
+                  ...prev,
+                  [activeAnalyticsTab]: prev[activeAnalyticsTab].filter(x => x.id !== f.id),
+                }));
+              }}
+              trailingAriaLabel={`Remove ${f.label} filter`}
+            >
+              {f.label}
+            </SplitButton>
+          ))}
+          <DashboardAddFilterButton>+ Filter</DashboardAddFilterButton>
+        </DashboardFiltersRow>
 
-              <DashboardFiltersRow>
-                {filters.map(f => (
-                  <SplitButton
-                    key={f.id}
-                    appearance={SplitButton.APPEARANCES.OUTLINE}
-                    size={SplitButton.SIZES.XS}
-                    dropdownIcon={Icon.TYPES.CLOSE}
-                    dropdownList={[{ label: 'Remove filter', value: f.id }]}
-                    onDropdownChange={() => {
-                      setDashboardFilters(prev => ({
-                        ...prev,
-                        [tab.id]: prev[tab.id].filter(x => x.id !== f.id),
-                      }));
-                    }}
-                    trailingAriaLabel={`Remove ${f.label} filter`}
-                  >
-                    {f.label}
-                  </SplitButton>
+        <DashboardGrid>
+          <ChartCard>
+            <ChartHeader>
+              <ChartTitle><ChartDot $color="#7A005D" /> Headcount trend</ChartTitle>
+              <Button.Icon icon={Icon.TYPES.MORE_VERTICAL} aria-label="More" appearance={Button.APPEARANCES.GHOST} size={Button.SIZES.XS} />
+            </ChartHeader>
+            <ChartArea>
+              <ChartYAxis theme={theme}>
+                <span>80</span><span>60</span><span>40</span><span>20</span>
+              </ChartYAxis>
+              <ChartBody theme={theme}>
+                <ChartGridLine theme={theme} style={{ top: '25%' }} />
+                <ChartGridLine theme={theme} style={{ top: '50%' }} />
+                <ChartGridLine theme={theme} style={{ top: '75%' }} />
+                <LineChartSvg color="#7A005D" data={HEADCOUNT_DATA} />
+              </ChartBody>
+              <ChartXAxis theme={theme}>
+                <span>Jul</span><span>Sep</span><span>Nov</span><span>Jan</span><span>Mar</span>
+              </ChartXAxis>
+            </ChartArea>
+          </ChartCard>
+
+          <ChartCard>
+            <ChartHeader>
+              <ChartTitle><ChartDot $color="#7A005D" /> Revenue by quarter</ChartTitle>
+              <Button.Icon icon={Icon.TYPES.MORE_VERTICAL} aria-label="More" appearance={Button.APPEARANCES.GHOST} size={Button.SIZES.XS} />
+            </ChartHeader>
+            <ChartArea>
+              <ChartYAxis theme={theme}>
+                <span>$300K</span><span>$200K</span><span>$100K</span><span>$0</span>
+              </ChartYAxis>
+              <ChartBody theme={theme}>
+                <ChartGridLine theme={theme} style={{ top: '25%' }} />
+                <ChartGridLine theme={theme} style={{ top: '50%' }} />
+                <ChartGridLine theme={theme} style={{ top: '75%' }} />
+                <BarChartSvg color="#7A005D" data={REVENUE_DATA} />
+              </ChartBody>
+              <ChartXAxis theme={theme}>
+                <span>Jul</span><span>Sep</span><span>Nov</span><span>Jan</span><span>Mar</span>
+              </ChartXAxis>
+            </ChartArea>
+          </ChartCard>
+
+          <ChartCard $span={2}>
+            <ChartHeader>
+              <ChartTitle><ChartDot $color="#7A005D" /> Attrition risk vs tenure</ChartTitle>
+              <Button.Icon icon={Icon.TYPES.MORE_VERTICAL} aria-label="More" appearance={Button.APPEARANCES.GHOST} size={Button.SIZES.XS} />
+            </ChartHeader>
+            <ChartArea>
+              <ChartYAxis theme={theme}>
+                <span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+              </ChartYAxis>
+              <ChartBody theme={theme}>
+                <ChartGridLine theme={theme} style={{ top: '20%' }} />
+                <ChartGridLine theme={theme} style={{ top: '40%' }} />
+                <ChartGridLine theme={theme} style={{ top: '60%' }} />
+                <ChartGridLine theme={theme} style={{ top: '80%' }} />
+                <ScatterChartSvg color="#7A005D" data={ATTRITION_DATA} />
+              </ChartBody>
+              <ChartXAxis theme={theme}>
+                <span>0–6 mo</span><span>6–12 mo</span><span>1–2 yr</span><span>2–3 yr</span><span>3–5 yr</span><span>5+ yr</span>
+              </ChartXAxis>
+            </ChartArea>
+          </ChartCard>
+
+          <ChartCard $span={2} style={{ padding: 0, paddingTop: (theme as any).space500 }}>
+            <ChartHeader style={{ padding: `0 ${(theme as any).space500}`, marginBottom: (theme as any).space200 }}>
+              <ChartTitle>Headcount by department</ChartTitle>
+              <Button.Icon icon={Icon.TYPES.MORE_VERTICAL} aria-label="More" appearance={Button.APPEARANCES.GHOST} size={Button.SIZES.XS} />
+            </ChartHeader>
+            <DashboardTable>
+              <thead>
+                <tr>
+                  <DashboardTh>Department</DashboardTh>
+                  <DashboardTh>Headcount</DashboardTh>
+                  <DashboardTh>New hires</DashboardTh>
+                  <DashboardTh>Attrition</DashboardTh>
+                  <DashboardTh>Open roles</DashboardTh>
+                  <DashboardTh>QoQ change</DashboardTh>
+                </tr>
+              </thead>
+              <tbody>
+                {DEPT_TABLE_DATA.map(row => (
+                  <tr key={row.dept}>
+                    <DashboardTd style={{ fontWeight: 600 }}>{row.dept}</DashboardTd>
+                    <DashboardTd>{row.headcount}</DashboardTd>
+                    <DashboardTd>{row.newHires}</DashboardTd>
+                    <DashboardTdMuted>{row.attrition}</DashboardTdMuted>
+                    <DashboardTd>{row.openRoles}</DashboardTd>
+                    <DashboardTd>
+                      {row.trend !== 0 ? (
+                        <TrendBadge $positive={row.trend > 0}>
+                          <Icon type={row.trend > 0 ? Icon.TYPES.ARROW_UP : Icon.TYPES.ARROW_DOWN} size={12} color="currentColor" />
+                          {Math.abs(row.trend)}%
+                        </TrendBadge>
+                      ) : (
+                        <span style={{ color: (theme as any).colorOnSurfaceVariant }}>—</span>
+                      )}
+                    </DashboardTd>
+                  </tr>
                 ))}
-                <DashboardAddFilter
-                  onClick={() => {
-                    const newId = `f_${Date.now()}`;
-                    setDashboardFilters(prev => ({
-                      ...prev,
-                      [tab.id]: [...prev[tab.id], { id: newId, label: 'New filter' }],
-                    }));
-                  }}
-                >
-                  + Filter
-                </DashboardAddFilter>
-              </DashboardFiltersRow>
-
-              <DashboardPlaceholder>
-                Dashboard visualization for "{tab.name}"
-              </DashboardPlaceholder>
-            </>
-          );
-        })()}
-      </DashboardsWrap>
+              </tbody>
+            </DashboardTable>
+          </ChartCard>
+        </DashboardGrid>
+        </DashboardContentWrap>
+      </AnalyticsSection>
 
       <ResourcesFooter>
         <ResourcesLabel>Company resources</ResourcesLabel>
@@ -2820,4 +3076,4 @@ const DesktopHomeDemo: React.FC = () => {
   );
 };
 
-export default DesktopHomeDemo;
+export default DesktopHomeDemo422;

@@ -127,6 +127,9 @@ const TopNavActions = styled.div<{ adminMode?: boolean }>`
       color: white !important;
       fill: white !important;
     }
+    button img {
+      filter: brightness(0) invert(1) !important;
+    }
   `}
 `;
 
@@ -171,6 +174,7 @@ const AiButton = styled.button<{ $active?: boolean }>`
   img {
     width: 20px;
     height: 20px;
+    filter: brightness(0);
   }
 `;
 
@@ -191,6 +195,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
   notificationCount = 0,
   onPersonaSelect,
   personaLabel,
+  onAiToggle,
+  aiPanelOpen = false,
   theme,
 }) => {
   return (
@@ -243,6 +249,17 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
                   <NotificationBadge theme={theme}>{notificationCount}</NotificationBadge>
                 )}
               </div>
+            )}
+            {onAiToggle && (
+              <AiButton
+                theme={theme}
+                $active={aiPanelOpen}
+                onClick={onAiToggle}
+                aria-label="AI Assistant"
+                title="AI Assistant"
+              >
+                <img src={RipplingAiSpark} alt="" />
+              </AiButton>
             )}
           </TopNavActions>
 

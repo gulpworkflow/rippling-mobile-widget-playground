@@ -5,6 +5,7 @@ import Page from '@rippling/pebble/Page';
 import Tabs from '@rippling/pebble/Tabs';
 import { TopNavBar } from './TopNavBar';
 import { Sidebar } from './Sidebar';
+import { ExpansionPanel, ExpansionPanelType } from './ExpansionPanel';
 import { NavSectionData } from './types';
 
 interface AppShellLayoutProps {
@@ -40,15 +41,36 @@ const AppContainer = styled.div`
   overflow: hidden;
 `;
 
-const MainContent = styled.main<{ sidebarCollapsed: boolean }>`
+const OVERLAY_THRESHOLD = 650;
+
+const MainContent = styled.main<{
+  sidebarCollapsed: boolean;
+  expansionPanelWidth: number;
+  isResizing: boolean;
+}>`
   position: fixed;
   left: ${({ sidebarCollapsed }) => (sidebarCollapsed ? '60px' : '266px')};
   top: 56px;
-  right: 0;
+  right: ${({ expansionPanelWidth }) =>
+    expansionPanelWidth > OVERLAY_THRESHOLD ? 0 : expansionPanelWidth}px;
   bottom: 0;
-  transition: left 200ms ease;
+  transition: ${({ isResizing }) =>
+    isResizing ? 'left 200ms ease' : 'left 200ms ease, right 250ms ease-out'};
   overflow-y: auto;
   overflow-x: hidden;
+`;
+
+const Scrim = styled.div<{ $visible: boolean }>`
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 89;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  pointer-events: ${({ $visible }) => ($visible ? 'auto' : 'none')};
+  transition: opacity 200ms ease;
 `;
 
 const PageContentContainer = styled.div`
@@ -133,6 +155,24 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
   const [adminMode, setAdminMode] = useState(true);
 
+  const [expansionPanelType, setExpansionPanelType] = useState<ExpansionPanelType>(null);
+  const [expansionPanelWidth, setExpansionPanelWidth] = useState(0);
+  const [isExpansionPanelResizing, setIsExpansionPanelResizing] = useState(false);
+
+  const handleToggleExpansionPanel = (type: ExpansionPanelType) => {
+    if (expansionPanelType === type) {
+      setExpansionPanelType(null);
+      setExpansionPanelWidth(0);
+    } else {
+      setExpansionPanelType(type);
+    }
+  };
+
+  const handleCloseExpansionPanel = () => {
+    setExpansionPanelType(null);
+    setExpansionPanelWidth(0);
+  };
+
   const handleTabChange = (index: number) => {
     setActiveTab(index);
     onTabChange?.(index);
@@ -153,6 +193,8 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
         notificationCount={notificationCount}
         onPersonaSelect={onPersonaSelect}
         personaLabel={personaLabel}
+        onAiToggle={() => handleToggleExpansionPanel('ai')}
+        aiPanelOpen={expansionPanelType === 'ai'}
         theme={theme}
       />
 
@@ -166,7 +208,12 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
       />
 
       {/* Main Content Area */}
-      <MainContent theme={theme} sidebarCollapsed={sidebarCollapsed}>
+      <MainContent
+        theme={theme}
+        sidebarCollapsed={sidebarCollapsed}
+        expansionPanelWidth={expansionPanelWidth}
+        isResizing={isExpansionPanelResizing}
+      >
         <PageContentContainer theme={theme}>
           {/* Page Header with Actions and Tabs */}
           {!hidePageHeader && (
@@ -203,6 +250,21 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
           <PageContent theme={theme} $flush={hidePageHeader}>{children}</PageContent>
         </PageContentContainer>
       </MainContent>
+
+      <Scrim
+        $visible={expansionPanelWidth > OVERLAY_THRESHOLD}
+        onClick={handleCloseExpansionPanel}
+      />
+
+      <ExpansionPanel
+        isOpen={expansionPanelType !== null}
+        panelType={expansionPanelType}
+        onClose={handleCloseExpansionPanel}
+        onWidthChange={setExpansionPanelWidth}
+        onResizingChange={setIsExpansionPanelResizing}
+        onSwitchToAI={() => handleToggleExpansionPanel('ai')}
+        theme={theme}
+      />
     </AppContainer>
   );
 };

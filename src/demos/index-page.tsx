@@ -392,6 +392,32 @@ const IndexPage: React.FC = () => {
             </ProposalText>
           </ProposalCard>
 
+          <ProposalCard
+            $clickable
+            onClick={() => navigate('/desktop-home-demo-v2')}
+          >
+            <ProposalIcon />
+            <ProposalText>
+              <ProposalTitle>Desktop web home v2</ProposalTitle>
+              <ProposalDescription>
+                Next iteration of the desktop web home experience
+              </ProposalDescription>
+            </ProposalText>
+          </ProposalCard>
+
+          <ProposalCard
+            $clickable
+            onClick={() => navigate('/desktop-home-demo-4-22')}
+          >
+            <ProposalIcon />
+            <ProposalText>
+              <ProposalTitle>Desktop web home 4/22</ProposalTitle>
+              <ProposalDescription>
+                Latest iteration with AI assistant panel and inline widgets
+              </ProposalDescription>
+            </ProposalText>
+          </ProposalCard>
+
         </ProposalList>
       </LeftPanel>
 

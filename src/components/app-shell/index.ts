@@ -24,5 +24,7 @@ export { SearchBar } from './SearchBar';
 export { ProfileDropdown } from './ProfileDropdown';
 export { NavSection } from './NavSection';
 export { NavItem } from './NavItem';
+export { ExpansionPanel } from './ExpansionPanel';
+export type { ExpansionPanelType } from './ExpansionPanel';
 export * from './types';
 

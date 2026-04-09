@@ -10,11 +10,12 @@ import Drawer from '@rippling/pebble/Drawer';
 import Modal from '@rippling/pebble/Modal';
 import Input from '@rippling/pebble/Inputs';
 import Tip from '@rippling/pebble/Tip';
-import SplitButton from '@rippling/pebble/Button/SplitButton/SplitButton';
 
 import Atoms from '@rippling/pebble/Atoms';
 import { AppShellLayout, NavSectionData } from '@/components/app-shell';
 import RipplingAiSpark from '@/assets/rippling-ai-spark.svg';
+import ShiftClockContent from '@/widgets/ShiftClockWidget';
+import EarningsSummaryContent from '@/widgets/EarningsWidget';
 import { SAMPLE_USERS } from '@/data-models/sample-users';
 import { PERSONA_OPTIONS } from '@/data-models/personas';
 import { getQuickActions } from '@/data-models/quick-actions';
@@ -423,17 +424,80 @@ const QUICK_ACTION_ICONS: Record<string, string> = {
   book_travel: Icon.TYPES.LOCATION_OUTLINE,
 };
 
-const ShortcutsStrip = styled.div`
+const ShortcutsSection = styled.div`
+  width: 100%;
+  max-width: 960px;
+  margin: ${({ theme }) => (theme as StyledTheme).space1000} 0 0;
+  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space800} 0;
+`;
+
+const ShortcutsHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  row-gap: ${({ theme }) => (theme as StyledTheme).space200};
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+  position: relative;
+`;
+
+const ShortcutsLabel = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  white-space: nowrap;
+`;
+
+const ShortcutsDropdownToggle = styled.button`
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: ${({ theme }) => (theme as StyledTheme).space100};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerSm};
+  cursor: pointer;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  transition: background 0.1s, color 0.1s;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  }
+`;
+
+const ShortcutsDropdownMenu = styled.div`
+  position: absolute;
+  top: calc(100% + ${({ theme }) => (theme as StyledTheme).space100});
+  left: 0;
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: ${({ theme }) => (theme as StyledTheme).space100} 0;
+  min-width: 180px;
+  z-index: 10;
+`;
+
+const ShortcutsDropdownItem = styled.button<{ $active?: boolean }>`
+  display: block;
   width: 100%;
-  max-width: 830px;
-  margin: ${({ theme }) => (theme as StyledTheme).space500} 0 0;
-  margin-left: -${({ theme }) => (theme as StyledTheme).space200};
-  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space800} 0;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space350};
+  border: none;
+  background: ${({ $active, theme }) => $active ? (theme as StyledTheme).colorSurfaceContainerLow : 'none'};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  font-weight: ${({ $active }) => $active ? 600 : 400};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+  }
+`;
+
+const ShortcutsStrip = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+  width: 100%;
+  margin: 8px 0 0;
+  position: relative;
 `;
 
 const chipFadeIn = keyframes`
@@ -452,7 +516,6 @@ const QATile = styled.a<{ $index?: number }>`
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space250};
   padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space150};
-  margin-left: ${({ theme }) => (theme as StyledTheme).space200};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   cursor: pointer;
@@ -462,6 +525,7 @@ const QATile = styled.a<{ $index?: number }>`
   opacity: 0;
   animation: ${chipFadeIn} 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: ${({ $index = 0 }) => 200 + $index * 50}ms;
+  min-width: 0;
 
   &:hover {
     background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
@@ -469,8 +533,8 @@ const QATile = styled.a<{ $index?: number }>`
 `;
 
 const QAIconBox = styled.div`
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: ${({ theme }) => (theme as StyledTheme).colorSurfaceDim};
   display: grid;
@@ -482,8 +546,25 @@ const QALabel = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 `;
 
+
+const ShortcutsEditButton = styled.span`
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
 
 const QAMore = styled.a`
   display: flex;
@@ -599,19 +680,32 @@ const TASK_ITEMS = [
 
 const CardGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: ${({ theme }) => (theme as StyledTheme).space400};
   width: 100%;
-  max-width: 1200px;
+  max-width: 960px;
   margin: ${({ theme }) => (theme as StyledTheme).space800} auto ${({ theme }) => (theme as StyledTheme).space400};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space800};
+  box-sizing: border-box;
+`;
+
+const EditWidgetsRow = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 960px;
+  margin: ${({ theme }) => (theme as StyledTheme).space800} auto ${({ theme }) => (theme as StyledTheme).space800};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space800};
+  box-sizing: border-box;
 `;
 
 const Card = styled.div`
-  background: color-mix(in srgb, ${({ theme }) => (theme as StyledTheme).colorSurfaceDim} 30%, transparent);
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
   padding: ${({ theme }) => (theme as StyledTheme).space500};
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.03);
   min-width: 0;
+  min-height: 270px;
   display: flex;
   flex-direction: column;
 `;
@@ -623,6 +717,13 @@ const CardHeader = styled.div`
   margin-bottom: ${({ theme }) => (theme as StyledTheme).space350};
 `;
 
+const CardActionFooter = styled.div`
+  display: flex;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  margin-top: auto;
+  padding-top: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
 const CardTitleButton = styled.button`
   display: flex;
   align-items: center;
@@ -631,12 +732,11 @@ const CardTitleButton = styled.button`
   border: none;
   padding: 0;
   cursor: pointer;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleSmall};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  letter-spacing: -0.2px;
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
 
   &:hover {
-    color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   }
 `;
 
@@ -694,7 +794,7 @@ const RecentRow = styled.div`
 const RecentIconCircle = styled.div<{ $bg: string }>`
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   background: ${({ $bg }) => $bg};
   display: grid;
   place-items: center;
@@ -712,7 +812,7 @@ const RecentIconCircle = styled.div<{ $bg: string }>`
 `;
 
 const RecentName = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   flex: 1;
   overflow: hidden;
@@ -763,7 +863,7 @@ const TaskBody = styled.div`
 `;
 
 const TaskTitle = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   overflow: hidden;
   text-overflow: ellipsis;
@@ -863,14 +963,15 @@ const CreateShortcutLink = styled.button`
 // ── Company Resources Footer ─────────────────────────────────────────────────
 
 const ResourcesFooter = styled.div`
-  max-width: 1200px;
+  max-width: 960px;
   margin: 80px auto 0;
-  padding: ${({ theme }) => (theme as StyledTheme).space600} 0 ${({ theme }) => (theme as StyledTheme).space800};
+  padding: ${({ theme }) => (theme as StyledTheme).space600} ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space800};
   border-top: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
+  box-sizing: border-box;
 `;
 
 const ResourcesLabel = styled.span`
@@ -906,9 +1007,10 @@ const ResourceLink = styled.a`
 
 const InlineAd = styled.div`
   text-align: center;
-  padding: ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space600};
-  max-width: 1200px;
+  padding: ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space600};
+  max-width: 960px;
   margin: 0 auto;
+  box-sizing: border-box;
 `;
 
 const InlineAdText = styled.span`
@@ -932,9 +1034,10 @@ const InlineAdLink = styled.a`
 // ── What's New ──────────────────────────────────────────────────────────────
 
 const WhatsNewSection = styled.div`
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 0 ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space1200};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space1200};
+  box-sizing: border-box;
 `;
 
 const WhatsNewHeader = styled.div`
@@ -1035,212 +1138,6 @@ const ANALYTICS_ITEMS: AnalyticsItem[] = [
   },
 ];
 
-// ── Dashboards Section ─────────────────────────────────────────────────────
-
-interface DashboardFilter {
-  id: string;
-  label: string;
-}
-
-interface DashboardTab {
-  id: string;
-  name: string;
-  lastEdited: string;
-  filters: DashboardFilter[];
-}
-
-const DASHBOARD_TABS: DashboardTab[] = [
-  {
-    id: 'headcount',
-    name: 'Q1 Headcount by Department',
-    lastEdited: 'Just now',
-    filters: [
-      { id: 'dept', label: 'Department: Sales' },
-      { id: 'region', label: 'Region equals West' },
-      { id: 'start', label: 'Start date' },
-      { id: 'owner', label: 'Owner' },
-    ],
-  },
-  {
-    id: 'revenue',
-    name: 'Revenue Overview',
-    lastEdited: '2h ago',
-    filters: [
-      { id: 'period', label: 'Period: Q1 2026' },
-      { id: 'segment', label: 'Segment: Enterprise' },
-    ],
-  },
-  {
-    id: 'hiring',
-    name: 'Hiring Funnel',
-    lastEdited: 'Yesterday',
-    filters: [
-      { id: 'dept', label: 'Department: Engineering' },
-      { id: 'stage', label: 'Stage: All' },
-      { id: 'source', label: 'Source' },
-    ],
-  },
-];
-
-const DashboardsWrap = styled.div`
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto ${({ theme }) => (theme as StyledTheme).space800};
-`;
-
-const DashboardTabBar = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0;
-  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  padding: 0;
-`;
-
-const DashboardTabItem = styled.button<{ $active?: boolean }>`
-  position: relative;
-  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
-  border: none;
-  background: ${({ $active, theme }) =>
-    $active ? (theme as StyledTheme).colorSurfaceContainerLow : 'none'};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg} ${({ theme }) => (theme as StyledTheme).shapeCornerLg} 0 0;
-  cursor: pointer;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  font-weight: ${({ $active }) => ($active ? 600 : 400)};
-  color: ${({ $active, theme }) =>
-    $active
-      ? (theme as StyledTheme).colorOnSurface
-      : (theme as StyledTheme).colorOnSurfaceVariant};
-  white-space: nowrap;
-  transition: background 0.1s, color 0.1s;
-
-  &:hover {
-    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  }
-
-  ${({ $active, theme }) =>
-    $active
-      ? `&::after {
-          content: '';
-          position: absolute;
-          bottom: -1px;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: ${(theme as StyledTheme).colorOnSurface};
-        }`
-      : ''}
-`;
-
-const DashboardTabAdd = styled.button`
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
-  transition: background 0.1s;
-
-  &:hover {
-    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-  }
-`;
-
-const DashboardTabSpacer = styled.div`
-  flex: 1;
-`;
-
-const DashboardTabActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space200};
-`;
-
-const DashboardAllButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space100};
-  padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space350};
-  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
-  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
-  cursor: pointer;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  white-space: nowrap;
-  transition: background 0.1s;
-
-  &:hover {
-    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-  }
-`;
-
-const DashboardHeaderRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => (theme as StyledTheme).space400} 0 ${({ theme }) => (theme as StyledTheme).space200};
-`;
-
-const DashboardTitleText = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleMedium};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-`;
-
-const DashboardHeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space200};
-`;
-
-const DashboardTimestamp = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  white-space: nowrap;
-`;
-
-const DashboardFiltersRow = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => (theme as StyledTheme).space200};
-  padding-bottom: ${({ theme }) => (theme as StyledTheme).space400};
-`;
-
-const DashboardAddFilter = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space100};
-  padding: ${({ theme }) => (theme as StyledTheme).space100} ${({ theme }) => (theme as StyledTheme).space300};
-  border: 1px dashed ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
-  background: none;
-  cursor: pointer;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  transition: background 0.1s, color 0.1s;
-
-  &:hover {
-    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-    border-style: solid;
-  }
-`;
-
-const DashboardPlaceholder = styled.div`
-  width: 100%;
-  height: 320px;
-  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
-  display: grid;
-  place-items: center;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-`;
-
 function sparklinePaths(points: number[], width: number, height: number): { line: string; area: string } {
   const max = Math.max(...points);
   const min = Math.min(...points);
@@ -1283,7 +1180,7 @@ const AnalyticsBody = styled.div`
 `;
 
 const AnalyticsTitle = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   display: block;
 `;
@@ -1310,19 +1207,19 @@ const PageGradient = styled.div`
 const HomeContent = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: ${({ theme }) => (theme as StyledTheme).space800} ${({ theme }) => (theme as StyledTheme).space800} 0;
-  padding-top: ${({ theme }) => (theme as StyledTheme).space1200};
+  align-items: flex-start;
+  padding: ${({ theme }) => (theme as StyledTheme).space1200} ${({ theme }) => (theme as StyledTheme).space800} 0;
   position: relative;
   max-width: 960px;
   margin: 0 auto;
+  box-sizing: border-box;
 `;
 
 const PromptHeading = styled.h1`
   ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  text-align: center;
-  margin: ${({ theme }) => (theme as StyledTheme).space2400} 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
+  text-align: left;
+  margin: ${({ theme }) => (theme as StyledTheme).space2400} 0 ${({ theme }) => (theme as StyledTheme).space400} 0;
 `;
 
 const PromptCard = styled.div<{ $dropdownOpen?: boolean }>`
@@ -1342,7 +1239,7 @@ const PromptCard = styled.div<{ $dropdownOpen?: boolean }>`
   ${({ $dropdownOpen }) => $dropdownOpen && 'border-bottom-color: transparent;'}
   padding: ${({ theme }) => (theme as StyledTheme).space400};
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space200};
   cursor: text;
   box-sizing: border-box;
@@ -1356,7 +1253,7 @@ const PromptInput = styled.textarea`
   resize: none;
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  min-height: ${({ theme }) => (theme as StyledTheme).space1200};
+  min-height: 1lh;
   padding: 0;
   margin: 0;
 
@@ -1425,7 +1322,7 @@ const DEFAULT_SUGGESTIONS: string[] = [
 const PromptWrap = styled.div`
   position: relative;
   width: 100%;
-  max-width: 830px;
+  max-width: 960px;
   box-sizing: border-box;
 `;
 
@@ -1434,7 +1331,7 @@ const CreditNotice = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 830px;
+  max-width: 960px;
   box-sizing: border-box;
   padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
   border-radius: 0 0 ${({ theme }) => (theme as StyledTheme).shapeCornerLg} ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
@@ -1784,7 +1681,7 @@ function getGreeting(): string {
 
 // ── Component ───────────────────────────────────────────────────────────────
 
-const DesktopHomeDemo: React.FC = () => {
+const DesktopHomeDemoV2: React.FC = () => {
   const { theme } = useTheme();
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -1798,7 +1695,7 @@ const DesktopHomeDemo: React.FC = () => {
   const [qaSearch, setQaSearch] = useState('');
   const [qaSortBy, setQaSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
   const [qaSortMenuOpen, setQaSortMenuOpen] = useState(false);
-  const [userIdx, setUserIdx] = useState(3);
+  const [userIdx, setUserIdx] = useState(2);
   const [personaHudOpen, setPersonaHudOpen] = useState(false);
 
   const [customShortcuts, setCustomShortcuts] = useState<CustomShortcut[]>([]);
@@ -1808,10 +1705,7 @@ const DesktopHomeDemo: React.FC = () => {
   const [createUrlError, setCreateUrlError] = useState('');
   const [createUrlTouched, setCreateUrlTouched] = useState(false);
   const [pulseDrawerOpen, setPulseDrawerOpen] = useState(false);
-  const [activeDashboard, setActiveDashboard] = useState(DASHBOARD_TABS[0].id);
-  const [dashboardFilters, setDashboardFilters] = useState<Record<string, DashboardFilter[]>>(
-    () => Object.fromEntries(DASHBOARD_TABS.map(t => [t.id, [...t.filters]])),
-  );
+  const [shortcutsDropdownOpen, setShortcutsDropdownOpen] = useState(false);
 
   const user = SAMPLE_USERS[userIdx];
   const enabledApps = useMemo(() => new Set(user.enabledApps ?? []), [user.enabledApps]);
@@ -2325,34 +2219,55 @@ const DesktopHomeDemo: React.FC = () => {
           </CreditNoticeLink>
         </CreditNotice>
 
-        <ShortcutsStrip>
-        {[
-          ...allQuickActionsRaw.filter(a => qaFavorites.has(a.id)).map(a => ({ id: a.id, label: a.label, icon: QUICK_ACTION_ICONS[a.id] || Icon.TYPES.LINK_OUTLET, url: undefined as string | undefined })),
-          ...customShortcuts.filter(s => qaFavorites.has(s.id)).map(s => ({ id: s.id, label: s.label, icon: Icon.TYPES.LINK_OUTLET, url: s.url })),
-        ].map((item, i) => (
-          <QATile key={item.id} $index={i} href={item.url} target={item.url ? '_blank' : undefined} rel={item.url ? 'noopener noreferrer' : undefined}>
-            <QAIconBox>
-                <Icon
-                  type={item.icon}
-                  size={16}
-                  color={(theme as any).colorOnSurface}
-                />
-              </QAIconBox>
-              <QALabel>{item.label}</QALabel>
-              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
-            </QATile>
-          ))}
-          <span style={{ marginLeft: 8, opacity: 0.5 }}>
-            <Button.Icon
-              icon={Icon.TYPES.EDIT_OUTLINE}
-              aria-label="Edit shortcuts"
-              tip="Edit shortcuts"
-              appearance={Button.APPEARANCES.GHOST}
-              size={Button.SIZES.S}
-              onClick={() => setQaDrawerOpen(true)}
-            />
-          </span>
-        </ShortcutsStrip>
+        <ShortcutsSection>
+          <ShortcutsHeader>
+            <ShortcutsLabel>Recently visited</ShortcutsLabel>
+            <ShortcutsDropdownToggle onClick={() => setShortcutsDropdownOpen(prev => !prev)}>
+              <Icon type={Icon.TYPES.DOUBLE_CHEVRON} size={16} color="currentColor" />
+            </ShortcutsDropdownToggle>
+            {shortcutsDropdownOpen && (
+              <ShortcutsDropdownMenu>
+                <ShortcutsDropdownItem $active onClick={() => setShortcutsDropdownOpen(false)}>
+                  Recently visited
+                </ShortcutsDropdownItem>
+                <ShortcutsDropdownItem onClick={() => setShortcutsDropdownOpen(false)}>
+                  Most visited
+                </ShortcutsDropdownItem>
+                <ShortcutsDropdownItem onClick={() => setShortcutsDropdownOpen(false)}>
+                  Pinned shortcuts
+                </ShortcutsDropdownItem>
+              </ShortcutsDropdownMenu>
+            )}
+          </ShortcutsHeader>
+          <ShortcutsStrip>
+          {[
+            ...allQuickActionsRaw.filter(a => qaFavorites.has(a.id)).map(a => ({ id: a.id, label: a.label, icon: QUICK_ACTION_ICONS[a.id] || Icon.TYPES.LINK_OUTLET, url: undefined as string | undefined })),
+            ...customShortcuts.filter(s => qaFavorites.has(s.id)).map(s => ({ id: s.id, label: s.label, icon: Icon.TYPES.LINK_OUTLET, url: s.url })),
+          ].map((item, i) => (
+            <QATile key={item.id} $index={i} href={item.url} target={item.url ? '_blank' : undefined} rel={item.url ? 'noopener noreferrer' : undefined}>
+              <QAIconBox>
+                  <Icon
+                    type={item.icon}
+                    size={16}
+                    color={(theme as any).colorOnSurface}
+                  />
+                </QAIconBox>
+                <QALabel>{item.label}</QALabel>
+                <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
+              </QATile>
+            ))}
+            <ShortcutsEditButton>
+              <Button.Icon
+                icon={Icon.TYPES.LIST_OUTLINE}
+                aria-label="View all recently visited"
+                tip="View all recently visited"
+                appearance={Button.APPEARANCES.GHOST}
+                size={Button.SIZES.S}
+                onClick={() => setQaDrawerOpen(true)}
+              />
+            </ShortcutsEditButton>
+          </ShortcutsStrip>
+        </ShortcutsSection>
       </HomeContent>
 
       {/* InlineAd hidden for now
@@ -2363,11 +2278,11 @@ const DesktopHomeDemo: React.FC = () => {
       */}
 
       <CardGrid>
-        {/* Card 1: Recently visited / Most visited */}
+        {/* Card 1: Shift Clock */}
         <Card>
           <CardHeader>
             <CardTitleButton>
-              {recentCardSort === 'recent' ? 'Recently visited' : 'Most visited'}
+              Clock in
               <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
             </CardTitleButton>
             <CardMenuWrap>
@@ -2376,219 +2291,159 @@ const DesktopHomeDemo: React.FC = () => {
                 aria-label="More options"
                 appearance={Button.APPEARANCES.GHOST}
                 size={Button.SIZES.XS}
-                onClick={() => setCardMenu(cardMenu === 'recent' ? null : 'recent')}
+                onClick={() => setCardMenu(cardMenu === 'clock' ? null : 'clock')}
               />
-              {cardMenu === 'recent' && (
+              {cardMenu === 'clock' && (
                 <CardMenu>
-                  <CardMenuItem onClick={() => {
-                    setRecentCardSort(recentCardSort === 'recent' ? 'visited' : 'recent');
-                    setCardMenu(null);
-                  }}>
-                    {recentCardSort === 'recent' ? 'Sort by most visited' : 'Sort by recently visited'}
-                  </CardMenuItem>
-                  <CardMenuDivider />
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Clear history</CardMenuItem>
-                </CardMenu>
-              )}
-            </CardMenuWrap>
-          </CardHeader>
-          {(recentCardSort === 'recent' ? RECENT_ITEMS : MOST_VISITED_ITEMS).map(item => (
-            <RecentRow key={item.name}>
-              <RecentIconCircle $bg={item.avatar ? (item.color ?? 'transparent') : (theme as any).colorPrimary}>
-                {item.avatar ? <img src={item.avatar} alt="" /> : <Icon type={item.icon!} size={13} color="white" />}
-              </RecentIconCircle>
-              <RecentName>{item.name}</RecentName>
-              {'meta' in item && (item as any).meta && <RecentTime>{(item as any).meta}</RecentTime>}
-            </RecentRow>
-          ))}
-        </Card>
-
-        {/* Card 2: Needs your attention */}
-        <Card>
-          <CardHeader>
-            <CardTitleButton>
-              Priority to-dos
-              <span style={{ marginLeft: 2, position: 'relative', top: -2 }}><Atoms.Badge text="7" appearance={Atoms.Badge.APPEARANCES.PRIMARY_LIGHT} size={Atoms.Badge.SIZES.S} /></span>
-              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
-            </CardTitleButton>
-            <CardMenuWrap>
-              <Button.Icon
-                icon={Icon.TYPES.MORE_HORIZONTAL}
-                aria-label="More options"
-                appearance={Button.APPEARANCES.GHOST}
-                size={Button.SIZES.XS}
-                onClick={() => setCardMenu(cardMenu === 'tasks' ? null : 'tasks')}
-              />
-              {cardMenu === 'tasks' && (
-                <CardMenu>
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Mark all as read</CardMenuItem>
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Filter by type</CardMenuItem>
-                </CardMenu>
-              )}
-            </CardMenuWrap>
-          </CardHeader>
-          {TASK_ITEMS.map(item => (
-            <TaskRow key={item.name}>
-              <TaskIconCircle $bg={item.color}>
-                <img src={item.avatar} alt="" />
-              </TaskIconCircle>
-              <TaskBody>
-                <TaskTitle>{item.name}</TaskTitle>
-                <TaskMeta>{item.meta}</TaskMeta>
-              </TaskBody>
-            </TaskRow>
-          ))}
-        </Card>
-
-        {/* Card 3: Analytics */}
-        <Card>
-          <CardHeader>
-            <CardTitleButton>
-              Analytics
-              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
-            </CardTitleButton>
-            <CardMenuWrap>
-              <Button.Icon
-                icon={Icon.TYPES.MORE_HORIZONTAL}
-                aria-label="More options"
-                appearance={Button.APPEARANCES.GHOST}
-                size={Button.SIZES.XS}
-                onClick={() => setCardMenu(cardMenu === 'analytics' ? null : 'analytics')}
-              />
-              {cardMenu === 'analytics' && (
-                <CardMenu>
-                  <CardMenuItem onClick={() => setCardMenu(null)}>Customize analytics</CardMenuItem>
+                  <CardMenuItem onClick={() => setCardMenu(null)}>View timecard</CardMenuItem>
                   <CardMenuDivider />
                   <CardMenuItem onClick={() => setCardMenu(null)}>Hide card</CardMenuItem>
                 </CardMenu>
               )}
             </CardMenuWrap>
           </CardHeader>
-          {ANALYTICS_ITEMS.map(item => (
-            <AnalyticsRow key={item.title}>
-              <AnalyticsIconCircle $bg={(theme as any).colorSurfaceDim}>
-                <Icon type={item.icon} size={13} color={(theme as any).colorOnSurfaceVariant} />
+          <ShiftClockContent />
+          <CardActionFooter>
+            <Button appearance={Button.APPEARANCES.OUTLINE} size={Button.SIZES.M} isFullWidth>My schedule</Button>
+            <Button appearance={Button.APPEARANCES.PRIMARY} size={Button.SIZES.M} isFullWidth>Clock in</Button>
+          </CardActionFooter>
+        </Card>
+
+        {/* Card 2: My Pay */}
+        <Card>
+          <CardHeader>
+            <CardTitleButton>
+              Most recent pay
+              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
+            </CardTitleButton>
+            <CardMenuWrap>
+              <Button.Icon
+                icon={Icon.TYPES.MORE_HORIZONTAL}
+                aria-label="More options"
+                appearance={Button.APPEARANCES.GHOST}
+                size={Button.SIZES.XS}
+                onClick={() => setCardMenu(cardMenu === 'pay' ? null : 'pay')}
+              />
+              {cardMenu === 'pay' && (
+                <CardMenu>
+                  <CardMenuItem onClick={() => setCardMenu(null)}>View all paystubs</CardMenuItem>
+                  <CardMenuDivider />
+                  <CardMenuItem onClick={() => setCardMenu(null)}>Hide card</CardMenuItem>
+                </CardMenu>
+              )}
+            </CardMenuWrap>
+          </CardHeader>
+          <EarningsSummaryContent persona={user.persona as any} />
+          <CardActionFooter>
+            <Button appearance={Button.APPEARANCES.OUTLINE} size={Button.SIZES.M} isFullWidth>View paystubs</Button>
+          </CardActionFooter>
+        </Card>
+
+        {/* Card 3: Shift Schedules */}
+        <Card>
+          <CardHeader>
+            <CardTitleButton>
+              Schedule
+              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
+            </CardTitleButton>
+            <CardMenuWrap>
+              <Button.Icon
+                icon={Icon.TYPES.MORE_HORIZONTAL}
+                aria-label="More options"
+                appearance={Button.APPEARANCES.GHOST}
+                size={Button.SIZES.XS}
+                onClick={() => setCardMenu(cardMenu === 'schedule' ? null : 'schedule')}
+              />
+              {cardMenu === 'schedule' && (
+                <CardMenu>
+                  <CardMenuItem onClick={() => setCardMenu(null)}>View full schedule</CardMenuItem>
+                  <CardMenuDivider />
+                  <CardMenuItem onClick={() => setCardMenu(null)}>Hide card</CardMenuItem>
+                </CardMenu>
+              )}
+            </CardMenuWrap>
+          </CardHeader>
+          {[
+            { day: 'Mon', date: 'Apr 7', time: '9:00 AM – 5:00 PM', hours: '8h', today: true },
+            { day: 'Tue', date: 'Apr 8', time: 'Off', hours: '' },
+            { day: 'Wed', date: 'Apr 9', time: '11:00 AM – 7:00 PM', hours: '8h' },
+            { day: 'Thu', date: 'Apr 10', time: 'Off', hours: '' },
+            { day: 'Fri', date: 'Apr 11', time: '9:00 AM – 3:00 PM', hours: '6h' },
+          ].map(shift => (
+            <RecentRow key={shift.day}>
+              <RecentIconCircle $bg={(theme as any).colorSurfaceDim}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: (theme as any).colorOnSurfaceVariant, letterSpacing: '0.3px' }}>{shift.day.toUpperCase()}</span>
+              </RecentIconCircle>
+              <RecentName style={{ fontWeight: shift.time === 'Off' ? 400 : undefined, opacity: shift.time === 'Off' ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 4 }}>
+                {shift.time}
+                {shift.hours && <Icon type={Icon.TYPES.SWAP} size={14} color={(theme as any).colorOnSurfaceVariant} style={{ flexShrink: 0 }} />}
+              </RecentName>
+              {shift.hours && <RecentTime>{shift.hours}</RecentTime>}
+            </RecentRow>
+          ))}
+          <CardActionFooter>
+            <Button appearance={Button.APPEARANCES.OUTLINE} size={Button.SIZES.M} isFullWidth>Full schedule</Button>
+          </CardActionFooter>
+        </Card>
+
+        {/* Card 4: Benefits Overview */}
+        <Card>
+          <CardHeader>
+            <CardTitleButton>
+              Benefits
+              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color="currentColor" />
+            </CardTitleButton>
+            <CardMenuWrap>
+              <Button.Icon
+                icon={Icon.TYPES.MORE_HORIZONTAL}
+                aria-label="More options"
+                appearance={Button.APPEARANCES.GHOST}
+                size={Button.SIZES.XS}
+                onClick={() => setCardMenu(cardMenu === 'benefits' ? null : 'benefits')}
+              />
+              {cardMenu === 'benefits' && (
+                <CardMenu>
+                  <CardMenuItem onClick={() => setCardMenu(null)}>View all benefits</CardMenuItem>
+                  <CardMenuDivider />
+                  <CardMenuItem onClick={() => setCardMenu(null)}>Hide card</CardMenuItem>
+                </CardMenu>
+              )}
+            </CardMenuWrap>
+          </CardHeader>
+          {[
+            { icon: Icon.TYPES.HEART_FILLED, label: 'Medical', detail: 'Anthem Blue Cross PPO', color: (theme as any).colorPrimary },
+            { icon: Icon.TYPES.SHIELD_TOOTH_FILLED, label: 'Dental', detail: 'Delta Dental PPO', color: (theme as any).colorPrimary },
+            { icon: Icon.TYPES.EYE_FILLED, label: 'Vision', detail: 'VSP Choice Plan', color: (theme as any).colorPrimary },
+            { icon: Icon.TYPES['401K_FILLED'], label: '401(k)', detail: '8% contribution · 4% match', color: (theme as any).colorPrimary },
+          ].map(benefit => (
+            <AnalyticsRow key={benefit.label}>
+              <AnalyticsIconCircle $bg={benefit.color}>
+                <Icon type={benefit.icon} size={13} color="white" />
               </AnalyticsIconCircle>
               <AnalyticsBody>
-                <AnalyticsTitle>{item.title}</AnalyticsTitle>
-                <AnalyticsInsight>{item.insight}</AnalyticsInsight>
+                <AnalyticsTitle>{benefit.label}</AnalyticsTitle>
+                <AnalyticsInsight>{benefit.detail}</AnalyticsInsight>
               </AnalyticsBody>
-              {(() => {
-                const { line, area } = sparklinePaths(item.points, 48, 18);
-                return (
-                  <svg width="48" height="18" viewBox="0 0 48 18" fill="none" style={{ flexShrink: 0, display: 'none' }}>
-                    <polygon points={area} fill={(theme as any).colorPrimaryVariant} />
-                    <polyline
-                      points={line}
-                      stroke={(theme as any).colorPrimary}
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                    />
-                  </svg>
-                );
-              })()}
             </AnalyticsRow>
           ))}
+          <CardActionFooter>
+            <Button appearance={Button.APPEARANCES.OUTLINE} size={Button.SIZES.M} isFullWidth>View benefits</Button>
+          </CardActionFooter>
         </Card>
       </CardGrid>
 
-      <DashboardsWrap>
-        <DashboardTabBar>
-          {DASHBOARD_TABS.map(tab => (
-            <DashboardTabItem
-              key={tab.id}
-              $active={activeDashboard === tab.id}
-              onClick={() => setActiveDashboard(tab.id)}
-            >
-              {tab.name}
-            </DashboardTabItem>
-          ))}
-          <DashboardTabAdd aria-label="Add dashboard">
-            <Icon type={Icon.TYPES.ADD} size={16} color="currentColor" />
-          </DashboardTabAdd>
-          <DashboardTabSpacer />
-          <DashboardTabActions>
-            <Button.Icon
-              icon={Icon.TYPES.SETTINGS_OUTLINE}
-              aria-label="Dashboard settings"
-              appearance={Button.APPEARANCES.GHOST}
-              size={Button.SIZES.S}
-            />
-            <DashboardAllButton>All dashboards</DashboardAllButton>
-          </DashboardTabActions>
-        </DashboardTabBar>
-
-        {(() => {
-          const tab = DASHBOARD_TABS.find(t => t.id === activeDashboard) ?? DASHBOARD_TABS[0];
-          const filters = dashboardFilters[tab.id] ?? [];
-          return (
-            <>
-              <DashboardHeaderRow>
-                <DashboardTitleText>{tab.name}</DashboardTitleText>
-                <DashboardHeaderRight>
-                  <DashboardTimestamp>{tab.lastEdited}</DashboardTimestamp>
-                  <Button.Icon
-                    icon={Icon.TYPES.REFRESH}
-                    aria-label="Refresh"
-                    appearance={Button.APPEARANCES.GHOST}
-                    size={Button.SIZES.S}
-                  />
-                  <Button.Icon
-                    icon={Icon.TYPES.FILTER}
-                    aria-label="Filters"
-                    appearance={Button.APPEARANCES.GHOST}
-                    size={Button.SIZES.S}
-                  />
-                  <Button.Icon
-                    icon={Icon.TYPES.MORE_HORIZONTAL}
-                    aria-label="More options"
-                    appearance={Button.APPEARANCES.GHOST}
-                    size={Button.SIZES.S}
-                  />
-                </DashboardHeaderRight>
-              </DashboardHeaderRow>
-
-              <DashboardFiltersRow>
-                {filters.map(f => (
-                  <SplitButton
-                    key={f.id}
-                    appearance={SplitButton.APPEARANCES.OUTLINE}
-                    size={SplitButton.SIZES.XS}
-                    dropdownIcon={Icon.TYPES.CLOSE}
-                    dropdownList={[{ label: 'Remove filter', value: f.id }]}
-                    onDropdownChange={() => {
-                      setDashboardFilters(prev => ({
-                        ...prev,
-                        [tab.id]: prev[tab.id].filter(x => x.id !== f.id),
-                      }));
-                    }}
-                    trailingAriaLabel={`Remove ${f.label} filter`}
-                  >
-                    {f.label}
-                  </SplitButton>
-                ))}
-                <DashboardAddFilter
-                  onClick={() => {
-                    const newId = `f_${Date.now()}`;
-                    setDashboardFilters(prev => ({
-                      ...prev,
-                      [tab.id]: [...prev[tab.id], { id: newId, label: 'New filter' }],
-                    }));
-                  }}
-                >
-                  + Filter
-                </DashboardAddFilter>
-              </DashboardFiltersRow>
-
-              <DashboardPlaceholder>
-                Dashboard visualization for "{tab.name}"
-              </DashboardPlaceholder>
-            </>
-          );
-        })()}
-      </DashboardsWrap>
+      <EditWidgetsRow>
+        <Button
+          appearance={Button.APPEARANCES.OUTLINE}
+          size={Button.SIZES.S}
+          onClick={() => {}}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Icon type={Icon.TYPES.EDIT_OUTLINE} size={14} color="currentColor" />
+            Edit widgets
+          </span>
+        </Button>
+      </EditWidgetsRow>
 
       <ResourcesFooter>
         <ResourcesLabel>Company resources</ResourcesLabel>
@@ -2820,4 +2675,4 @@ const DesktopHomeDemo: React.FC = () => {
   );
 };
 
-export default DesktopHomeDemo;
+export default DesktopHomeDemoV2;
