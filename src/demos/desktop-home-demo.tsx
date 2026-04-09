@@ -1808,10 +1808,6 @@ const DesktopHomeDemo: React.FC = () => {
   const [createUrlError, setCreateUrlError] = useState('');
   const [createUrlTouched, setCreateUrlTouched] = useState(false);
   const [pulseDrawerOpen, setPulseDrawerOpen] = useState(false);
-  const [activeDashboard, setActiveDashboard] = useState(DASHBOARD_TABS[0].id);
-  const [dashboardFilters, setDashboardFilters] = useState<Record<string, DashboardFilter[]>>(
-    () => Object.fromEntries(DASHBOARD_TABS.map(t => [t.id, [...t.filters]])),
-  );
 
   const user = SAMPLE_USERS[userIdx];
   const enabledApps = useMemo(() => new Set(user.enabledApps ?? []), [user.enabledApps]);
@@ -2493,102 +2489,6 @@ const DesktopHomeDemo: React.FC = () => {
           ))}
         </Card>
       </CardGrid>
-
-      <DashboardsWrap>
-        <DashboardTabBar>
-          {DASHBOARD_TABS.map(tab => (
-            <DashboardTabItem
-              key={tab.id}
-              $active={activeDashboard === tab.id}
-              onClick={() => setActiveDashboard(tab.id)}
-            >
-              {tab.name}
-            </DashboardTabItem>
-          ))}
-          <DashboardTabAdd aria-label="Add dashboard">
-            <Icon type={Icon.TYPES.ADD} size={16} color="currentColor" />
-          </DashboardTabAdd>
-          <DashboardTabSpacer />
-          <DashboardTabActions>
-            <Button.Icon
-              icon={Icon.TYPES.SETTINGS_OUTLINE}
-              aria-label="Dashboard settings"
-              appearance={Button.APPEARANCES.GHOST}
-              size={Button.SIZES.S}
-            />
-            <DashboardAllButton>All dashboards</DashboardAllButton>
-          </DashboardTabActions>
-        </DashboardTabBar>
-
-        {(() => {
-          const tab = DASHBOARD_TABS.find(t => t.id === activeDashboard) ?? DASHBOARD_TABS[0];
-          const filters = dashboardFilters[tab.id] ?? [];
-          return (
-            <>
-              <DashboardHeaderRow>
-                <DashboardTitleText>{tab.name}</DashboardTitleText>
-                <DashboardHeaderRight>
-                  <DashboardTimestamp>{tab.lastEdited}</DashboardTimestamp>
-                  <Button.Icon
-                    icon={Icon.TYPES.REFRESH}
-                    aria-label="Refresh"
-                    appearance={Button.APPEARANCES.GHOST}
-                    size={Button.SIZES.S}
-                  />
-                  <Button.Icon
-                    icon={Icon.TYPES.FILTER}
-                    aria-label="Filters"
-                    appearance={Button.APPEARANCES.GHOST}
-                    size={Button.SIZES.S}
-                  />
-                  <Button.Icon
-                    icon={Icon.TYPES.MORE_HORIZONTAL}
-                    aria-label="More options"
-                    appearance={Button.APPEARANCES.GHOST}
-                    size={Button.SIZES.S}
-                  />
-                </DashboardHeaderRight>
-              </DashboardHeaderRow>
-
-              <DashboardFiltersRow>
-                {filters.map(f => (
-                  <SplitButton
-                    key={f.id}
-                    appearance={SplitButton.APPEARANCES.OUTLINE}
-                    size={SplitButton.SIZES.XS}
-                    dropdownIcon={Icon.TYPES.CLOSE}
-                    dropdownList={[{ label: 'Remove filter', value: f.id }]}
-                    onDropdownChange={() => {
-                      setDashboardFilters(prev => ({
-                        ...prev,
-                        [tab.id]: prev[tab.id].filter(x => x.id !== f.id),
-                      }));
-                    }}
-                    trailingAriaLabel={`Remove ${f.label} filter`}
-                  >
-                    {f.label}
-                  </SplitButton>
-                ))}
-                <DashboardAddFilter
-                  onClick={() => {
-                    const newId = `f_${Date.now()}`;
-                    setDashboardFilters(prev => ({
-                      ...prev,
-                      [tab.id]: [...prev[tab.id], { id: newId, label: 'New filter' }],
-                    }));
-                  }}
-                >
-                  + Filter
-                </DashboardAddFilter>
-              </DashboardFiltersRow>
-
-              <DashboardPlaceholder>
-                Dashboard visualization for "{tab.name}"
-              </DashboardPlaceholder>
-            </>
-          );
-        })()}
-      </DashboardsWrap>
 
       <ResourcesFooter>
         <ResourcesLabel>Company resources</ResourcesLabel>

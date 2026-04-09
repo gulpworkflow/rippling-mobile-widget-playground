@@ -124,7 +124,7 @@ const SSOItem = styled.a`
   padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space300};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
@@ -527,12 +527,12 @@ const QATile = styled.a<{ $index?: number }>`
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space250};
   padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space150};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
-  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutline};
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  transition: background 0.12s;
+  transition: background 0.12s, transform 0.15s cubic-bezier(0.2, 0, 0.4, 1);
   opacity: 0;
   animation: ${chipFadeIn} 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: ${({ $index = 0 }) => 200 + $index * 50}ms;
@@ -541,13 +541,17 @@ const QATile = styled.a<{ $index?: number }>`
   &:hover {
     background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
   }
+
+  &:active {
+    transform: scale(0.9);
+  }
 `;
 
 const QAIconBox = styled.div`
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceDim};
+  border-radius: 6px;
+  background: ${({ theme }) => (theme as StyledTheme).colorPrimary};
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -561,7 +565,7 @@ const QALabelWrap = styled.div`
 `;
 
 const QALabel = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMediumEmphasized};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   white-space: nowrap;
   overflow: hidden;
@@ -680,11 +684,10 @@ const PersonaHudSelect = styled.select`
 // ── Card Grid ───────────────────────────────────────────────────────────────
 
 const RECENT_ITEMS = [
-  { avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face', name: 'Alex Kim — Profile', meta: '1h ago', color: 'oklch(55% 0.1 200)' },
-  { icon: Icon.TYPES.CALENDAR_FILLED, name: 'Time Management', meta: '2h ago' },
-  { icon: Icon.TYPES.DOLLAR_CIRCLE_FILLED, name: 'Run Payroll — March', meta: '3h ago' },
-  { icon: Icon.TYPES.BAR_CHART_FILLED, name: 'Headcount Report Q1', meta: 'Yesterday' },
-  { icon: Icon.TYPES.TIME_FILLED, name: 'Time & Attendance Summary', meta: '2 days ago' },
+  { icon: Icon.TYPES.DOLLAR_CIRCLE_FILLED, name: 'Payroll overview', meta: 'in Payroll' },
+  { icon: Icon.TYPES.CREDIT_CARD_FILLED, name: 'Bills', meta: 'in Finance' },
+  { icon: Icon.TYPES.HEART_FILLED, name: 'COBRA', meta: 'in Benefits' },
+  { icon: Icon.TYPES.TALENT_FILLED, name: 'Review Cycles', meta: 'in Talent' },
 ];
 
 const MOST_VISITED_ITEMS = [
@@ -1637,11 +1640,55 @@ const DEPT_TABLE_DATA = [
   { dept: 'Legal', headcount: 12, newHires: 0, attrition: 0, openRoles: 1, trend: 0 },
 ];
 
+const PromptRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  margin: ${({ theme }) => (theme as StyledTheme).space2400} 0 20px 0;
+`;
+
 const PromptHeading = styled.h1`
   ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   text-align: left;
-  margin: ${({ theme }) => (theme as StyledTheme).space2400} 0 20px 0;
+  margin: ${({ theme }) => (theme as StyledTheme).space600} 0 0;
+`;
+
+const TaskBadge = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+  padding: 0;
+  margin-top: ${({ theme }) => (theme as StyledTheme).space200};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  cursor: pointer;
+  transition: background 0.12s;
+  flex-shrink: 0;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+  }
+`;
+
+const TaskBadgeDot = styled.span<{ $color: string }>`
+  width: 10px;
+  height: 10px;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
+  background: ${({ $color }) => $color};
+  flex-shrink: 0;
+`;
+
+const TaskBadgeRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space100};
+`;
+
+const TaskBadgeLabel = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
 `;
 
 const PromptCard = styled.div<{ $dropdownOpen?: boolean }>`
@@ -2096,9 +2143,9 @@ const PulsePostAction = styled.button`
 
 function getGreeting(): string {
   const h = new Date().getHours();
-  if (h < 12) return 'this morning';
-  if (h < 17) return 'this afternoon';
-  return 'this evening';
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
 }
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -2294,7 +2341,7 @@ const DesktopHomeDemo422: React.FC = () => {
       companyName={user.company}
       userInitial={user.name.charAt(0)}
       showNotificationBadge
-      notificationCount={2}
+      notificationCount={0}
       onPersonaSelect={() => setPersonaHudOpen(prev => !prev)}
       personaLabel={PERSONA_OPTIONS.find(p => p.id === user.persona)?.label}
     >
@@ -2596,7 +2643,14 @@ const DesktopHomeDemo422: React.FC = () => {
       )}
 
       <HomeContent>
-        <PromptHeading>What are you working on {getGreeting()}?</PromptHeading>
+        <PromptHeading>{getGreeting()}, {user.name.split(' ')[0]}</PromptHeading>
+        <TaskBadge>
+          <TaskBadgeRow>
+            <TaskBadgeDot $color="#5B9A8B" />
+            <TaskBadgeLabel>You have 12 to-dos</TaskBadgeLabel>
+            <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color={(theme as any).colorOnSurface} />
+          </TaskBadgeRow>
+        </TaskBadge>
         <PromptWrap ref={promptWrapRef}>
           <PromptCard $dropdownOpen={promptFocused && !promptValue} onClick={() => promptRef.current?.focus()}>
             <svg width="20" height="20" viewBox="0 0 26 26" fill="none" style={{ flexShrink: 0 }}>
@@ -2652,25 +2706,22 @@ const DesktopHomeDemo422: React.FC = () => {
             )}
           </ShortcutsHeader>
           <ShortcutsStrip>
-          {[
-            ...allQuickActionsRaw.filter(a => qaFavorites.has(a.id)).map(a => ({ id: a.id, label: a.label, icon: QUICK_ACTION_ICONS[a.id] || Icon.TYPES.LINK_OUTLET, url: undefined as string | undefined })),
-            ...customShortcuts.filter(s => qaFavorites.has(s.id)).map(s => ({ id: s.id, label: s.label, icon: Icon.TYPES.LINK_OUTLET, url: s.url })),
-          ].map((item, i) => (
-            <QATile key={item.id} $index={i} href={item.url} target={item.url ? '_blank' : undefined} rel={item.url ? 'noopener noreferrer' : undefined}>
+          {RECENT_ITEMS.map((item, i) => (
+            <QATile key={item.name} $index={i}>
               <QAIconBox>
-                  <Icon
-                    type={item.icon}
-                    size={16}
-                    color={(theme as any).colorOnSurface}
-                  />
-                </QAIconBox>
-                <QALabelWrap>
-                <QALabel>{item.label}</QALabel>
-                {QUICK_ACTION_META[item.id] && <QAMeta>{QUICK_ACTION_META[item.id]}</QAMeta>}
+                <Icon
+                  type={item.icon}
+                  size={20}
+                  color={(theme as any).colorOnPrimary}
+                />
+              </QAIconBox>
+              <QALabelWrap>
+                <QALabel>{item.name}</QALabel>
+                <QAMeta>{item.meta}</QAMeta>
               </QALabelWrap>
-                <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
-              </QATile>
-            ))}
+              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
+            </QATile>
+          ))}
             <ShortcutsEditButton>
               <Button.Icon
                 icon={Icon.TYPES.LIST_OUTLINE}
