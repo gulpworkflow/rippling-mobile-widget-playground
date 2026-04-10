@@ -528,7 +528,7 @@ const QATile = styled.a<{ $index?: number }>`
   gap: ${({ theme }) => (theme as StyledTheme).space250};
   padding: ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space150} ${({ theme }) => (theme as StyledTheme).space150};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
-  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutline};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -551,7 +551,7 @@ const QAIconBox = styled.div`
   width: 40px;
   height: 40px;
   border-radius: 6px;
-  background: ${({ theme }) => (theme as StyledTheme).colorPrimary};
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceDim};
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -684,10 +684,10 @@ const PersonaHudSelect = styled.select`
 // ── Card Grid ───────────────────────────────────────────────────────────────
 
 const RECENT_ITEMS = [
-  { icon: Icon.TYPES.DOLLAR_CIRCLE_FILLED, name: 'Payroll overview', meta: 'in Payroll' },
-  { icon: Icon.TYPES.CREDIT_CARD_FILLED, name: 'Bills', meta: 'in Finance' },
-  { icon: Icon.TYPES.HEART_FILLED, name: 'COBRA', meta: 'in Benefits' },
-  { icon: Icon.TYPES.TALENT_FILLED, name: 'Review Cycles', meta: 'in Talent' },
+  { icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, name: 'Payroll overview', meta: 'in Payroll' },
+  { icon: Icon.TYPES.CREDIT_CARD_OUTLINE, name: 'Bills', meta: 'in Finance' },
+  { icon: Icon.TYPES.HEART_OUTLINE, name: 'COBRA', meta: 'in Benefits' },
+  { icon: Icon.TYPES.TALENT_OUTLINE, name: 'Review Cycles', meta: 'in Talent' },
 ];
 
 const MOST_VISITED_ITEMS = [
@@ -1241,7 +1241,7 @@ const HomeContent = styled.div`
   max-width: 960px;
   margin: 0 auto;
   box-sizing: border-box;
-  min-height: 60vh;
+  min-height: 57vh;
 `;
 
 const AnalyticsSection = styled.div`
@@ -1652,7 +1652,7 @@ const PromptHeading = styled.h1`
   ${({ theme }) => (theme as StyledTheme).typestyleV2TitleLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   text-align: left;
-  margin: ${({ theme }) => (theme as StyledTheme).space600} 0 0;
+  margin: 124px 0 0;
 `;
 
 const TaskBadge = styled.div`
@@ -1894,6 +1894,112 @@ const DropdownRowIcon = styled.span`
 const DropdownRowText = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+// ── @ Mentions ──────────────────────────────────────────────────────────────
+
+const MENTION_RECENTLY_USED = [
+  { name: 'Finance', meta: 'Departments' },
+];
+
+const MENTION_EMPLOYEES = [
+  { name: 'Paul Best', dept: 'Product Design', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face' },
+  { name: 'Saha Hammari', dept: 'Product Design', avatar: 'https://images.unsplash.com/photo-1534751516642-a1af1ef26a56?w=80&h=80&fit=crop&crop=face' },
+  { name: 'Abhishek Bhardwaj', dept: 'Product Design', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face' },
+  { name: 'Rahul Gajjar', dept: 'Product Design', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face' },
+  { name: 'James Donovan', dept: 'Product Design', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face' },
+];
+
+const MENTION_DEPARTMENTS = ['Engineering', 'Sales', 'Product Design', 'Marketing', 'Finance'];
+
+const MentionDropdown = styled.div<{ $visible: boolean }>`
+  position: absolute;
+  top: calc(100% + ${({ theme }) => (theme as StyledTheme).space200});
+  left: 0;
+  width: 440px;
+  z-index: 30;
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  padding: ${({ theme }) => (theme as StyledTheme).space200} 0;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  pointer-events: ${({ $visible }) => ($visible ? 'auto' : 'none')};
+  transform: translateY(${({ $visible }) => ($visible ? '0' : '-8px')});
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  max-height: 400px;
+  overflow-y: auto;
+`;
+
+const MentionSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const MentionSectionChevron = styled.span`
+  display: flex;
+  align-items: center;
+`;
+
+const MentionRow = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  width: 100%;
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
+  }
+`;
+
+const MentionAvatar = styled.img`
+  width: 28px;
+  height: 28px;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
+  object-fit: cover;
+  flex-shrink: 0;
+`;
+
+const MentionName = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMediumEmphasized};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  flex: 1;
+  min-width: 0;
+`;
+
+const MentionMeta = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  flex-shrink: 0;
+`;
+
+const MentionMoreLink = styled.div`
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const MentionDivider = styled.div`
+  height: 1px;
+  background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  margin: ${({ theme }) => (theme as StyledTheme).space100} 0;
+`;
+
+const MentionAtSymbol = styled.div`
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorPrimary};
 `;
 
 // ── Company Feed ─────────────────────────────────────────────────────────────
@@ -2192,6 +2298,8 @@ const DesktopHomeDemo422: React.FC = () => {
 
   const [promptValue, setPromptValue] = useState('');
   const [promptFocused, setPromptFocused] = useState(false);
+  const [mentionOpen, setMentionOpen] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
   const promptWrapRef = useRef<HTMLDivElement>(null);
 
   const [qaFavorites, setQaFavorites] = useState<Set<string>>(() => new Set(quickActions.map(a => a.id)));
@@ -2247,6 +2355,43 @@ const DesktopHomeDemo422: React.FC = () => {
     });
     setShowCreateModal(false);
   };
+
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setPromptValue(val);
+    const cursorPos = e.target.selectionStart ?? val.length;
+    const textBeforeCursor = val.slice(0, cursorPos);
+    const atMatch = textBeforeCursor.match(/@([^\s]*)$/);
+    if (atMatch) {
+      setMentionOpen(true);
+      setMentionQuery(atMatch[1].toLowerCase());
+    } else {
+      setMentionOpen(false);
+      setMentionQuery('');
+    }
+  };
+
+  const handleMentionSelect = (name: string) => {
+    const cursorPos = promptRef.current?.selectionStart ?? promptValue.length;
+    const textBeforeCursor = promptValue.slice(0, cursorPos);
+    const atIdx = textBeforeCursor.lastIndexOf('@');
+    const before = promptValue.slice(0, atIdx);
+    const after = promptValue.slice(cursorPos);
+    setPromptValue(`${before}@${name} ${after}`);
+    setMentionOpen(false);
+    setMentionQuery('');
+    promptRef.current?.focus();
+  };
+
+  const filteredMentionEmployees = useMemo(() => {
+    if (!mentionQuery) return MENTION_EMPLOYEES;
+    return MENTION_EMPLOYEES.filter(e => e.name.toLowerCase().includes(mentionQuery));
+  }, [mentionQuery]);
+
+  const filteredMentionDepts = useMemo(() => {
+    if (!mentionQuery) return MENTION_DEPARTMENTS;
+    return MENTION_DEPARTMENTS.filter(d => d.toLowerCase().includes(mentionQuery));
+  }, [mentionQuery]);
 
   const handleDropdownItemClick = (text: string) => {
     setPromptValue(text);
@@ -2662,7 +2807,7 @@ const DesktopHomeDemo422: React.FC = () => {
               placeholder="Describe what you want to get done..."
               rows={1}
               value={promptValue}
-              onChange={e => setPromptValue(e.target.value)}
+              onChange={handlePromptChange}
               onFocus={() => setPromptFocused(true)}
             />
             <Button.Icon
@@ -2684,6 +2829,64 @@ const DesktopHomeDemo422: React.FC = () => {
               </DropdownRow>
             ))}
           </PromptDropdown>
+          <MentionDropdown $visible={mentionOpen}>
+            {!mentionQuery && (
+              <>
+                <MentionSectionHeader>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Icon type={Icon.TYPES.TIME_OUTLINE} size={14} color="currentColor" /> Recently used
+                  </span>
+                </MentionSectionHeader>
+                {MENTION_RECENTLY_USED.map(item => (
+                  <MentionRow key={item.name} onClick={() => handleMentionSelect(item.name)}>
+                    <MentionName>{item.name}</MentionName>
+                    <MentionMeta>{item.meta}</MentionMeta>
+                  </MentionRow>
+                ))}
+                <MentionDivider />
+              </>
+            )}
+            {filteredMentionEmployees.length > 0 && (
+              <>
+                <MentionSectionHeader>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Icon type={Icon.TYPES.MY_ACCOUNT_SETTINGS_OUTLINE} size={14} color="currentColor" /> Employees
+                  </span>
+                  <MentionSectionChevron>
+                    <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
+                  </MentionSectionChevron>
+                </MentionSectionHeader>
+                {filteredMentionEmployees.map(emp => (
+                  <MentionRow key={emp.name} onClick={() => handleMentionSelect(emp.name)}>
+                    <MentionAvatar src={emp.avatar} alt={emp.name} />
+                    <MentionName>{emp.name}</MentionName>
+                    <MentionMeta>{emp.dept}</MentionMeta>
+                  </MentionRow>
+                ))}
+                <MentionMoreLink>5 more</MentionMoreLink>
+                <MentionDivider />
+              </>
+            )}
+            {filteredMentionDepts.length > 0 && (
+              <>
+                <MentionSectionHeader>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Icon type={Icon.TYPES.HIERARCHY_HORIZONTAL_OUTLINE} size={14} color="currentColor" /> Departments
+                  </span>
+                  <MentionSectionChevron>
+                    <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
+                  </MentionSectionChevron>
+                </MentionSectionHeader>
+                {filteredMentionDepts.map(dept => (
+                  <MentionRow key={dept} onClick={() => handleMentionSelect(dept)}>
+                    <MentionName>{dept}</MentionName>
+                  </MentionRow>
+                ))}
+              </>
+            )}
+            <MentionDivider />
+            <MentionAtSymbol>@</MentionAtSymbol>
+          </MentionDropdown>
         </PromptWrap>
         <ShortcutsSection>
           <ShortcutsHeader>
@@ -2712,7 +2915,7 @@ const DesktopHomeDemo422: React.FC = () => {
                 <Icon
                   type={item.icon}
                   size={20}
-                  color={(theme as any).colorOnPrimary}
+                  color={(theme as any).colorOnSurface}
                 />
               </QAIconBox>
               <QALabelWrap>
