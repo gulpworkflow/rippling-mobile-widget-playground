@@ -442,7 +442,7 @@ const ShortcutsSection = styled.div`
   padding: 0 0 ${({ theme }) => (theme as StyledTheme).space1200} 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: ${({ theme }) => (theme as StyledTheme).space1600};
+  gap: ${({ theme }) => (theme as StyledTheme).space2400};
 `;
 
 const ShortcutsColumn = styled.div`
@@ -722,7 +722,7 @@ const PersonaHudSelect = styled.select`
 const RECENT_ITEMS = [
   { icon: Icon.TYPES.CREDIT_CARD_OUTLINE, name: 'Bills', context: 'Finance', meta: '2h ago' },
   { icon: Icon.TYPES.HEART_OUTLINE, name: 'COBRA', context: 'Benefits', meta: '1d ago' },
-  { icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, name: 'Payroll overview', context: '', meta: 'Yesterday' },
+  { icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, name: 'Payroll overview', context: '', meta: '1d ago' },
 ];
 
 const TODO_ITEMS = [
