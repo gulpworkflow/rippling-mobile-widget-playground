@@ -17,6 +17,7 @@ import WidgetCardFrameworkPage from './demos/widget-card-framework-page';
 import DesktopHomeDemo from './demos/desktop-home-demo';
 import DesktopHomeDemoV2 from './demos/desktop-home-demo-v2';
 import DesktopHomeDemo422 from './demos/desktop-home-demo-4-22';
+import DesktopHome422Shippable from './demos/desktop-home-4-22-shippable';
 
 // Initialize @rippling/ui package
 oneUiService.init({} as any);
@@ -84,6 +85,7 @@ init().then(() => {
             <Route path="/desktop-home-demo" element={<DesktopHomeDemo />} />
             <Route path="/desktop-home-demo-v2" element={<DesktopHomeDemoV2 />} />
             <Route path="/desktop-home-demo-4-22" element={<DesktopHomeDemo422 />} />
+            <Route path="/desktop-home-4-22-shippable" element={<DesktopHome422Shippable />} />
             
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

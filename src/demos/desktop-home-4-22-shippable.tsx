@@ -81,12 +81,11 @@ const SSOStrip = styled.div`
   top: 0;
   left: 0;
   right: 0;
-  height: ${({ theme }) => (theme as StyledTheme).space1200};
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
-  padding: 0 ${({ theme }) => (theme as StyledTheme).space600};
+  padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space600};
   border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   background: transparent;
   z-index: 1;
@@ -438,22 +437,53 @@ const QUICK_ACTION_META: Record<string, string> = {
 
 const ShortcutsSection = styled.div`
   width: 100%;
-  max-width: 960px;
-  margin: ${({ theme }) => (theme as StyledTheme).space1000} 0 0;
-  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space800} 0;
+  max-width: 744px;
+  margin: ${({ theme }) => (theme as StyledTheme).space600} 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
+  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space1200} 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${({ theme }) => (theme as StyledTheme).space1600};
 `;
 
-const ShortcutsHeader = styled.div`
+const ShortcutsColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const ShortcutsColumnHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => (theme as StyledTheme).space100};
-  position: relative;
+  justify-content: space-between;
+  margin-left: -12px;
 `;
 
-const ShortcutsLabel = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLargeEmphasized};
+const ShortcutsColumnRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: ${({ theme }) => (theme as StyledTheme).space300} 0;
+  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const ShortcutsRowLabel = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  flex: 1;
+  min-width: 0;
+`;
+
+const ShortcutsRowMeta = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   white-space: nowrap;
+`;
+
+const ShortcutsRowContext = styled.span`
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
 `;
 
 const ShortcutsDropdownToggle = styled.button`
@@ -685,10 +715,15 @@ const PersonaHudSelect = styled.select`
 // ── Card Grid ───────────────────────────────────────────────────────────────
 
 const RECENT_ITEMS = [
-  { icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, name: 'Payroll overview', meta: '2h ago' },
-  { icon: Icon.TYPES.CREDIT_CARD_OUTLINE, name: 'Bills', meta: '5h ago' },
-  { icon: Icon.TYPES.HEART_OUTLINE, name: 'COBRA', meta: 'Yesterday' },
-  { icon: Icon.TYPES.TALENT_OUTLINE, name: 'Review Cycles', meta: '2 days ago' },
+  { icon: Icon.TYPES.CREDIT_CARD_OUTLINE, name: 'Bills', context: 'Finance', meta: '2h ago' },
+  { icon: Icon.TYPES.HEART_OUTLINE, name: 'COBRA', context: 'Benefits', meta: '1d ago' },
+  { icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, name: 'Payroll overview', context: '', meta: 'Yesterday' },
+];
+
+const TODO_ITEMS = [
+  { icon: Icon.TYPES.PENDING_APPROVAL_OUTLINE, label: 'Approvals', count: '12 pending' },
+  { icon: Icon.TYPES.TASKS_OUTLINE, label: 'Overdue tasks', count: '2 items' },
+  { icon: Icon.TYPES.CALENDAR_OUTLINE, label: 'Due within 7 days', count: '1 item' },
 ];
 
 const MOST_VISITED_ITEMS = [
@@ -1224,25 +1259,20 @@ const AnalyticsInsight = styled.div`
 // ── Content ─────────────────────────────────────────────────────────────────
 
 const PageGradient = styled.div`
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, ${({ theme }) => (theme as StyledTheme).colorSurfaceDim} 35%, transparent) 0%,
-    ${({ theme }) => (theme as StyledTheme).colorSurface} 50%
-  );
+  background: ${({ theme }) => (theme as StyledTheme).colorSurface};
   min-height: 100%;
 `;
 
 const HomeContent = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding: 0 ${({ theme }) => (theme as StyledTheme).space800};
   position: relative;
   max-width: 960px;
   margin: 0 auto;
   box-sizing: border-box;
-  min-height: 57vh;
 `;
 
 const AnalyticsSection = styled.div`
@@ -1257,18 +1287,12 @@ const AnalyticsSection = styled.div`
 `;
 
 const AnalyticsTitleAndTabs = styled.div`
-  background: color-mix(in srgb, #e1d8d2 30%, transparent);
+  background: ${({ theme }) => (theme as StyledTheme).colorSurface};
   padding: 32px;
   padding-bottom: 12px;
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-
-  [data-active="true"] {
-    background: #e1d8d2 !important;
-    border-color: #e1d8d2 !important;
-    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface} !important;
-  }
 `;
 
 const DashboardContentWrap = styled.div`
@@ -1434,7 +1458,7 @@ const DashboardGrid = styled.div`
 const ChartCard = styled.div<{ $span?: number }>`
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
-  background: white;
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   padding: ${({ theme }) => (theme as StyledTheme).space500};
   grid-column: ${({ $span }) => $span ? `span ${$span}` : 'auto'};
   display: flex;
@@ -1662,10 +1686,10 @@ const PromptHeading = styled.h1`
 const GreetingRow = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
-  margin-top: 124px;
-  margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+  margin-top: 144px;
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
 `;
 
 const TodoAboveInput = styled.div`
@@ -1844,28 +1868,25 @@ const TodoHoverViewAll = styled.button`
   }
 `;
 
-const PromptCard = styled.div<{ $dropdownOpen?: boolean }>`
+const PromptCard = styled.div`
   width: 100%;
-  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
-  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  border-radius: ${({ $dropdownOpen, theme }) =>
-    $dropdownOpen
-      ? `${(theme as StyledTheme).shapeCorner3xl} ${(theme as StyledTheme).shapeCorner3xl} 0 0`
-      : (theme as StyledTheme).shapeCorner3xl};
-  box-shadow: ${({ $dropdownOpen }) =>
-    $dropdownOpen
-      ? '0 12px 32px rgba(0, 0, 0, 0.1)'
-      : '0px 1px 2px rgba(0, 0, 0, 0.1)'};
-  clip-path: ${({ $dropdownOpen }) =>
-    $dropdownOpen ? 'inset(-40px -40px 0 -40px)' : 'none'};
-  ${({ $dropdownOpen }) => $dropdownOpen && 'border-bottom-color: transparent;'}
-  padding: ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space600};
+  height: 120px;
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 1px 0px;
+  padding: 20px 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => (theme as StyledTheme).space300};
+  justify-content: space-between;
   cursor: text;
   box-sizing: border-box;
-  transition: border-radius 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  transition: border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: rgba(0, 0, 0, 0.2);
+  }
 `;
 
 const PromptInputRow = styled.div`
@@ -1880,10 +1901,10 @@ const PromptInput = styled.textarea`
   background: transparent;
   border: none;
   resize: none;
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-  min-height: 48px;
-  padding: 2px 0 0 0;
+  min-height: 20px;
+  padding: 0;
   margin: 0;
   line-height: 1.5;
 
@@ -1984,7 +2005,7 @@ const DEFAULT_SUGGESTIONS: string[] = [
 const PromptWrap = styled.div`
   position: relative;
   width: 100%;
-  max-width: 960px;
+  max-width: 768px;
   box-sizing: border-box;
 `;
 
@@ -2447,11 +2468,154 @@ function getTimeOfDay(): string {
   return 'evening';
 }
 
-// ── Component ───────────────────────────────────────────────────────────────
+// ── Isolated Prompt (own state = no full-page re-render on keystroke) ────────
 
-const DesktopHomeDemo422: React.FC = () => {
+const HomePrompt = React.memo(({ onSubmit }: { onSubmit?: () => void }) => {
   const { theme } = useTheme();
   const promptRef = useRef<HTMLTextAreaElement>(null);
+  const promptWrapRef = useRef<HTMLDivElement>(null);
+  const [promptValue, setPromptValue] = useState('');
+  const [mentionOpen, setMentionOpen] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+
+  const filteredMentionEmployees = useMemo(() => {
+    if (!mentionQuery) return MENTION_EMPLOYEES;
+    return MENTION_EMPLOYEES.filter(e => e.name.toLowerCase().includes(mentionQuery));
+  }, [mentionQuery]);
+
+  const filteredMentionDepts = useMemo(() => {
+    if (!mentionQuery) return MENTION_DEPARTMENTS;
+    return MENTION_DEPARTMENTS.filter(d => d.toLowerCase().includes(mentionQuery));
+  }, [mentionQuery]);
+
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setPromptValue(val);
+    const cursorPos = e.target.selectionStart ?? val.length;
+    const textBeforeCursor = val.slice(0, cursorPos);
+    const atMatch = textBeforeCursor.match(/@([^\s]*)$/);
+    if (atMatch) {
+      setMentionOpen(true);
+      setMentionQuery(atMatch[1].toLowerCase());
+    } else {
+      setMentionOpen(false);
+      setMentionQuery('');
+    }
+  };
+
+  const handleMentionSelect = (name: string) => {
+    const cursorPos = promptRef.current?.selectionStart ?? promptValue.length;
+    const textBeforeCursor = promptValue.slice(0, cursorPos);
+    const atIdx = textBeforeCursor.lastIndexOf('@');
+    const before = promptValue.slice(0, atIdx);
+    const after = promptValue.slice(cursorPos);
+    setPromptValue(`${before}@${name} ${after}`);
+    setMentionOpen(false);
+    setMentionQuery('');
+    promptRef.current?.focus();
+  };
+
+  return (
+    <PromptWrap ref={promptWrapRef}>
+      <PromptCard onClick={() => promptRef.current?.focus()}>
+        <PromptInputRow>
+          <PromptInput
+            ref={promptRef}
+            id="home-prompt"
+            placeholder="Ask, make, or search anything..."
+            rows={1}
+            value={promptValue}
+            onChange={handlePromptChange}
+          />
+        </PromptInputRow>
+        <PromptActions>
+          <Button
+            appearance={Button.APPEARANCES.OUTLINE}
+            size={Button.SIZES.S}
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); }}
+          >
+            Pro
+            <Icon type={Icon.TYPES.CHEVRON_DOWN} size={14} color="currentColor" />
+          </Button>
+          <PromptActionsRight>
+            <Button.Icon
+              icon={Icon.TYPES.ARROW_UP}
+              aria-label="Submit"
+              appearance={Button.APPEARANCES.PRIMARY}
+              size={Button.SIZES.S}
+              isDisabled={!promptValue.trim()}
+              onClick={(e: React.MouseEvent) => { e.stopPropagation(); onSubmit?.(); }}
+            />
+          </PromptActionsRight>
+        </PromptActions>
+      </PromptCard>
+      <MentionDropdown $visible={mentionOpen}>
+        {!mentionQuery && (
+          <>
+            <MentionSectionHeader>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Icon type={Icon.TYPES.TIME_OUTLINE} size={14} color="currentColor" /> Recently used
+              </span>
+            </MentionSectionHeader>
+            {MENTION_RECENTLY_USED.map(item => (
+              <MentionRow key={item.name} onClick={() => handleMentionSelect(item.name)}>
+                <MentionName>{item.name}</MentionName>
+                <MentionMeta>{item.meta}</MentionMeta>
+              </MentionRow>
+            ))}
+            <MentionDivider />
+          </>
+        )}
+        {filteredMentionEmployees.length > 0 && (
+          <>
+            <MentionSectionHeader>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Icon type={Icon.TYPES.MY_ACCOUNT_SETTINGS_OUTLINE} size={14} color="currentColor" /> Employees
+              </span>
+              <MentionSectionChevron>
+                <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
+              </MentionSectionChevron>
+            </MentionSectionHeader>
+            {filteredMentionEmployees.map(emp => (
+              <MentionRow key={emp.name} onClick={() => handleMentionSelect(emp.name)}>
+                <MentionAvatar src={emp.avatar} alt={emp.name} />
+                <MentionName>{emp.name}</MentionName>
+                <MentionMeta>{emp.dept}</MentionMeta>
+              </MentionRow>
+            ))}
+            <MentionMoreLink>5 more</MentionMoreLink>
+            <MentionDivider />
+          </>
+        )}
+        {filteredMentionDepts.length > 0 && (
+          <>
+            <MentionSectionHeader>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Icon type={Icon.TYPES.HIERARCHY_HORIZONTAL_OUTLINE} size={14} color="currentColor" /> Departments
+              </span>
+              <MentionSectionChevron>
+                <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
+              </MentionSectionChevron>
+            </MentionSectionHeader>
+            {filteredMentionDepts.map(dept => (
+              <MentionRow key={dept} onClick={() => handleMentionSelect(dept)}>
+                <MentionName>{dept}</MentionName>
+              </MentionRow>
+            ))}
+          </>
+        )}
+        <MentionDivider />
+        <MentionAtSymbol>@</MentionAtSymbol>
+      </MentionDropdown>
+    </PromptWrap>
+  );
+});
+
+// ── Component ───────────────────────────────────────────────────────────────
+
+const DesktopHome422Shippable: React.FC = () => {
+  const { theme } = useTheme();
+  const aiPanelRef = useRef<{ open: () => void } | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
@@ -2476,6 +2640,7 @@ const DesktopHomeDemo422: React.FC = () => {
   const [todoHoverOpen, setTodoHoverOpen] = useState(false);
   const todoHoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [shortcutsDropdownOpen, setShortcutsDropdownOpen] = useState(false);
+  const [activeSectionTab, setActiveSectionTab] = useState(0);
   const [activeAnalyticsTab, setActiveAnalyticsTab] = useState(0);
   const [analyticsFilters, setAnalyticsFilters] = useState<Record<number, DashboardFilterDef[]>>(
     () => Object.fromEntries(Object.entries(DASHBOARD_TAB_FILTERS).map(([k, v]) => [Number(k), [...v.filters]])),
@@ -2491,11 +2656,6 @@ const DesktopHomeDemo422: React.FC = () => {
     maxCount: 4,
   });
 
-  const [promptValue, setPromptValue] = useState('');
-  const [promptFocused, setPromptFocused] = useState(false);
-  const [mentionOpen, setMentionOpen] = useState(false);
-  const [mentionQuery, setMentionQuery] = useState('');
-  const promptWrapRef = useRef<HTMLDivElement>(null);
 
   const [qaFavorites, setQaFavorites] = useState<Set<string>>(() => new Set(quickActions.map(a => a.id)));
   useEffect(() => {
@@ -2549,49 +2709,6 @@ const DesktopHomeDemo422: React.FC = () => {
       return next;
     });
     setShowCreateModal(false);
-  };
-
-  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setPromptValue(val);
-    const cursorPos = e.target.selectionStart ?? val.length;
-    const textBeforeCursor = val.slice(0, cursorPos);
-    const atMatch = textBeforeCursor.match(/@([^\s]*)$/);
-    if (atMatch) {
-      setMentionOpen(true);
-      setMentionQuery(atMatch[1].toLowerCase());
-    } else {
-      setMentionOpen(false);
-      setMentionQuery('');
-    }
-  };
-
-  const handleMentionSelect = (name: string) => {
-    const cursorPos = promptRef.current?.selectionStart ?? promptValue.length;
-    const textBeforeCursor = promptValue.slice(0, cursorPos);
-    const atIdx = textBeforeCursor.lastIndexOf('@');
-    const before = promptValue.slice(0, atIdx);
-    const after = promptValue.slice(cursorPos);
-    setPromptValue(`${before}@${name} ${after}`);
-    setMentionOpen(false);
-    setMentionQuery('');
-    promptRef.current?.focus();
-  };
-
-  const filteredMentionEmployees = useMemo(() => {
-    if (!mentionQuery) return MENTION_EMPLOYEES;
-    return MENTION_EMPLOYEES.filter(e => e.name.toLowerCase().includes(mentionQuery));
-  }, [mentionQuery]);
-
-  const filteredMentionDepts = useMemo(() => {
-    if (!mentionQuery) return MENTION_DEPARTMENTS;
-    return MENTION_DEPARTMENTS.filter(d => d.toLowerCase().includes(mentionQuery));
-  }, [mentionQuery]);
-
-  const handleDropdownItemClick = (text: string) => {
-    setPromptValue(text);
-    setPromptFocused(false);
-    promptRef.current?.blur();
   };
 
   const handleTodoHoverEnter = () => {
@@ -2692,6 +2809,7 @@ const DesktopHomeDemo422: React.FC = () => {
       notificationCount={0}
       onPersonaSelect={() => setPersonaHudOpen(prev => !prev)}
       personaLabel={PERSONA_OPTIONS.find(p => p.id === user.persona)?.label}
+      aiPanelRef={aiPanelRef}
     >
       <PageGradient>
       <SSOStrip>
@@ -2713,9 +2831,6 @@ const DesktopHomeDemo422: React.FC = () => {
           </SSOItemWrap>
         ))}
         <SSOMoreWrap onClick={() => setDrawerOpen(true)}>
-          <SSOIcon>
-            <Icon type={Icon.TYPES.LIST_OUTLINE} size={16} color="currentColor" />
-          </SSOIcon>
           +{OVERFLOW_COUNT} more
         </SSOMoreWrap>
       </SSOStrip>
@@ -2996,218 +3111,77 @@ const DesktopHomeDemo422: React.FC = () => {
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none" style={{ flexShrink: 0 }}>
               <path d="M6.46408 13.0041C10.4723 12.3102 13.7947 9.62068 15.3717 5.99496C14.2054 4.2129 13.3799 2.18447 13.0021 0C11.8563 6.62731 6.62835 11.8544 0 13.0041C6.62835 14.1539 11.8563 19.381 13.0062 26.0083C13.384 23.8238 14.2095 21.7954 15.3758 20.0133C13.7947 16.3876 10.4764 13.6981 6.46819 13.0041H6.46408ZM18.4682 5.46527C17.8029 9.30862 14.7721 12.3389 10.9282 13.0041C14.7721 13.6693 17.7988 16.6997 18.4682 20.543C19.1335 16.6997 22.1643 13.6693 26.0083 13.0041C22.1643 12.3389 19.1376 9.30862 18.4682 5.46527Z" fill={(theme as any).colorPrimary} />
             </svg>
-            What are you working on this {getTimeOfDay()}?
+            What are you working on?
           </PromptHeading>
-          <TaskBadgeWrap
-            onMouseEnter={handleTodoHoverEnter}
-            onMouseLeave={handleTodoHoverLeave}
-          >
-            <TaskBadgePill>
+        </GreetingRow>
+        <HomePrompt onSubmit={() => aiPanelRef.current?.open()} />
+        <ShortcutsSection>
+          <ShortcutsColumn>
+            <ShortcutsColumnHeader>
               <Button
                 appearance={Button.APPEARANCES.GHOST}
                 size={Button.SIZES.S}
-                icon={Icon.TYPES.TASKS_OUTLINE}
                 onClick={() => {}}
-                style={{ whiteSpace: 'nowrap' }}
               >
-                To-do
+                Recents
+                <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
               </Button>
-              <TaskBadgeDivider />
-              <Status
-                appearance={Status.APPEARANCES.PRIMARY}
-                text="15 need review"
-                size={Status.SIZES.S}
-              />
-            </TaskBadgePill>
-            <TodoHoverCard $visible={todoHoverOpen}>
-              <TodoHoverHeader>
-                <TodoHoverTitle>Needs my attention</TodoHoverTitle>
-                <TodoHoverCount>15 total</TodoHoverCount>
-              </TodoHoverHeader>
-
-              {TODO_CATEGORIES.map(cat => (
-                <React.Fragment key={cat.label}>
-                  <TodoCategoryRow>
-                    <TodoCatIcon $overdue={!!cat.overdue}>
-                      <Icon type={cat.icon as any} size={14} color="white" />
-                    </TodoCatIcon>
-                    <TodoCatLabel>{cat.label}</TodoCatLabel>
-                    <TodoCatCount $overdue={!!cat.overdue}>{cat.count}</TodoCatCount>
-                  </TodoCategoryRow>
-                  {cat.label === 'Approvals' && APPROVAL_SUBCATS.map(sub => (
-                    <TodoSubcatRow key={sub.label}>
-                      <TodoSubcatLabel>{sub.label}</TodoSubcatLabel>
-                      <TodoSubcatCount>{sub.count}</TodoSubcatCount>
-                    </TodoSubcatRow>
-                  ))}
-                  {cat.label === 'Tasks' && TASK_SUBCATS.map(sub => (
-                    <TodoSubcatRow key={sub.label}>
-                      <TodoSubcatLabel>{sub.label}</TodoSubcatLabel>
-                      <TodoSubcatCount>{sub.count}</TodoSubcatCount>
-                    </TodoSubcatRow>
-                  ))}
-                </React.Fragment>
-              ))}
-
-              <TodoHoverFooter>
-                <TodoHoverViewAll>
-                  View all tasks
-                  <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color={(theme as any).colorPrimary} />
-                </TodoHoverViewAll>
-              </TodoHoverFooter>
-            </TodoHoverCard>
-          </TaskBadgeWrap>
-        </GreetingRow>
-        <PromptWrap ref={promptWrapRef}>
-          <PromptCard $dropdownOpen={promptFocused && !promptValue} onClick={() => promptRef.current?.focus()}>
-            <PromptInputRow>
-              <PromptInput
-                ref={promptRef}
-                id="home-prompt"
-                placeholder="Ask, make, or search anything..."
-                rows={2}
-                value={promptValue}
-                onChange={handlePromptChange}
-                onFocus={() => setPromptFocused(true)}
-              />
-            </PromptInputRow>
-            <PromptActions>
-              <Button.Icon
-                icon={Icon.TYPES.ADD}
-                aria-label="Add attachment"
-                appearance={Button.APPEARANCES.OUTLINE}
-                size={Button.SIZES.S}
-                onClick={(e: React.MouseEvent) => { e.stopPropagation(); }}
-              />
-              <PromptActionsRight>
-                <MicButton
-                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); }}
-                  aria-label="Voice input"
-                >
-                  <svg width="12" height="18" viewBox="0 0 12 18" fill="none">
-                    <path d="M1.25 8.54167C1.3102 11.0355 3.2896 13.125 5.83333 13.125C8.36464 13.125 10.4167 11.073 10.4167 8.54167V6.25H11.6667V8.54167C11.6667 11.5521 9.38605 14.0289 6.45833 14.3408V15.8333H10V17.0833H1.66667V15.8333H5.20833V14.34C2.22912 14.0226 0.0716984 11.4813 0 8.54167V6.25H1.25V8.54167Z" fill="currentColor"/>
-                    <path fillRule="evenodd" clipRule="evenodd" d="M5.83333 0C7.78934 0 9.375 1.58566 9.375 3.54167V8.54167C9.375 10.4977 7.78934 12.0833 5.83333 12.0833C3.87733 12.0833 2.29167 10.4977 2.29167 8.54167V3.54167C2.29167 1.58566 3.87733 0 5.83333 0ZM5.83333 1.25C4.56768 1.25 3.54167 2.27601 3.54167 3.54167V8.54167C3.54167 9.80732 4.56768 10.8333 5.83333 10.8333C7.09899 10.8333 8.125 9.80732 8.125 8.54167V3.54167C8.125 2.27601 7.09899 1.25 5.83333 1.25Z" fill="currentColor"/>
-                  </svg>
-                </MicButton>
-                <Button.Icon
-                  icon={Icon.TYPES.ARROW_UP}
-                  aria-label="Submit"
-                  appearance={Button.APPEARANCES.PRIMARY}
-                  size={Button.SIZES.S}
-                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); }}
-                />
-              </PromptActionsRight>
-            </PromptActions>
-          </PromptCard>
-          <PromptDropdown $visible={promptFocused && !promptValue}>
-            <PromptDivider />
-            {suggestions.map(text => (
-              <DropdownRow key={text} onClick={() => handleDropdownItemClick(text)}>
-                <DropdownRowIcon>
-                  ↪
-                </DropdownRowIcon>
-                <DropdownRowText>{text}</DropdownRowText>
-              </DropdownRow>
+            </ShortcutsColumnHeader>
+            {RECENT_ITEMS.map(item => (
+              <ShortcutsColumnRow key={item.name}>
+                <Icon type={item.icon} size={16} color={(theme as any).colorOnSurface} />
+                <ShortcutsRowLabel>
+                  {item.name}{item.context ? <ShortcutsRowContext> in {item.context}</ShortcutsRowContext> : ''}
+                </ShortcutsRowLabel>
+                <ShortcutsRowMeta>{item.meta}</ShortcutsRowMeta>
+              </ShortcutsColumnRow>
             ))}
-          </PromptDropdown>
-          <MentionDropdown $visible={mentionOpen}>
-            {!mentionQuery && (
-              <>
-                <MentionSectionHeader>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Icon type={Icon.TYPES.TIME_OUTLINE} size={14} color="currentColor" /> Recently used
-                  </span>
-                </MentionSectionHeader>
-                {MENTION_RECENTLY_USED.map(item => (
-                  <MentionRow key={item.name} onClick={() => handleMentionSelect(item.name)}>
-                    <MentionName>{item.name}</MentionName>
-                    <MentionMeta>{item.meta}</MentionMeta>
-                  </MentionRow>
-                ))}
-                <MentionDivider />
-              </>
-            )}
-            {filteredMentionEmployees.length > 0 && (
-              <>
-                <MentionSectionHeader>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Icon type={Icon.TYPES.MY_ACCOUNT_SETTINGS_OUTLINE} size={14} color="currentColor" /> Employees
-                  </span>
-                  <MentionSectionChevron>
-                    <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
-                  </MentionSectionChevron>
-                </MentionSectionHeader>
-                {filteredMentionEmployees.map(emp => (
-                  <MentionRow key={emp.name} onClick={() => handleMentionSelect(emp.name)}>
-                    <MentionAvatar src={emp.avatar} alt={emp.name} />
-                    <MentionName>{emp.name}</MentionName>
-                    <MentionMeta>{emp.dept}</MentionMeta>
-                  </MentionRow>
-                ))}
-                <MentionMoreLink>5 more</MentionMoreLink>
-                <MentionDivider />
-              </>
-            )}
-            {filteredMentionDepts.length > 0 && (
-              <>
-                <MentionSectionHeader>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Icon type={Icon.TYPES.HIERARCHY_HORIZONTAL_OUTLINE} size={14} color="currentColor" /> Departments
-                  </span>
-                  <MentionSectionChevron>
-                    <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
-                  </MentionSectionChevron>
-                </MentionSectionHeader>
-                {filteredMentionDepts.map(dept => (
-                  <MentionRow key={dept} onClick={() => handleMentionSelect(dept)}>
-                    <MentionName>{dept}</MentionName>
-                  </MentionRow>
-                ))}
-              </>
-            )}
-            <MentionDivider />
-            <MentionAtSymbol>@</MentionAtSymbol>
-          </MentionDropdown>
-        </PromptWrap>
-        <ShortcutsSection>
-          <ShortcutsHeader>
-            <ShortcutsLabel>Recently visited</ShortcutsLabel>
-          </ShortcutsHeader>
-          <ShortcutsStrip>
-          {RECENT_ITEMS.map((item, i) => (
-            <QATile key={item.name} $index={i}>
-              <QAIconBox>
-                <Icon
-                  type={item.icon}
-                  size={20}
-                  color={(theme as any).colorOnSurface}
-                />
-              </QAIconBox>
-              <QALabelWrap>
-                <QALabel>{item.name}</QALabel>
-                <QAMeta>{item.meta}</QAMeta>
-              </QALabelWrap>
-              <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={(theme as any).colorOnSurface} />
-            </QATile>
-          ))}
-            <ShortcutsEditButton>
-              <Button.Icon
-                icon={Icon.TYPES.LIST_OUTLINE}
-                aria-label="View all recently visited"
-                tip="View all recently visited"
+          </ShortcutsColumn>
+
+          <ShortcutsColumn>
+            <ShortcutsColumnHeader>
+              <Button
                 appearance={Button.APPEARANCES.GHOST}
                 size={Button.SIZES.S}
-                onClick={() => setQaDrawerOpen(true)}
+                onClick={() => {}}
+              >
+                To-dos
+                <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
+              </Button>
+              <Status
+                appearance={Status.APPEARANCES.PRIMARY}
+                text="14 need review"
+                size={Status.SIZES.M}
+                outlined
               />
-            </ShortcutsEditButton>
-          </ShortcutsStrip>
+            </ShortcutsColumnHeader>
+            {TODO_ITEMS.map(item => (
+              <ShortcutsColumnRow key={item.label}>
+                <Icon type={item.icon} size={16} color={(theme as any).colorOnSurface} />
+                <ShortcutsRowLabel>{item.label}</ShortcutsRowLabel>
+                <ShortcutsRowMeta>{item.count}</ShortcutsRowMeta>
+              </ShortcutsColumnRow>
+            ))}
+          </ShortcutsColumn>
         </ShortcutsSection>
       </HomeContent>
 
       <AnalyticsSection>
         <AnalyticsTitleAndTabs>
           <AnalyticsSectionHeader>
-            <AnalyticsSectionTitle>Analytics</AnalyticsSectionTitle>
+            <Tabs.LINK activeIndex={activeSectionTab} onChange={(idx: number) => setActiveSectionTab(idx)}>
+              <Tabs.Tab title="Analytics" />
+              <Tabs.Tab title="Apps" />
+              <Tabs.Tab title="Feed" />
+            </Tabs.LINK>
+          </AnalyticsSectionHeader>
+          <AnalyticsTabRow>
+          <Tabs activeIndex={activeAnalyticsTab} onChange={(idx: number) => setActiveAnalyticsTab(idx)}>
+            <Tabs.Tab title="Q1 Headcount by Department" />
+            <Tabs.Tab title="Revenue Overview" />
+            <Tabs.Tab title="Sales Pipeline" />
+            <Tabs.Tab title="+" />
+          </Tabs>
             <AnalyticsSectionActions>
               <Button.Icon
                 icon={Icon.TYPES.SETTINGS_OUTLINE}
@@ -3222,14 +3196,6 @@ const DesktopHomeDemo422: React.FC = () => {
                 All dashboards
               </Button>
             </AnalyticsSectionActions>
-          </AnalyticsSectionHeader>
-          <AnalyticsTabRow>
-          <Tabs activeIndex={activeAnalyticsTab} onChange={(idx: number) => setActiveAnalyticsTab(idx)}>
-            <Tabs.Tab title="Q1 Headcount by Department" />
-            <Tabs.Tab title="Revenue Overview" />
-            <Tabs.Tab title="Sales Pipeline" />
-            <Tabs.Tab title="+" />
-          </Tabs>
         </AnalyticsTabRow>
         </AnalyticsTitleAndTabs>
 
@@ -3624,4 +3590,4 @@ const DesktopHomeDemo422: React.FC = () => {
   );
 };
 
-export default DesktopHomeDemo422;
+export default DesktopHome422Shippable;

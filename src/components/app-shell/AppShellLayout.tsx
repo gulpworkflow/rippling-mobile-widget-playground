@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import Page from '@rippling/pebble/Page';
@@ -32,6 +32,7 @@ interface AppShellLayoutProps {
   notificationCount?: number;
   onPersonaSelect?: () => void;
   personaLabel?: string;
+  aiPanelRef?: React.MutableRefObject<{ open: () => void } | null>;
 }
 
 const AppContainer = styled.div`
@@ -149,6 +150,7 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   notificationCount = 0,
   onPersonaSelect,
   personaLabel,
+  aiPanelRef,
 }) => {
   const { theme, mode: currentMode } = usePebbleTheme();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
@@ -172,6 +174,14 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
     setExpansionPanelType(null);
     setExpansionPanelWidth(0);
   };
+
+  useEffect(() => {
+    if (aiPanelRef) {
+      aiPanelRef.current = {
+        open: () => handleToggleExpansionPanel('ai'),
+      };
+    }
+  });
 
   const handleTabChange = (index: number) => {
     setActiveTab(index);

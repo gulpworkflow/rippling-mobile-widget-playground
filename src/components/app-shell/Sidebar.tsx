@@ -114,7 +114,7 @@ const NavItemText = styled.div<{ isCollapsed: boolean }>`
 
 const NavSectionsWrapper = styled.div`
   padding: ${({ theme }) =>
-    `${(theme as StyledTheme).space250} ${(theme as StyledTheme).space200} 0`};
+    `0 ${(theme as StyledTheme).space200} 0`};
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => (theme as StyledTheme).space50};
