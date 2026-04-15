@@ -457,15 +457,20 @@ const ShortcutsColumnHeader = styled.div`
   margin-left: -12px;
 `;
 
-const ShortcutsColumnRow = styled.div`
+const ShortcutsColumnRow = styled.a`
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: ${({ theme }) => (theme as StyledTheme).space300} 0;
-  border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  padding: ${({ theme }) => (theme as StyledTheme).space200};
+  margin: 0 -${({ theme }) => (theme as StyledTheme).space200};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerMd};
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
 
-  &:last-child {
-    border-bottom: none;
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
   }
 `;
 
@@ -3121,14 +3126,14 @@ const DesktopHome422Shippable: React.FC = () => {
               <Button
                 appearance={Button.APPEARANCES.GHOST}
                 size={Button.SIZES.S}
+                icon={{ alignment: Button.ICON_ALIGNMENTS.RIGHT, type: Icon.TYPES.CHEVRON_RIGHT }}
                 onClick={() => {}}
               >
                 Recents
-                <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
               </Button>
             </ShortcutsColumnHeader>
             {RECENT_ITEMS.map(item => (
-              <ShortcutsColumnRow key={item.name}>
+              <ShortcutsColumnRow key={item.name} href="#" onClick={(e: React.MouseEvent) => e.preventDefault()}>
                 <Icon type={item.icon} size={16} color={(theme as any).colorOnSurface} />
                 <ShortcutsRowLabel>
                   {item.name}{item.context ? <ShortcutsRowContext> in {item.context}</ShortcutsRowContext> : ''}
@@ -3143,10 +3148,10 @@ const DesktopHome422Shippable: React.FC = () => {
               <Button
                 appearance={Button.APPEARANCES.GHOST}
                 size={Button.SIZES.S}
+                icon={{ alignment: Button.ICON_ALIGNMENTS.RIGHT, type: Icon.TYPES.CHEVRON_RIGHT }}
                 onClick={() => {}}
               >
                 To-dos
-                <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={14} color="currentColor" />
               </Button>
               <Status
                 appearance={Status.APPEARANCES.PRIMARY}
@@ -3156,7 +3161,7 @@ const DesktopHome422Shippable: React.FC = () => {
               />
             </ShortcutsColumnHeader>
             {TODO_ITEMS.map(item => (
-              <ShortcutsColumnRow key={item.label}>
+              <ShortcutsColumnRow key={item.label} href="#" onClick={(e: React.MouseEvent) => e.preventDefault()}>
                 <Icon type={item.icon} size={16} color={(theme as any).colorOnSurface} />
                 <ShortcutsRowLabel>{item.label}</ShortcutsRowLabel>
                 <ShortcutsRowMeta>{item.count}</ShortcutsRowMeta>
