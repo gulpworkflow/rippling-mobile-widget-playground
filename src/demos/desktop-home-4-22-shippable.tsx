@@ -491,6 +491,12 @@ const ShortcutsRowContext = styled.span`
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
 `;
 
+const ShortcutsEmptyLabel = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  padding: ${({ theme }) => (theme as StyledTheme).space200} 0;
+`;
+
 const ShortcutsDropdownToggle = styled.button`
   display: flex;
   align-items: center;
@@ -726,9 +732,9 @@ const RECENT_ITEMS = [
 ];
 
 const TODO_ITEMS = [
-  { icon: Icon.TYPES.PENDING_APPROVAL_OUTLINE, label: 'Approvals', count: '12 pending' },
-  { icon: Icon.TYPES.TASKS_OUTLINE, label: 'Overdue tasks', count: '2 items' },
+  { icon: Icon.TYPES.WARNING_TRIANGLE_OUTLINE, label: 'Overdue', count: '2 items' },
   { icon: Icon.TYPES.CALENDAR_OUTLINE, label: 'Due within 7 days', count: '1 item' },
+  { icon: Icon.TYPES.TASKS_OUTLINE, label: 'New', count: '12 unread' },
 ];
 
 const MOST_VISITED_ITEMS = [
@@ -2621,6 +2627,7 @@ const HomePrompt = React.memo(({ onSubmit }: { onSubmit?: () => void }) => {
 const DesktopHome422Shippable: React.FC = () => {
   const { theme } = useTheme();
   const aiPanelRef = useRef<{ open: () => void } | null>(null);
+  const isEmptyState = new URLSearchParams(window.location.search).has('empty');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
@@ -3132,7 +3139,9 @@ const DesktopHome422Shippable: React.FC = () => {
                 Recents
               </Button>
             </ShortcutsColumnHeader>
-            {RECENT_ITEMS.map(item => (
+            {isEmptyState ? (
+              <ShortcutsEmptyLabel>No recent activity</ShortcutsEmptyLabel>
+            ) : RECENT_ITEMS.map(item => (
               <ShortcutsColumnRow key={item.name} href="#" onClick={(e: React.MouseEvent) => e.preventDefault()}>
                 <Icon type={item.icon} size={16} color={(theme as any).colorOnSurface} />
                 <ShortcutsRowLabel>
@@ -3151,16 +3160,16 @@ const DesktopHome422Shippable: React.FC = () => {
                 icon={{ alignment: Button.ICON_ALIGNMENTS.RIGHT, type: Icon.TYPES.CHEVRON_RIGHT }}
                 onClick={() => {}}
               >
-                To-dos
+                Your tasks
               </Button>
               <Status
-                appearance={Status.APPEARANCES.PRIMARY}
-                text="14 need review"
+                appearance={isEmptyState ? Status.APPEARANCES.SUCCESS : Status.APPEARANCES.PRIMARY}
+                text={isEmptyState ? 'All caught up' : '14 pending'}
                 size={Status.SIZES.M}
                 outlined
               />
             </ShortcutsColumnHeader>
-            {TODO_ITEMS.map(item => (
+            {(isEmptyState ? TODO_ITEMS.map(i => ({ ...i, count: '0 items' })) : TODO_ITEMS).map(item => (
               <ShortcutsColumnRow key={item.label} href="#" onClick={(e: React.MouseEvent) => e.preventDefault()}>
                 <Icon type={item.icon} size={16} color={(theme as any).colorOnSurface} />
                 <ShortcutsRowLabel>{item.label}</ShortcutsRowLabel>
