@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
 import { css } from '@emotion/css';
@@ -17,6 +18,7 @@ import Atoms from '@rippling/pebble/Atoms';
 import Status from '@rippling/pebble/Status';
 import { AppShellLayout, NavSectionData } from '@/components/app-shell';
 import RipplingAiSpark from '@/assets/rippling-ai-spark.svg';
+import adDataCloudImg from '@/assets/ad-data-cloud.png';
 import ShiftClockContent from '@/widgets/ShiftClockWidget';
 import EarningsSummaryContent from '@/widgets/EarningsWidget';
 import { SAMPLE_USERS } from '@/data-models/sample-users';
@@ -721,6 +723,232 @@ const PersonaHudSelect = styled.select`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   cursor: pointer;
   outline: none;
+`;
+
+const HudSectionTitle = styled.div`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelSmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: ${({ theme }) => (theme as StyledTheme).space200};
+`;
+
+const HudRow = styled.label`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: ${({ theme }) => (theme as StyledTheme).space100} 0;
+`;
+
+const HudRowLabel = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+const HudToggle = styled.button<{ $on: boolean }>`
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  background: ${({ $on, theme }) => $on ? (theme as StyledTheme).colorPrimary : (theme as StyledTheme).colorOutlineVariant};
+  transition: background 0.15s ease;
+  display: flex;
+  align-items: center;
+
+  &::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.15s ease;
+    transform: translateX(${({ $on }) => $on ? '16px' : '0'});
+  }
+`;
+
+const HudDivider = styled.div`
+  height: 1px;
+  background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  margin: ${({ theme }) => (theme as StyledTheme).space100} 0;
+`;
+
+// ── Trial Banner ─────────────────────────────────────────────────────────────
+
+const TrialBanner = styled.div`
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 744px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space600};
+  background: linear-gradient(90deg, rgba(180, 200, 255, 0.45) 0%, rgba(210, 160, 230, 0.55) 50%, rgba(230, 160, 220, 0.5) 100%);
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  z-index: 0;
+  box-sizing: border-box;
+`;
+
+const TrialBannerText = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+`;
+
+const TrialBannerActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space400};
+`;
+
+const TrialBannerLink = styled.button`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  background: none;
+  border: none;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const TrialBannerCTA = styled.button`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorSurface};
+  }
+`;
+
+// ── Ad Banner ────────────────────────────────────────────────────────────────
+
+const AdBanner = styled.div`
+  max-width: 744px;
+  margin: -24px auto 64px auto;
+  box-sizing: border-box;
+`;
+
+const AdBannerCard = styled.div`
+  display: flex;
+  align-items: stretch;
+  background: ${({ theme }) => (theme as StyledTheme).colorSurfaceInverse};
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCorner2xl};
+  overflow: hidden;
+  position: relative;
+`;
+
+const AdBannerImage = styled.div`
+  width: 200px;
+  min-height: 120px;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+`;
+
+const AdBannerBody = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+  padding: ${({ theme }) => (theme as StyledTheme).space400} ${({ theme }) => (theme as StyledTheme).space600};
+`;
+
+const AdBannerEyebrow = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelSmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+`;
+
+const AdBannerTitle = styled.h3`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceInverse};
+  margin: 0;
+`;
+
+const AdBannerDesc = styled.p`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceInverse};
+  opacity: 0.7;
+  margin: 0;
+  max-width: 520px;
+`;
+
+const AdBannerActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space400};
+  margin-top: ${({ theme }) => (theme as StyledTheme).space100};
+`;
+
+const AdBannerCTA = styled.button`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  background: #F5A623;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  border: none;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+const AdBannerLink = styled.button`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelLarge};
+  background: none;
+  border: none;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceInverse};
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const AdBannerDismiss = styled.button`
+  position: absolute;
+  top: ${({ theme }) => (theme as StyledTheme).space300};
+  right: ${({ theme }) => (theme as StyledTheme).space300};
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceInverse};
+  opacity: 0.7;
+  display: grid;
+  place-items: center;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerSm};
+  transition: background 0.1s, opacity 0.1s;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+  }
 `;
 
 // ── Card Grid ───────────────────────────────────────────────────────────────
@@ -1694,12 +1922,17 @@ const PromptHeading = styled.h1`
   gap: ${({ theme }) => (theme as StyledTheme).space200};
 `;
 
-const GreetingRow = styled.div`
+const GreetingRow = styled.div<{ $sso?: boolean; $trial?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-top: 144px;
+  margin-top: ${({ $sso, $trial }) => {
+    let base = 96;
+    if ($sso) base += 48;
+    if ($trial) base += 44;
+    return `${base}px`;
+  }};
   margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
 `;
 
@@ -2627,7 +2860,26 @@ const HomePrompt = React.memo(({ onSubmit }: { onSubmit?: () => void }) => {
 const DesktopHome422Shippable: React.FC = () => {
   const { theme } = useTheme();
   const aiPanelRef = useRef<{ open: () => void } | null>(null);
-  const isEmptyState = new URLSearchParams(window.location.search).has('empty');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const hasSSO = searchParams.get('sso') !== '0';
+  const hasAI = searchParams.get('ai') !== '0';
+  const hasTrial = searchParams.get('trial') === '1';
+  const hasAds = searchParams.get('ads') === '1';
+  const [adDismissed, setAdDismissed] = useState(false);
+  const isEmptyState = searchParams.has('empty');
+
+  const toggleParam = useCallback((key: string, currentlyOn: boolean, defaultOn: boolean) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (defaultOn) {
+        currentlyOn ? next.set(key, '0') : next.delete(key);
+      } else {
+        currentlyOn ? next.delete(key) : next.set(key, '1');
+      }
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
@@ -2820,32 +3072,45 @@ const DesktopHome422Shippable: React.FC = () => {
       showNotificationBadge
       notificationCount={0}
       onPersonaSelect={() => setPersonaHudOpen(prev => !prev)}
-      personaLabel={PERSONA_OPTIONS.find(p => p.id === user.persona)?.label}
+      personaLabel="Prototype config"
       aiPanelRef={aiPanelRef}
+      hideAI={!hasAI}
     >
       <PageGradient>
-      <SSOStrip>
-        <SSOLabel>Quick sign-in</SSOLabel>
-        <SSODivider />
-        {PINNED_APPS.map(app => (
-          <SSOItemWrap key={app.name}>
-            <SSOItem>
-              <SSOIcon><img src={app.icon} alt={app.name} /></SSOIcon>
-              {app.name}
-            </SSOItem>
-            <SSOHoverCard>
-              <SSOHoverIcon><img src={app.icon} alt={app.name} /></SSOHoverIcon>
-              <SSOHoverBody>
-                <SSOHoverName>{app.name}</SSOHoverName>
-                <SSOHoverDesc>{app.desc}</SSOHoverDesc>
-              </SSOHoverBody>
-            </SSOHoverCard>
-          </SSOItemWrap>
-        ))}
-        <SSOMoreWrap onClick={() => setDrawerOpen(true)}>
-          +{OVERFLOW_COUNT} more
-        </SSOMoreWrap>
-      </SSOStrip>
+      {hasSSO && (
+        <SSOStrip>
+          <SSOLabel>Quick sign-in</SSOLabel>
+          <SSODivider />
+          {PINNED_APPS.map(app => (
+            <SSOItemWrap key={app.name}>
+              <SSOItem>
+                <SSOIcon><img src={app.icon} alt={app.name} /></SSOIcon>
+                {app.name}
+              </SSOItem>
+              <SSOHoverCard>
+                <SSOHoverIcon><img src={app.icon} alt={app.name} /></SSOHoverIcon>
+                <SSOHoverBody>
+                  <SSOHoverName>{app.name}</SSOHoverName>
+                  <SSOHoverDesc>{app.desc}</SSOHoverDesc>
+                </SSOHoverBody>
+              </SSOHoverCard>
+            </SSOItemWrap>
+          ))}
+          <SSOMoreWrap onClick={() => setDrawerOpen(true)}>
+            +{OVERFLOW_COUNT} more
+          </SSOMoreWrap>
+        </SSOStrip>
+      )}
+
+      {hasTrial && (
+        <TrialBanner style={{ top: hasSSO ? '80px' : '16px' }}>
+          <TrialBannerText>Your Rippling AI 30-day free trial is active!</TrialBannerText>
+          <TrialBannerActions>
+            <Button appearance={Button.APPEARANCES.GHOST} size={Button.SIZES.S}>Learn more</Button>
+            <Button appearance={Button.APPEARANCES.OUTLINE} size={Button.SIZES.S}>Talk to sales</Button>
+          </TrialBannerActions>
+        </TrialBanner>
+      )}
 
       <Drawer
         isVisible={drawerOpen}
@@ -3101,24 +3366,49 @@ const DesktopHome422Shippable: React.FC = () => {
           <PersonaHudBackdrop onClick={() => setPersonaHudOpen(false)} />
           <PersonaHud $visible>
             <PersonaHudHeader>
-              <PersonaHudLabel>Viewing as</PersonaHudLabel>
+              <PersonaHudLabel>Prototype config</PersonaHudLabel>
               <PersonaHudDismiss onClick={() => setPersonaHudOpen(false)}>×</PersonaHudDismiss>
             </PersonaHudHeader>
-            <PersonaHudSelect
-              value={userIdx}
-              onChange={e => { setUserIdx(Number(e.target.value)); setPersonaHudOpen(false); }}
-            >
-              {SAMPLE_USERS.map((u, i) => {
-                const pl = PERSONA_OPTIONS.find(p => p.id === u.persona)?.label ?? '';
-                return <option key={u.id} value={i}>{u.name} — {pl}</option>;
-              })}
-            </PersonaHudSelect>
+
+            <HudSectionTitle>Features</HudSectionTitle>
+            <HudRow>
+              <HudRowLabel>SSO strip</HudRowLabel>
+              <HudToggle $on={hasSSO} onClick={() => toggleParam('sso', hasSSO, true)} />
+            </HudRow>
+            <HudRow>
+              <HudRowLabel>AI assistant</HudRowLabel>
+              <HudToggle $on={hasAI} onClick={() => toggleParam('ai', hasAI, true)} />
+            </HudRow>
+
+            <HudDivider />
+            <HudSectionTitle>Banners</HudSectionTitle>
+            <HudRow>
+              <HudRowLabel>Trial banner</HudRowLabel>
+              <HudToggle $on={hasTrial} onClick={() => toggleParam('trial', hasTrial, false)} />
+            </HudRow>
+            <HudRow>
+              <HudRowLabel>Ads</HudRowLabel>
+              <HudToggle $on={hasAds} onClick={() => { toggleParam('ads', hasAds, false); setAdDismissed(false); }} />
+            </HudRow>
+
+            <HudDivider />
+            <HudSectionTitle>State</HudSectionTitle>
+            <HudRow>
+              <HudRowLabel>Empty (no tasks/recents)</HudRowLabel>
+              <HudToggle $on={isEmptyState} onClick={() => {
+                setSearchParams(prev => {
+                  const next = new URLSearchParams(prev);
+                  isEmptyState ? next.delete('empty') : next.set('empty', '');
+                  return next;
+                }, { replace: true });
+              }} />
+            </HudRow>
           </PersonaHud>
         </>
       )}
 
       <HomeContent>
-        <GreetingRow>
+        <GreetingRow $sso={hasSSO} $trial={hasTrial}>
           <PromptHeading>
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none" style={{ flexShrink: 0 }}>
               <path d="M6.46408 13.0041C10.4723 12.3102 13.7947 9.62068 15.3717 5.99496C14.2054 4.2129 13.3799 2.18447 13.0021 0C11.8563 6.62731 6.62835 11.8544 0 13.0041C6.62835 14.1539 11.8563 19.381 13.0062 26.0083C13.384 23.8238 14.2095 21.7954 15.3758 20.0133C13.7947 16.3876 10.4764 13.6981 6.46819 13.0041H6.46408ZM18.4682 5.46527C17.8029 9.30862 14.7721 12.3389 10.9282 13.0041C14.7721 13.6693 17.7988 16.6997 18.4682 20.543C19.1335 16.6997 22.1643 13.6693 26.0083 13.0041C22.1643 12.3389 19.1376 9.30862 18.4682 5.46527Z" fill={(theme as any).colorPrimary} />
@@ -3126,7 +3416,7 @@ const DesktopHome422Shippable: React.FC = () => {
             What are you working on?
           </PromptHeading>
         </GreetingRow>
-        <HomePrompt onSubmit={() => aiPanelRef.current?.open()} />
+        {hasAI && <HomePrompt onSubmit={() => aiPanelRef.current?.open()} />}
         <ShortcutsSection>
           <ShortcutsColumn>
             <ShortcutsColumnHeader>
@@ -3179,6 +3469,30 @@ const DesktopHome422Shippable: React.FC = () => {
           </ShortcutsColumn>
         </ShortcutsSection>
       </HomeContent>
+
+      {hasAds && !adDismissed && (
+        <AdBanner>
+          <AdBannerCard>
+            <AdBannerImage>
+              <img src={adDataCloudImg} alt="Rippling Data Cloud" />
+            </AdBannerImage>
+            <AdBannerBody>
+              <AdBannerEyebrow>Rippling Data Cloud</AdBannerEyebrow>
+              <AdBannerTitle>People and business data, together</AdBannerTitle>
+              <AdBannerDesc>
+                Connect Rippling with 3rd party business tools to get decision-ready insights and trigger automations, without spreadsheets or switching services.
+              </AdBannerDesc>
+              <AdBannerActions>
+                <AdBannerCTA>Start trial</AdBannerCTA>
+                <AdBannerLink>Learn more</AdBannerLink>
+              </AdBannerActions>
+            </AdBannerBody>
+            <AdBannerDismiss aria-label="Dismiss" onClick={() => setAdDismissed(true)}>
+              <Icon type={Icon.TYPES.CLOSE} size={16} color="currentColor" />
+            </AdBannerDismiss>
+          </AdBannerCard>
+        </AdBanner>
+      )}
 
       <AnalyticsSection>
         <AnalyticsTitleAndTabs>

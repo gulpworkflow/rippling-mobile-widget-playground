@@ -33,6 +33,7 @@ interface AppShellLayoutProps {
   onPersonaSelect?: () => void;
   personaLabel?: string;
   aiPanelRef?: React.MutableRefObject<{ open: () => void } | null>;
+  hideAI?: boolean;
 }
 
 const AppContainer = styled.div`
@@ -151,6 +152,7 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   onPersonaSelect,
   personaLabel,
   aiPanelRef,
+  hideAI = false,
 }) => {
   const { theme, mode: currentMode } = usePebbleTheme();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
@@ -203,7 +205,7 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
         notificationCount={notificationCount}
         onPersonaSelect={onPersonaSelect}
         personaLabel={personaLabel}
-        onAiToggle={() => handleToggleExpansionPanel('ai')}
+        onAiToggle={hideAI ? undefined : () => handleToggleExpansionPanel('ai')}
         aiPanelOpen={expansionPanelType === 'ai'}
         theme={theme}
       />

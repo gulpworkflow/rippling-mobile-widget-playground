@@ -94,7 +94,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
     menuItems.push(
       { isSeparator: true },
       {
-        label: personaLabel ? `Persona: ${personaLabel}` : 'Switch persona',
+        label: personaLabel || 'Switch persona',
         leftIconType: Icon.TYPES.PEOPLE_GROUP_OUTLINE,
         value: 'persona',
       },
