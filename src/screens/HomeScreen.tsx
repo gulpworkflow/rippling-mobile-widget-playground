@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import Icon from '@rippling/pebble/Icon';
+import Badge from '@rippling/pebble/Atoms/Badge';
 import RipplingLogoBlack from '@/assets/rippling-logo-black.svg';
 import RipplingLogoWhite from '@/assets/rippling-logo-white.svg';
 import { getQuickActions } from '@/data-models/quick-actions';
@@ -18,7 +19,7 @@ import DiscoveryAppList from '@/widgets/DiscoveryAppList';
 
 const WIDGET_SKELETON: Record<string, { archetype: SkeletonArchetype; rows?: number; columns?: number; height?: number }> = {
   shift_clock: { archetype: 'detail', rows: 2, height: 137 },
-  earnings_summary: { archetype: 'detail', rows: 1, height: 104 },
+  earnings_summary: { archetype: 'detail', rows: 3, height: 104 },
   inbox_preview: { archetype: 'list', rows: 2, height: 129 },
   quick_actions: { archetype: 'grid', columns: 4, height: 88 },
   recently_visited: { archetype: 'list', rows: 4, height: 235 },
@@ -78,20 +79,10 @@ const OfflineLabel = styled.span`
   color: ${({ theme }) => (theme as any).colorOnSurfaceVariant};
 `;
 
-const ChatBadge = styled.span`
+const ChatBadgeWrap = styled.span`
   position: absolute;
-  top: 2px;
-  right: 1px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 100px;
-  background: ${({ theme }) => (theme as any).colorError};
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 16px;
-  text-align: center;
+  top: 0;
+  right: -2px;
   pointer-events: none;
 `;
 
@@ -161,9 +152,11 @@ const HomeScreen: React.FC<{
               </OfflineIconCircle>
             </OfflineIndicator>
           ) : (
-            <ChatButtonWrap aria-label="Chat">
-              <Icon type={Icon.TYPES.COMMENTS_OUTLINE} size={22} color={sv} />
-              <ChatBadge>3</ChatBadge>
+            <ChatButtonWrap aria-label="Chat" style={{ marginRight: 8 }}>
+              <Icon type={Icon.TYPES.COMMENTS_OUTLINE} size={22} color={theme.colorOnSurface} />
+              <ChatBadgeWrap>
+                <Badge text="3" appearance={Badge.APPEARANCES.PRIMARY_DARK} size={Badge.SIZES.XS} />
+              </ChatBadgeWrap>
             </ChatButtonWrap>
           )}
         </HeaderRight>

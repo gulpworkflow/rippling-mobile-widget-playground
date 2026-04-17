@@ -135,6 +135,18 @@ const MobileHomeDemo: React.FC = () => {
   const [loadingKey, setLoadingKey] = useState(0);
   const [loadingRunning, setLoadingRunning] = useState(isLoading);
 
+  const toggleSearchParam = useCallback((key: string) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (next.get(key) === '1') {
+        next.delete(key);
+      } else {
+        next.set(key, '1');
+      }
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
   useEffect(() => {
     if (!isLoading) { setLoadingRunning(false); return; }
     setLoadingRunning(true);
@@ -171,6 +183,9 @@ const MobileHomeDemo: React.FC = () => {
             leftToggleRef={leftToggleRef}
             onToggle={() => setLeftPanelOpen(prev => !prev)}
             darkMode={darkMode}
+            isLoading={isLoading}
+            isError={isError}
+            isOffline={isOffline}
           />
           {isLoading && (
             <div style={{ position: 'fixed', top: 112, left: 16, zIndex: 100 }}>
@@ -210,6 +225,12 @@ const MobileHomeDemo: React.FC = () => {
             open={leftPanelOpen}
             darkMode={darkMode}
             setDarkMode={setDarkMode}
+            isLoading={isLoading}
+            isError={isError}
+            isOffline={isOffline}
+            onToggleLoading={() => toggleSearchParam('loading')}
+            onToggleError={() => toggleSearchParam('error')}
+            onToggleOffline={() => toggleSearchParam('offline')}
           />
           <RightHudPanel
             panelRef={rightPanelRef}

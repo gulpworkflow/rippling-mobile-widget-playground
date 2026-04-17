@@ -258,6 +258,18 @@ const HudEditButton = styled.button`
   }
 `;
 
+const HudStateIndicator = styled.span<{ $active: boolean }>`
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: ${({ $active }) => $active ? 'rgba(239, 68, 68, 0.15)' : 'var(--chrome-overlay)'};
+  color: ${({ $active }) => $active ? '#ef4444' : 'var(--chrome-text-muted)'};
+  border: 1px solid ${({ $active }) => $active ? 'rgba(239, 68, 68, 0.3)' : 'var(--chrome-border-subtle)'};
+`;
+
 // --- Shared HUD Chip Components ---
 
 const HudChipWrapper = styled.div<{ $position: 'left' | 'right' }>`
@@ -352,22 +364,33 @@ const HudChipPill = styled.span`
   background: var(--chrome-overlay);
 `;
 
+const HudChipPillAlert = styled.span`
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+`;
+
 // --- System Status Chip ---
 
 interface SystemStatusSummaryProps {
   leftToggleRef: React.Ref<HTMLButtonElement>;
   onToggle: () => void;
   darkMode: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
+  isOffline?: boolean;
 }
 
 export const SystemStatusSummary: React.FC<SystemStatusSummaryProps> = ({
-  leftToggleRef, onToggle, darkMode,
+  leftToggleRef, onToggle, darkMode, isLoading, isError, isOffline,
 }) => {
   const cardStyle = {
     background: darkMode ? '#1a1a1a' : '#ffffff',
     color: darkMode ? '#fff' : '#1a1a1a',
     borderColor: darkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)',
   };
+  const hasOverride = isLoading || isError || isOffline;
   return (
     <HudChipWrapper $position="left">
       <HudChipEyebrow>System status</HudChipEyebrow>
@@ -381,6 +404,10 @@ export const SystemStatusSummary: React.FC<SystemStatusSummaryProps> = ({
           <HudChipTitle>iOS</HudChipTitle>
           <HudChipPills>
             <HudChipPill>{darkMode ? 'Dark mode' : 'Light mode'}</HudChipPill>
+            {isLoading && <HudChipPillAlert>Loading</HudChipPillAlert>}
+            {isError && <HudChipPillAlert>Error</HudChipPillAlert>}
+            {isOffline && <HudChipPillAlert>Offline</HudChipPillAlert>}
+            {!hasOverride && <HudChipPill>Normal</HudChipPill>}
           </HudChipPills>
         </HudChipContent>
       </HudChipCard>
@@ -438,12 +465,43 @@ interface LeftHudPanelProps {
   open: boolean;
   darkMode: boolean;
   setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading: boolean;
+  isError: boolean;
+  isOffline: boolean;
+  onToggleLoading: () => void;
+  onToggleError: () => void;
+  onToggleOffline: () => void;
 }
 
-export const LeftHudPanel: React.FC<LeftHudPanelProps> = ({ panelRef, open, darkMode, setDarkMode }) => (
+export const LeftHudPanel: React.FC<LeftHudPanelProps> = ({
+  panelRef, open, darkMode, setDarkMode,
+  isLoading, isError, isOffline,
+  onToggleLoading, onToggleError, onToggleOffline,
+}) => (
   <HudPanel ref={panelRef} position="left" open={open} style={{ background: darkMode ? '#1a1a1a' : '#ffffff', color: darkMode ? '#fff' : '#1a1a1a' }}>
     <HudTitle>System</HudTitle>
     <HudSections>
+      <HudCard>
+        <HudCardHeader>
+          State Overrides
+          <HudStateIndicator $active={isLoading || isError || isOffline}>
+            {isLoading || isError || isOffline ? 'Active' : 'Normal'}
+          </HudStateIndicator>
+        </HudCardHeader>
+        <HudRow>
+          <HudRowLabel>Loading</HudRowLabel>
+          <HudToggleSwitch on={isLoading} onClick={onToggleLoading} />
+        </HudRow>
+        <HudRow>
+          <HudRowLabel>Error</HudRowLabel>
+          <HudToggleSwitch on={isError} onClick={onToggleError} />
+        </HudRow>
+        <HudRow>
+          <HudRowLabel>Offline</HudRowLabel>
+          <HudToggleSwitch on={isOffline} onClick={onToggleOffline} />
+        </HudRow>
+      </HudCard>
+
       <HudCard>
         <HudCardHeader>Navigation</HudCardHeader>
         <HudRow><HudRowLabel>Tab bar style</HudRowLabel><HudRowPlaceholder variant="dropdown" /></HudRow>

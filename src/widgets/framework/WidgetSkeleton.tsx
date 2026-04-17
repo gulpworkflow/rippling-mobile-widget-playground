@@ -7,8 +7,10 @@ const Col: React.FC<{ gap?: number; children: React.ReactNode; style?: React.CSS
   <div style={{ display: 'flex', flexDirection: 'column', gap, width: '100%', ...style }}>{children}</div>
 );
 
-const ListSkeleton: React.FC<{ rows: number }> = ({ rows }) => (
-  <Skeleton animation="wave">
+type SkeletonAnim = 'wave' | 'none';
+
+const ListSkeleton: React.FC<{ rows: number; anim: SkeletonAnim }> = ({ rows, anim }) => (
+  <Skeleton animation={anim}>
     <Col gap={0}>
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} style={{
@@ -25,8 +27,8 @@ const ListSkeleton: React.FC<{ rows: number }> = ({ rows }) => (
   </Skeleton>
 );
 
-const GridSkeleton: React.FC<{ columns: number }> = ({ columns }) => (
-  <Skeleton animation="wave">
+const GridSkeleton: React.FC<{ columns: number; anim: SkeletonAnim }> = ({ columns, anim }) => (
+  <Skeleton animation={anim}>
     <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', width: '100%', padding: '8px 0 4px' }}>
       {Array.from({ length: columns }, (_, i) => (
         <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, paddingTop: 8 }}>
@@ -43,8 +45,8 @@ const GridSkeleton: React.FC<{ columns: number }> = ({ columns }) => (
 
 const BAR_WIDTHS = ['80%', '65%', '70%', '55%'];
 
-const DetailSkeleton: React.FC<{ rows: number }> = ({ rows }) => (
-  <Skeleton animation="wave">
+const DetailSkeleton: React.FC<{ rows: number; anim: SkeletonAnim }> = ({ rows, anim }) => (
+  <Skeleton animation={anim}>
     <Col gap={16}>
       <Skeleton width="60%" lineHeight={28} />
       {Array.from({ length: rows }, (_, i) => (
@@ -65,13 +67,15 @@ export const WidgetBodySkeleton: React.FC<{
   archetype: SkeletonArchetype;
   rows?: number;
   columns?: number;
-}> = ({ archetype, rows, columns }) => {
+  frozen?: boolean;
+}> = ({ archetype, rows, columns, frozen }) => {
+  const anim: SkeletonAnim = frozen ? 'none' : 'wave';
   switch (archetype) {
     case 'list':
-      return <ListSkeleton rows={rows ?? 2} />;
+      return <ListSkeleton rows={rows ?? 2} anim={anim} />;
     case 'grid':
-      return <GridSkeleton columns={columns ?? 4} />;
+      return <GridSkeleton columns={columns ?? 4} anim={anim} />;
     case 'detail':
-      return <DetailSkeleton rows={rows ?? 2} />;
+      return <DetailSkeleton rows={rows ?? 2} anim={anim} />;
   }
 };

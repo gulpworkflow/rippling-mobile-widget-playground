@@ -18,6 +18,7 @@ import DesktopHomeDemo from './demos/desktop-home-demo';
 import DesktopHomeDemoV2 from './demos/desktop-home-demo-v2';
 import DesktopHomeDemo422 from './demos/desktop-home-demo-4-22';
 import DesktopHome422Shippable from './demos/desktop-home-4-22-shippable';
+import DesktopHomeB from './demos/desktop-home-b';
 
 // Initialize @rippling/ui package
 oneUiService.init({} as any);
@@ -86,6 +87,7 @@ init().then(() => {
             <Route path="/desktop-home-demo-v2" element={<DesktopHomeDemoV2 />} />
             <Route path="/desktop-home-demo-4-22" element={<DesktopHomeDemo422 />} />
             <Route path="/desktop-home-4-22-shippable" element={<DesktopHome422Shippable />} />
+            <Route path="/desktop-home-b" element={<DesktopHomeB />} />
             
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

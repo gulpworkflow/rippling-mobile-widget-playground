@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
+import { keyframes, css } from '@emotion/react';
 import Icon from '@rippling/pebble/Icon';
 import Skeleton, { SkeletonVariant } from '@rippling/pebble/Skeleton';
 import type { WidgetCardProps } from './types';
@@ -123,17 +124,95 @@ export const ContentSlot = styled.div`
   font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
 `;
 
+const SKELETON_PHASE_MS = 1500;
+const CROSSFADE_MS = 350;
+const CROSSFADE_EASE = 'cubic-bezier(0.2, 0, 0, 1)';
+
+const skeletonDim = keyframes`
+  from { opacity: 1; }
+  to { opacity: 0.2; }
+`;
+
+const errorReveal = keyframes`
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const contentReveal = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`;
+
+const ContentFadeIn = styled.div`
+  animation: ${contentReveal} ${CROSSFADE_MS}ms ${CROSSFADE_EASE} both;
+`;
+
+const CrossfadeWrap = styled.div`
+  position: relative;
+`;
+
+const SkeletonBackdrop = styled.div<{ $settled: boolean }>`
+  ${({ $settled }) => $settled
+    ? css`opacity: 0.2;`
+    : css`animation: ${skeletonDim} ${CROSSFADE_MS}ms ${CROSSFADE_EASE} forwards;`
+  }
+`;
+
+const ErrorOverlay = styled.div<{ $settled: boolean }>`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  ${({ $settled }) => $settled
+    ? css`opacity: 1;`
+    : css`animation: ${errorReveal} ${CROSSFADE_MS}ms ${CROSSFADE_EASE} forwards;`
+  }
+`;
+
 const WidgetCard: React.FC<WidgetCardProps> = ({ title, meta, children, actions, footer, surfaceVariant, outlineVariant, primaryColor, onTitleClick, disabled, loading, skeleton, skeletonRows, skeletonColumns, skeletonHeight, error }) => {
   const hasError = !!error;
+
+  const [errorEntrance, setErrorEntrance] = useState<'skeleton' | 'crossfade' | 'settled' | null>(
+    () => (hasError && skeleton) ? 'skeleton' : null
+  );
+
+  useEffect(() => {
+    if (hasError && skeleton) {
+      setErrorEntrance('skeleton');
+      const t1 = setTimeout(() => setErrorEntrance('crossfade'), SKELETON_PHASE_MS);
+      const t2 = setTimeout(() => setErrorEntrance('settled'), SKELETON_PHASE_MS + CROSSFADE_MS);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+    setErrorEntrance(null);
+  }, [hasError, skeleton]);
+
+  const inErrorSkeleton = errorEntrance === 'skeleton';
+  const inCrossfade = errorEntrance === 'crossfade';
+  const isSettled = errorEntrance === 'settled';
+  const showLoadingChrome = (loading && !hasError) || inErrorSkeleton;
+
   const isInteractive = !disabled && !loading && !hasError;
   const TitleWrapper = (onTitleClick && isInteractive) ? WidgetCardTitleButton : WidgetCardTitleGroup;
-  const showSkeleton = loading && skeleton && !hasError;
-  const contentRef = React.useRef<HTMLDivElement>(null);
-  const measuredHeight = React.useRef<number | undefined>(undefined);
+  const showSkeleton = (loading && skeleton && !hasError) || (inErrorSkeleton && !!skeleton);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const measuredHeight = useRef<number | undefined>(undefined);
   const errorMessage = typeof error === 'string' ? error : 'Could not load';
-  const buttonsDisabled = disabled || hasError;
+  const wasLoading = useRef(false);
+  const [fadeIn, setFadeIn] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (showLoadingChrome) {
+      wasLoading.current = true;
+    } else if (wasLoading.current && !hasError) {
+      wasLoading.current = false;
+      setFadeIn(true);
+      const t = setTimeout(() => setFadeIn(false), CROSSFADE_MS);
+      return () => clearTimeout(t);
+    }
+  }, [showLoadingChrome, hasError]);
+
+  useEffect(() => {
     if (!showSkeleton && !hasError && contentRef.current) {
       measuredHeight.current = contentRef.current.scrollHeight;
     }
@@ -142,7 +221,24 @@ const WidgetCard: React.FC<WidgetCardProps> = ({ title, meta, children, actions,
   const bodyHeight = measuredHeight.current ?? skeletonHeight;
 
   const renderBody = () => {
-    if (hasError) {
+    if ((inCrossfade || isSettled) && skeleton) {
+      return (
+        <CrossfadeWrap>
+          <SkeletonBackdrop $settled={isSettled}>
+            <div style={bodyHeight ? { height: bodyHeight, overflow: 'hidden' } : undefined}>
+              <WidgetBodySkeleton archetype={skeleton} rows={skeletonRows} columns={skeletonColumns} frozen />
+            </div>
+          </SkeletonBackdrop>
+          <ErrorOverlay $settled={isSettled}>
+            <WidgetErrorBody>
+              <Icon type={Icon.TYPES.WARNING_TRIANGLE_OUTLINE} size={24} color="currentColor" />
+              <WidgetErrorMessage>{errorMessage}</WidgetErrorMessage>
+            </WidgetErrorBody>
+          </ErrorOverlay>
+        </CrossfadeWrap>
+      );
+    }
+    if (hasError && !inErrorSkeleton) {
       return (
         <WidgetErrorBody>
           <Icon type={Icon.TYPES.WARNING_TRIANGLE_OUTLINE} size={24} color="currentColor" />
@@ -157,7 +253,8 @@ const WidgetCard: React.FC<WidgetCardProps> = ({ title, meta, children, actions,
         </div>
       );
     }
-    return <div ref={contentRef}>{children}</div>;
+    const content = <div ref={contentRef}>{children}</div>;
+    return fadeIn ? <ContentFadeIn key="reveal">{content}</ContentFadeIn> : content;
   };
 
   return (
@@ -167,10 +264,8 @@ const WidgetCard: React.FC<WidgetCardProps> = ({ title, meta, children, actions,
           <WidgetCardTitle surfaceVariant={surfaceVariant}>{title}</WidgetCardTitle>
           {onTitleClick && isInteractive && <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={surfaceVariant || 'rgba(0, 0, 0, 0.45)'} />}
         </TitleWrapper>
-        {loading && !hasError ? (
-          <WidgetCardMeta><Skeleton animation="wave" variant={SkeletonVariant.BOX} width={60} height={20} borderRadius={10} /></WidgetCardMeta>
-        ) : (
-          meta && <WidgetCardMeta>{meta}</WidgetCardMeta>
+        {!showLoadingChrome && meta && (
+          fadeIn ? <ContentFadeIn><WidgetCardMeta>{meta}</WidgetCardMeta></ContentFadeIn> : <WidgetCardMeta>{meta}</WidgetCardMeta>
         )}
       </WidgetCardHeader>
       <WidgetCardBody>
@@ -178,19 +273,39 @@ const WidgetCard: React.FC<WidgetCardProps> = ({ title, meta, children, actions,
       </WidgetCardBody>
       {actions && actions.length > 0 && (
         <WidgetCardFooter>
-          {loading && !hasError ? (
+          {(inCrossfade || isSettled) ? (
+            <SkeletonBackdrop $settled={isSettled} style={{ width: '100%' }}>
+              <Skeleton animation="none">
+                <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                  {actions.map(a => (
+                    <div key={a.label} style={{ flex: 1 }}>
+                      <Skeleton width="100%" lineHeight={36} borderRadius={10} />
+                    </div>
+                  ))}
+                </div>
+              </Skeleton>
+            </SkeletonBackdrop>
+          ) : showLoadingChrome ? (
             <Skeleton animation="wave">
               <div style={{ display: 'flex', gap: 8, width: '100%' }}>
                 {actions.map(a => (
                   <div key={a.label} style={{ flex: 1 }}>
-                    <Skeleton variant={SkeletonVariant.BOX} width="100%" height={36} borderRadius={10} />
+                    <Skeleton width="100%" lineHeight={36} borderRadius={10} />
                   </div>
                 ))}
               </div>
             </Skeleton>
+          ) : fadeIn ? (
+            <ContentFadeIn style={{ display: 'contents' }}>
+              {actions.map(a => (
+                <WidgetFooterButton key={a.label} variant={a.variant || 'primary'} primaryColor={primaryColor} $disabled={disabled} onClick={disabled ? undefined : a.onClick}>
+                  {a.label}
+                </WidgetFooterButton>
+              ))}
+            </ContentFadeIn>
           ) : (
             actions.map(a => (
-              <WidgetFooterButton key={a.label} variant={a.variant || 'primary'} primaryColor={primaryColor} $disabled={buttonsDisabled} onClick={buttonsDisabled ? undefined : a.onClick}>
+              <WidgetFooterButton key={a.label} variant={a.variant || 'primary'} primaryColor={primaryColor} $disabled={disabled} onClick={disabled ? undefined : a.onClick}>
                 {a.label}
               </WidgetFooterButton>
             ))
