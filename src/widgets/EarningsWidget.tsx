@@ -105,23 +105,24 @@ const EARNINGS_CONTRACTOR = {
   ],
 };
 
-const EarningsSummaryContent: React.FC<{ persona: PersonaId }> = ({ persona }) => {
+const EarningsSummaryContent: React.FC<{ persona: PersonaId; disabled?: boolean }> = ({ persona, disabled }) => {
   const data = persona === 'hourly_operator'
     ? EARNINGS_HOURLY
     : persona === 'contractor'
       ? EARNINGS_CONTRACTOR
       : EARNINGS_SALARIED;
+  const dimStyle = disabled ? { opacity: 0.4 } : undefined;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', paddingBottom: 8 }}>
       <EarningsMainValue>{data.mainValue}</EarningsMainValue>
-      <EarningsSegmentedBar>
+      <EarningsSegmentedBar style={dimStyle}>
         {data.segments.map((s, i) => (
           <EarningsSegment key={i} width={s.width} color={s.color} />
         ))}
       </EarningsSegmentedBar>
       {data.rows.map((r, i) => (
         <EarningsBreakdownRow key={i}>
-          <EarningsBreakdownDot color={r.color} />
+          <EarningsBreakdownDot color={r.color} style={dimStyle} />
           <EarningsBreakdownLabel>{r.label}</EarningsBreakdownLabel>
           <EarningsBreakdownValue>{r.value}</EarningsBreakdownValue>
         </EarningsBreakdownRow>

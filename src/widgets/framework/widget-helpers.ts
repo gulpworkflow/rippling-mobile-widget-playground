@@ -16,6 +16,17 @@ export const WIDGET_ACTIONS: Record<string, WidgetAction[]> = {
   ],
 };
 
+const ADMIN_PERSONAS: PersonaId[] = ['functional_admin', 'executive_owner'];
+
+export function getWidgetActions(widgetId: string, persona?: PersonaId): WidgetAction[] | undefined {
+  if (WIDGET_ACTIONS[widgetId]) return WIDGET_ACTIONS[widgetId];
+  if (widgetId === 'inbox_preview') {
+    const label = persona && ADMIN_PERSONAS.includes(persona) ? 'View all approvals' : 'Manage tasks';
+    return [{ label, variant: 'secondary' }];
+  }
+  return undefined;
+}
+
 export const EARNINGS_TITLE_BY_PERSONA: Partial<Record<PersonaId, string>> = {
   hourly_operator: 'My Pay',
   contractor: 'Invoices',
@@ -25,8 +36,6 @@ export const EARNINGS_TITLE_BY_PERSONA: Partial<Record<PersonaId, string>> = {
   functional_admin: 'My Pay',
   executive_owner: 'My Pay',
 };
-
-const ADMIN_PERSONAS: PersonaId[] = ['functional_admin', 'executive_owner'];
 
 export function widgetIdToTitle(id: string, persona?: PersonaId): string {
   if (id === 'inbox_preview' && persona === 'employee_self_service') return 'Priority tasks';

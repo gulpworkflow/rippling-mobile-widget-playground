@@ -86,7 +86,7 @@ const TEAMMATE_AVATARS = [
   { initials: 'AZ', bg: '#8D6E7B' },
 ];
 
-const ShiftClockContent: React.FC = () => (
+const ShiftClockContent: React.FC<{ disabled?: boolean }> = ({ disabled }) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%' }}>
     <ShiftTimeRow>Today 9:00 AM – 5:00 PM</ShiftTimeRow>
     <ShiftDetailGrid>
@@ -96,7 +96,7 @@ const ShiftClockContent: React.FC = () => (
       </ShiftDetailCell>
       <ShiftDetailCell>
         <ShiftDetailLabel>Teammates</ShiftDetailLabel>
-        <AvatarStack>
+        <AvatarStack style={disabled ? { opacity: 0.4 } : undefined}>
           {TEAMMATE_AVATARS.map((t, i) => (
             <AvatarBubble key={i} bg={t.bg} offset={i === 0 ? 0 : -6}>{t.initials}</AvatarBubble>
           ))}

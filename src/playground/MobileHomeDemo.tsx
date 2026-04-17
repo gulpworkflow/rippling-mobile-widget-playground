@@ -10,6 +10,8 @@ import { Canvas, PhoneMockup } from '@/playground/PhoneFrame';
 import ThemedPhoneScreen from '@/playground/ThemedPhoneScreen';
 import { SystemStatusSummary, UserIntentSummary, LeftHudPanel, RightHudPanel, MobileHudSheet } from '@/playground/HudPanels';
 import AppsModal from '@/playground/AppsModal';
+import Button from '@rippling/pebble/Button';
+import Icon from '@rippling/pebble/Icon';
 
 const MobileHomeDemo: React.FC = () => {
   const { theme } = usePebbleTheme();
@@ -127,6 +129,18 @@ const MobileHomeDemo: React.FC = () => {
   }, [leftPanelOpen, rightPanelOpen]);
 
   const isEmbed = searchParams.get('embed') === '1';
+  const isOffline = searchParams.get('offline') === '1';
+  const isLoading = searchParams.get('loading') === '1';
+  const isError = searchParams.get('error') === '1';
+  const [loadingKey, setLoadingKey] = useState(0);
+  const [loadingRunning, setLoadingRunning] = useState(isLoading);
+
+  useEffect(() => {
+    if (!isLoading) { setLoadingRunning(false); return; }
+    setLoadingRunning(true);
+    const timer = setTimeout(() => setLoadingRunning(false), 4000);
+    return () => clearTimeout(timer);
+  }, [isLoading, loadingKey]);
 
   useEffect(() => {
     if (isEmbed) {
@@ -158,6 +172,19 @@ const MobileHomeDemo: React.FC = () => {
             onToggle={() => setLeftPanelOpen(prev => !prev)}
             darkMode={darkMode}
           />
+          {isLoading && (
+            <div style={{ position: 'fixed', top: 112, left: 16, zIndex: 100 }}>
+              <Button
+                appearance={Button.APPEARANCES.GHOST}
+                size={Button.SIZES.S}
+                icon={{ type: Icon.TYPES.REFRESH_OUTLINE, alignment: Button.ICON_ALIGNMENTS.LEFT }}
+                isDisabled={loadingRunning}
+                onClick={() => setLoadingKey(k => k + 1)}
+              >
+                Re-run loading state
+              </Button>
+            </div>
+          )}
           <UserIntentSummary
             persona={persona}
             personaAvatar={personaAvatar}
@@ -228,6 +255,10 @@ const MobileHomeDemo: React.FC = () => {
               onboarding={onboarding}
               personaAvatar={personaAvatar}
               darkMode={darkMode}
+              isOffline={isOffline}
+              isLoading={isLoading}
+              loadingKey={loadingKey}
+              isError={isError}
               onAvatarTap={isEmbed ? undefined : () => setMobileHudVisible(prev => !prev)}
             />
           </ThemeProvider>

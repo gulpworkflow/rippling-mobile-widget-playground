@@ -105,19 +105,6 @@ const InboxTaskDue = styled.div`
   flex-shrink: 0;
 `;
 
-const InboxManageButton = styled.button`
-  width: 100%;
-  padding: 10px 16px;
-  margin-top: 8px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: transparent;
-  border: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant || 'rgba(0,0,0,0.12)'};
-  color: ${({ theme }) => (theme as any).colorOnSurface || '#000'};
-  cursor: pointer;
-`;
 
 const EMPLOYEE_TASKS = [
   { id: '1', title: 'Training and courses', subtitle: '2 items', due: '5d', icon: Icon.TYPES.STAR_OUTLINE },
@@ -177,30 +164,30 @@ const ADMIN_TASKS: AdminTask[] = [
 
 const ADMIN_PERSONAS: PersonaId[] = ['functional_admin', 'executive_owner'];
 
-const InboxPreviewContent: React.FC<{ persona?: PersonaId }> = ({ persona }) => {
+const InboxPreviewContent: React.FC<{ persona?: PersonaId; disabled?: boolean }> = ({ persona, disabled }) => {
   const { theme } = usePebbleTheme();
   const variantColor = theme.colorOnSurfaceVariant;
   const isAdmin = persona && ADMIN_PERSONAS.includes(persona);
+  const dimStyle = disabled ? { opacity: 0.4 } as const : undefined;
 
   if (isAdmin) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         {ADMIN_TASKS.slice(0, 2).map(t => (
           <InboxTaskRow key={t.id}>
-            <AvatarCircle $bg={t.avatarColor}>{t.initials}</AvatarCircle>
+            <AvatarCircle $bg={t.avatarColor} style={dimStyle}>{t.initials}</AvatarCircle>
             <InboxTaskBody>
               <InboxTaskTitle>{t.name}</InboxTaskTitle>
               <InboxTaskSubtitle>{t.description}</InboxTaskSubtitle>
               <InboxTaskMeta>
                 {t.badges.map((b, i) => (
-                  <MetaBadge key={i} $variant={b.variant}>{b.label}</MetaBadge>
+                  <MetaBadge key={i} $variant={b.variant} style={dimStyle}>{b.label}</MetaBadge>
                 ))}
                 <MetaCategory>{t.category}</MetaCategory>
               </InboxTaskMeta>
             </InboxTaskBody>
           </InboxTaskRow>
         ))}
-        <InboxManageButton>View all approvals</InboxManageButton>
       </div>
     );
   }
@@ -209,7 +196,7 @@ const InboxPreviewContent: React.FC<{ persona?: PersonaId }> = ({ persona }) => 
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
       {EMPLOYEE_TASKS.map(t => (
         <InboxTaskRow key={t.id}>
-          <InboxTaskIcon>
+          <InboxTaskIcon style={dimStyle}>
             <Icon type={t.icon} size={20} color="#fff" />
           </InboxTaskIcon>
           <InboxTaskBody>
@@ -222,7 +209,6 @@ const InboxPreviewContent: React.FC<{ persona?: PersonaId }> = ({ persona }) => 
           </InboxTaskDue>
         </InboxTaskRow>
       ))}
-      <InboxManageButton>Manage tasks</InboxManageButton>
     </div>
   );
 };

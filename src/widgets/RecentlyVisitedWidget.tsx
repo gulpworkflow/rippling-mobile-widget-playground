@@ -90,14 +90,15 @@ const RECENT_ITEMS: RecentItem[] = [
   },
 ];
 
-const RecentlyVisitedContent: React.FC = () => {
+const RecentlyVisitedContent: React.FC<{ disabled?: boolean }> = ({ disabled }) => {
   const { theme } = usePebbleTheme();
   const variantColor = theme.colorOnSurfaceVariant;
+  const dimStyle = disabled ? { opacity: 0.4 } as const : undefined;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
       {RECENT_ITEMS.map(item => (
         <VisitedRow key={item.id}>
-          <VisitedIcon>
+          <VisitedIcon style={dimStyle}>
             <Icon type={item.icon} size={18} color={variantColor} />
           </VisitedIcon>
           <VisitedBody>

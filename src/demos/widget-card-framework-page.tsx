@@ -6,6 +6,8 @@ import Icon from '@rippling/pebble/Icon';
 import Button from '@rippling/pebble/Button';
 import Status from '@rippling/pebble/Status';
 import WidgetCard, { ContentSlot } from '@/widgets/framework/WidgetCard';
+import { WidgetBodySkeleton } from '@/widgets/framework/WidgetSkeleton';
+import ShiftClockContent from '@/widgets/ShiftClockWidget';
 import baseComponentImg from '@/assets/widget-card-base-component.png';
 import homeScreenImg from '@/assets/widget-card-home-screen.png';
 import todayPaystubImg from '@/assets/widget-today-paystub.png';
@@ -355,6 +357,78 @@ const AnnotationText = styled.div`
 const AnnotationStrong = styled.span`
   color: ${({ theme }: T) => theme.colorOnSurface};
   font-weight: 600;
+`;
+
+/* ================================================================
+   Disabled state — side-by-side
+   ================================================================ */
+
+const DisabledCompareGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${({ theme }: T) => theme.space800};
+  margin-bottom: ${({ theme }: T) => theme.space1200};
+`;
+
+const CompareSlot = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }: T) => theme.space300};
+`;
+
+const CompareLabel = styled.div`
+  ${({ theme }: T) => theme.typestyleV2LabelMedium};
+  color: ${({ theme }: T) => theme.colorOnSurfaceVariant};
+  text-align: center;
+`;
+
+/* ================================================================
+   Loading state — archetype specimens
+   ================================================================ */
+
+const ArchetypeGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: ${({ theme }: T) => theme.space600};
+  margin-top: ${({ theme }: T) => theme.space1200};
+`;
+
+const ArchetypeCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }: T) => theme.space400};
+`;
+
+const ArchetypeSpecimen = styled.div`
+  background: ${({ theme }: T) => theme.colorSurfaceContainerLow};
+  border-radius: ${({ theme }: T) => theme.shapeCorner2xl};
+  padding: ${({ theme }: T) => theme.space600};
+`;
+
+const ArchetypeName = styled.h4`
+  ${({ theme }: T) => theme.typestyleV2TitleSmall};
+  color: ${({ theme }: T) => theme.colorOnSurface};
+  margin: 0;
+`;
+
+const ArchetypeDesc = styled.p`
+  ${({ theme }: T) => theme.typestyleV2BodyMedium};
+  color: ${({ theme }: T) => theme.colorOnSurfaceVariant};
+  margin: 0;
+  line-height: 1.55;
+`;
+
+const SkeletonCallout = styled.p`
+  ${({ theme }: T) => theme.typestyleV2BodySmall};
+  color: ${({ theme }: T) => theme.colorOnSurfaceVariant};
+  margin: ${({ theme }: T) => theme.space800} 0 0;
+  line-height: 1.55;
+
+  a {
+    color: ${({ theme }: T) => theme.colorPrimary};
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
 `;
 
 /* ================================================================
@@ -852,6 +926,318 @@ const WidgetCardFrameworkPage: React.FC = () => {
                   The wrapper is the <AnnotationStrong>layout primitive</AnnotationStrong>.
                   WidgetCard is the <AnnotationStrong>content primitive</AnnotationStrong>.
                   They work together.
+                </AnnotationText>
+              </AnnotationItem>
+            </WrapperAnnotations>
+          </WidgetRowContainer>
+        </Section>
+
+        <SectionDivider />
+
+        {/* ============================================================
+            Disabled state
+            ============================================================ */}
+        <Section>
+          <SectionTitle>Disabled state</SectionTitle>
+          <SectionSubtitle>
+            When a widget cannot be interacted with — such as during offline mode — the card
+            enters a disabled state. Three rules govern how every element inside the card is treated.
+          </SectionSubtitle>
+
+          <DisabledCompareGrid>
+            <CompareSlot>
+              <WidgetCard
+                title="Upcoming shift"
+                onTitleClick={noop}
+                surfaceVariant={sv}
+                outlineVariant={ov}
+                primaryColor={pc}
+                meta={<Status appearance={Status.APPEARANCES.SUCCESS} size={Status.SIZES.S} text="Clocked In" />}
+                actions={[
+                  { label: 'My schedule', variant: 'secondary' },
+                  { label: 'Clock in', variant: 'primary' },
+                ]}
+              >
+                <ShiftClockContent />
+              </WidgetCard>
+              <CompareLabel>Default</CompareLabel>
+            </CompareSlot>
+            <CompareSlot>
+              <WidgetCard
+                title="Upcoming shift"
+                onTitleClick={noop}
+                disabled
+                surfaceVariant={theme.colorOnDisabledSurface}
+                outlineVariant={theme.colorDisabled}
+                primaryColor={theme.colorDisabled}
+                meta={<Status appearance={Status.APPEARANCES.SUCCESS} size={Status.SIZES.S} text="Clocked In" />}
+                actions={[
+                  { label: 'My schedule', variant: 'secondary' },
+                  { label: 'Clock in', variant: 'primary' },
+                ]}
+              >
+                <ShiftClockContent disabled />
+              </WidgetCard>
+              <CompareLabel>Disabled</CompareLabel>
+            </CompareSlot>
+          </DisabledCompareGrid>
+
+          <ConsiderationsRow>
+            <ConsiderationCard>
+              <ConsiderationTitle>Clickable elements</ConsiderationTitle>
+              <ConsiderationBody>
+                Buttons, links, and tappable titles switch to their disabled state.
+                Interactions are suppressed. Backgrounds use <strong>colorDisabled</strong>,
+                text uses <strong>colorOnDisabledSurface</strong>.
+              </ConsiderationBody>
+            </ConsiderationCard>
+            <ConsiderationCard>
+              <ConsiderationTitle>Text</ConsiderationTitle>
+              <ConsiderationBody>
+                All text color switches to <strong>colorOnDisabledSurface</strong>.
+                This applies to titles, labels, values, and any nested text within the card.
+              </ConsiderationBody>
+            </ConsiderationCard>
+            <ConsiderationCard>
+              <ConsiderationTitle>Decorative elements</ConsiderationTitle>
+              <ConsiderationBody>
+                Anything without a pre-baked disabled state — avatar stacks, data&nbsp;viz
+                segments, colored icon circles — renders at 40% opacity. This preserves
+                original color relationships while clearly communicating the element is inactive.
+              </ConsiderationBody>
+            </ConsiderationCard>
+          </ConsiderationsRow>
+
+          <GapTable style={{ marginTop: theme.space1200 }}>
+            <GapTableHeader>
+              <GapTableHeaderCell>Category</GapTableHeaderCell>
+              <GapTableHeaderCell>Token / Treatment</GapTableHeaderCell>
+            </GapTableHeader>
+            <GapRow>
+              <GapLabel>Button backgrounds</GapLabel>
+              <GapDetail>colorDisabled</GapDetail>
+            </GapRow>
+            <GapRow>
+              <GapLabel>Button / text color</GapLabel>
+              <GapDetail>colorOnDisabledSurface</GapDetail>
+            </GapRow>
+            <GapRow>
+              <GapLabel>Card border</GapLabel>
+              <GapDetail>colorDisabled</GapDetail>
+            </GapRow>
+            <GapRow>
+              <GapLabel>Decorative elements</GapLabel>
+              <GapDetail>40% opacity on original styling</GapDetail>
+            </GapRow>
+          </GapTable>
+        </Section>
+
+        <SectionDivider />
+
+        {/* ============================================================
+            Loading state
+            ============================================================ */}
+        <Section>
+          <SectionTitle>Loading state</SectionTitle>
+          <SectionSubtitle>
+            When <code style={{ background: theme.colorSurfaceContainerLow, padding: '2px 6px', borderRadius: 4, fontSize: '0.9em' }}>loading</code> is
+            true, WidgetCard owns the entire skeleton. The product team declares a shape — the card does
+            the rest.
+          </SectionSubtitle>
+
+          <WidgetRowContainer>
+            <div style={{ width: 361, flexShrink: 0 }}>
+              <WidgetCard
+                title="Upcoming shift"
+                loading
+                skeleton="detail"
+                skeletonRows={2}
+                skeletonHeight={137}
+                surfaceVariant={sv}
+                outlineVariant={ov}
+                primaryColor={pc}
+                meta={<Status appearance={Status.APPEARANCES.SUCCESS} size={Status.SIZES.S} text="Clocked In" />}
+                actions={[
+                  { label: 'My schedule', variant: 'secondary' },
+                  { label: 'Clock in', variant: 'primary' },
+                ]}
+              >
+                <ContentSlot>Content slot</ContentSlot>
+              </WidgetCard>
+            </div>
+
+            <WrapperAnnotations>
+              <AnnotationItem>
+                <AnnotationDot />
+                <AnnotationText>
+                  <AnnotationStrong>Card chrome is automatic.</AnnotationStrong> The header
+                  title renders as-is. The meta slot becomes a skeleton pill. Zero work
+                  from the widget team.
+                </AnnotationText>
+              </AnnotationItem>
+              <AnnotationItem>
+                <AnnotationDot />
+                <AnnotationText>
+                  <AnnotationStrong>Footer mirrors your actions.</AnnotationStrong> If your
+                  widget has 2 buttons, the skeleton shows 2 placeholder boxes in the same
+                  layout. 1 button? 1 box. No buttons? No footer. It matches whatever
+                  you declared in the <strong>actions</strong> prop. Custom footers
+                  (via the <strong>footer</strong> prop) are not skeletonized — if you use a
+                  custom footer, you are responsible for its loading state.
+                </AnnotationText>
+              </AnnotationItem>
+              <AnnotationItem>
+                <AnnotationDot />
+                <AnnotationText>
+                  <AnnotationStrong>Body fills from an archetype.</AnnotationStrong> Pass
+                  one of three skeleton shapes — <strong>detail</strong>, <strong>grid</strong>,
+                  or <strong>list</strong> — via the <strong>skeleton</strong> prop. The card
+                  renders the right pattern. See examples below.
+                </AnnotationText>
+              </AnnotationItem>
+              <AnnotationItem>
+                <AnnotationDot />
+                <AnnotationText>
+                  <AnnotationStrong>Height is locked to prevent layout shift.</AnnotationStrong> Pass <strong>skeletonHeight</strong> to
+                  match the real content height. The card also auto-measures after first
+                  render — the manual value is a first-paint safety net.
+                </AnnotationText>
+              </AnnotationItem>
+            </WrapperAnnotations>
+          </WidgetRowContainer>
+
+          <SectionTitle style={{ fontSize: 24, marginTop: theme.space1600 }}>Body archetypes</SectionTitle>
+          <SectionSubtitle>
+            Three layout shapes cover all widget body patterns. Pick the one that matches your
+            content structure and optionally tune with <strong>skeletonRows</strong> or <strong>skeletonColumns</strong>.
+          </SectionSubtitle>
+
+          <ArchetypeGrid>
+            <ArchetypeCard>
+              <ArchetypeSpecimen>
+                <WidgetBodySkeleton archetype="detail" rows={2} />
+              </ArchetypeSpecimen>
+              <ArchetypeName>Detail</ArchetypeName>
+              <ArchetypeDesc>
+                Metric or status widgets with a bold headline and supporting key-value
+                grid. Tune with <strong>skeletonRows</strong> (default 2).
+              </ArchetypeDesc>
+            </ArchetypeCard>
+            <ArchetypeCard>
+              <ArchetypeSpecimen>
+                <WidgetBodySkeleton archetype="grid" columns={4} />
+              </ArchetypeSpecimen>
+              <ArchetypeName>Grid</ArchetypeName>
+              <ArchetypeDesc>
+                Horizontal icon-based actions. Tune
+                with <strong>skeletonColumns</strong> (default 4).
+              </ArchetypeDesc>
+            </ArchetypeCard>
+            <ArchetypeCard>
+              <ArchetypeSpecimen>
+                <WidgetBodySkeleton archetype="list" rows={2} />
+              </ArchetypeSpecimen>
+              <ArchetypeName>List</ArchetypeName>
+              <ArchetypeDesc>
+                Stacked row content like task queues, feeds, or history. Tune
+                with <strong>skeletonRows</strong> (default 2).
+              </ArchetypeDesc>
+            </ArchetypeCard>
+          </ArchetypeGrid>
+
+          <GapTable style={{ marginTop: theme.space1200 }}>
+            <GapTableHeader>
+              <GapTableHeaderCell>Prop</GapTableHeaderCell>
+              <GapTableHeaderCell>Description</GapTableHeaderCell>
+            </GapTableHeader>
+            <GapRow>
+              <GapLabel>loading</GapLabel>
+              <GapDetail>Boolean — when true, card renders skeleton chrome and body</GapDetail>
+            </GapRow>
+            <GapRow>
+              <GapLabel>skeleton</GapLabel>
+              <GapDetail>Archetype shape: "detail", "grid", or "list"</GapDetail>
+            </GapRow>
+            <GapRow>
+              <GapLabel>skeletonRows</GapLabel>
+              <GapDetail>Row count for detail (default 2) or list (default 2)</GapDetail>
+            </GapRow>
+            <GapRow>
+              <GapLabel>skeletonColumns</GapLabel>
+              <GapDetail>Column count for grid (default 4)</GapDetail>
+            </GapRow>
+            <GapRow>
+              <GapLabel>skeletonHeight</GapLabel>
+              <GapDetail>Locks body height during loading to prevent layout shift</GapDetail>
+            </GapRow>
+          </GapTable>
+
+          <SkeletonCallout>
+            Skeleton fills use Pebble's Skeleton component.
+            See the <a href="https://rippling.design/pebble/?path=/docs/components-skeleton--docs" target="_blank" rel="noopener noreferrer">Skeleton docs</a> for
+            variant and animation details.
+          </SkeletonCallout>
+        </Section>
+
+        <SectionDivider />
+
+        {/* ============================================================
+            Error state
+            ============================================================ */}
+        <Section>
+          <SectionTitle>Error state</SectionTitle>
+          <SectionSubtitle>
+            When a widget fails to load data, pass the <code style={{ background: theme.colorSurfaceContainerLow, padding: '2px 6px', borderRadius: 4, fontSize: '0.9em' }}>error</code> prop.
+            The card replaces the body with a centered warning and disables footer actions.
+          </SectionSubtitle>
+
+          <WidgetRowContainer>
+            <div style={{ width: 361, flexShrink: 0 }}>
+              <WidgetCard
+                title="Upcoming Shift"
+                error="Could not load"
+                surfaceVariant={sv}
+                outlineVariant={ov}
+                primaryColor={pc}
+                actions={[
+                  { label: 'Shift details', variant: 'secondary' },
+                  { label: 'Clock in', variant: 'primary' },
+                ]}
+              >
+                <ContentSlot>Content slot</ContentSlot>
+              </WidgetCard>
+            </div>
+
+            <WrapperAnnotations>
+              <AnnotationItem>
+                <AnnotationDot />
+                <AnnotationText>
+                  <AnnotationStrong>Body is replaced.</AnnotationStrong> The card shows a centered
+                  warning icon and message. All widget content is hidden.
+                </AnnotationText>
+              </AnnotationItem>
+              <AnnotationItem>
+                <AnnotationDot />
+                <AnnotationText>
+                  <AnnotationStrong>Footer buttons are disabled.</AnnotationStrong> Buttons stay
+                  visible to preserve card shape but are grayed out — no layout shift vs the loaded
+                  state. If you need a functional retry, use a custom <strong>footer</strong> prop.
+                </AnnotationText>
+              </AnnotationItem>
+              <AnnotationItem>
+                <AnnotationDot />
+                <AnnotationText>
+                  <AnnotationStrong>Message is customizable.</AnnotationStrong> Pass <strong>error={'{true}'}</strong> for
+                  the default "Could not load", or pass a string
+                  like <strong>error="Could not load shifts"</strong> for context.
+                </AnnotationText>
+              </AnnotationItem>
+              <AnnotationItem>
+                <AnnotationDot />
+                <AnnotationText>
+                  <AnnotationStrong>Error wins over loading.</AnnotationStrong> If
+                  both <strong>error</strong> and <strong>loading</strong> are true, the error
+                  state takes priority.
                 </AnnotationText>
               </AnnotationItem>
             </WrapperAnnotations>

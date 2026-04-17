@@ -28,7 +28,7 @@ export const ShortcutItem = styled.div<{ $scrollable?: boolean }>`
   padding-top: 8px;
 `;
 
-export const ShortcutIconCircle = styled.div`
+export const ShortcutIconCircle = styled.div<{ $disabled?: boolean }>`
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -36,12 +36,13 @@ export const ShortcutIconCircle = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  ${({ $disabled }) => $disabled && 'opacity: 0.4;'}
 `;
 
-export const ShortcutLabel = styled.span`
+export const ShortcutLabel = styled.span<{ $disabled?: boolean }>`
   font-size: 14px;
   font-weight: 400;
-  color: ${({ theme }) => (theme as any).colorOnSurface || '#000'};
+  color: ${({ $disabled, theme }) => $disabled ? (theme as any).colorOnDisabledSurface : ((theme as any).colorOnSurface || '#000')};
   text-align: center;
   font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 19px;
@@ -100,15 +101,16 @@ export const PRODUCT_DISPLAY_NAMES: Record<string, string> = {
 const ShortcutsContent: React.FC<{
   actions: QuickAction[];
   onSurface?: string;
+  disabled?: boolean;
   onActionTap?: (actionId: QuickActionId) => void;
-}> = ({ actions, onSurface, onActionTap }) => (
+}> = ({ actions, onSurface, disabled, onActionTap }) => (
   <ShortcutsGrid>
     {actions.map(a => (
-      <ShortcutItem key={a.id} style={{ cursor: onActionTap ? 'pointer' : 'default' }} onClick={() => onActionTap?.(a.id)}>
-        <ShortcutIconCircle>
+      <ShortcutItem key={a.id} style={{ cursor: (onActionTap && !disabled) ? 'pointer' : 'default', pointerEvents: disabled ? 'none' : undefined }} onClick={disabled ? undefined : () => onActionTap?.(a.id)}>
+        <ShortcutIconCircle $disabled={disabled}>
           <Icon type={QUICK_ACTION_ICONS[a.id]} size={20} color={onSurface || '#000'} />
         </ShortcutIconCircle>
-        <ShortcutLabel>{a.label}</ShortcutLabel>
+        <ShortcutLabel $disabled={disabled}>{a.label}</ShortcutLabel>
       </ShortcutItem>
     ))}
   </ShortcutsGrid>

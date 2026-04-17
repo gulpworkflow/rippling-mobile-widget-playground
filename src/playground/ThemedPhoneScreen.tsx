@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styled from '@emotion/styled';
 import { usePebbleTheme } from '@/utils/theme';
+import Button from '@rippling/pebble/Button';
 import type { PersonaId, ZoneMapping } from '@/data-models/types';
 import { enabledAppsToSkuFlags } from '@/widgets/framework/widget-helpers';
 import {
@@ -21,6 +22,67 @@ import ActivityScreen from '@/screens/ActivityScreen';
 import ShortcutsSheet from '@/widgets/ShortcutsSheet';
 import WidgetReorderSheet from '@/widgets/WidgetReorderSheet';
 import TeamScheduleScreen from '@/screens/TeamScheduleScreen';
+
+const OfflineBanner = styled.div`
+  position: absolute;
+  top: 54px;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  padding: 16px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const OfflineBannerTitle = styled.h2`
+  ${({ theme }) => (theme as any).typestyleV2BodyLargeEmphasized};
+  color: ${({ theme }) => (theme as any).colorOnWarning};
+  margin: 0;
+`;
+
+const OfflineBannerDesc = styled.p`
+  ${({ theme }) => (theme as any).typestyleV2BodySmall};
+  color: ${({ theme }) => (theme as any).colorOnWarning};
+  margin: 0;
+  line-height: 1.4;
+`;
+
+const OfflineBannerActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+`;
+
+const RetryButton = styled.button`
+  ${({ theme }) => (theme as any).typestyleV2LabelMedium};
+  background: ${({ theme }) => (theme as any).colorWarningContainer};
+  color: ${({ theme }) => (theme as any).colorOnWarningContainer};
+  border: none;
+  border-radius: ${({ theme }) => (theme as any).shapeCornerLg};
+  padding: 6px 14px;
+  cursor: pointer;
+`;
+
+const ContentSlideWrapper = styled.div`
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.35s ease;
+`;
+
+const ContentHandle = styled.div`
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: ${({ theme }) => (theme as any).colorOutlineVariant};
+  margin: 8px auto 0;
+  flex-shrink: 0;
+`;
 
 const TabViewHeader = styled.div`
   display: flex;
@@ -61,13 +123,19 @@ export interface ThemedPhoneScreenProps {
   onboarding: boolean;
   personaAvatar: string;
   darkMode: boolean;
+  isOffline?: boolean;
+  isLoading?: boolean;
+  loadingKey?: number;
+  isError?: boolean;
   onAvatarTap?: () => void;
 }
 
 const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
-  activeNav, setActiveNav, zoneWidgets, enabledApps, persona, onboarding, personaAvatar, darkMode, onAvatarTap,
+  activeNav, setActiveNav, zoneWidgets, enabledApps, persona, onboarding, personaAvatar, darkMode, isOffline, isLoading, loadingKey, isError, onAvatarTap,
 }) => {
   const [shortcutsSheetOpen, setShortcutsSheetOpen] = useState(false);
+  const [offlineBannerDismissed, setOfflineBannerDismissed] = useState(false);
+  const showOfflineBanner = isOffline && !offlineBannerDismissed;
   const [reorderSheetOpen, setReorderSheetOpen] = useState(false);
   const [customWidgetOrder, setCustomWidgetOrder] = useState<string[] | null>(null);
   const [screenStack, setScreenStack] = useState<string[]>([]);
@@ -87,6 +155,10 @@ const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
   useEffect(() => {
     setCustomWidgetOrder(null);
   }, [persona, onboarding]);
+
+  useEffect(() => {
+    if (!isOffline) setOfflineBannerDismissed(false);
+  }, [isOffline]);
 
   const reorderedZoneWidgets = useMemo((): ZoneMapping => {
     if (!customWidgetOrder) return zoneWidgets;
@@ -120,9 +192,12 @@ const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
   }, [activeNav, filteredNavItems.length, setActiveNav]);
 
   return (
-    <PhoneScreen surfaceDim={theme.colorSurfaceDim} surface={theme.colorSurface}>
+    <PhoneScreen
+      surfaceDim={showOfflineBanner ? theme.colorWarning : (isOffline ? theme.colorSurface : theme.colorSurfaceDim)}
+      surface={showOfflineBanner ? theme.colorWarning : theme.colorSurface}
+    >
       <StatusBarBlur />
-      <StatusBar style={{ color: iconColor }}>
+      <StatusBar style={{ color: showOfflineBanner ? theme.colorOnWarning : iconColor }}>
         <span>9:41</span>
         <StatusIcons>
           <SignalBars />
@@ -131,13 +206,28 @@ const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
         </StatusIcons>
       </StatusBar>
 
+      {showOfflineBanner && (
+        <OfflineBanner>
+          <OfflineBannerTitle>No internet connection</OfflineBannerTitle>
+          <OfflineBannerDesc>
+            Last updated 14 min ago. Try connecting to the internet to access all of your Rippling apps.
+          </OfflineBannerDesc>
+          <OfflineBannerActions>
+            <RetryButton>Retry</RetryButton>
+            <Button appearance={Button.APPEARANCES.GHOST} size={Button.SIZES.S} onClick={() => setOfflineBannerDismissed(true)}>Dismiss</Button>
+          </OfflineBannerActions>
+        </OfflineBanner>
+      )}
+
       {!hasPushedScreen && (
-        <FloatingAvatar onClick={onAvatarTap} style={{ cursor: onAvatarTap ? 'pointer' : undefined }}>
-          <AvatarCircle src={personaAvatar} alt="Profile" />
+        <FloatingAvatar onClick={isOffline ? undefined : onAvatarTap} style={{ cursor: (onAvatarTap && !isOffline) ? 'pointer' : undefined, top: showOfflineBanner ? '211px' : undefined, pointerEvents: isOffline ? 'none' as const : undefined }}>
+          <AvatarCircle src={personaAvatar} alt="Profile" style={isOffline ? { opacity: 0.4 } : undefined} />
         </FloatingAvatar>
       )}
 
-      <ContentArea key={activeNav} $scrollLocked={shortcutsSheetOpen || reorderSheetOpen}>
+      <ContentSlideWrapper style={showOfflineBanner ? { transform: 'translateY(184px)' } : { transform: 'translateY(0)' }}>
+        {showOfflineBanner && <ContentHandle />}
+        <ContentArea key={activeNav} $scrollLocked={shortcutsSheetOpen || reorderSheetOpen} style={showOfflineBanner ? { paddingTop: 0, borderRadius: '16px 16px 0 0', background: theme.colorSurface } : undefined}>
         {(activeItem?.id ?? 'home') === 'home' && (
           <HomeScreen
             theme={theme}
@@ -146,6 +236,11 @@ const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
             persona={persona}
             onboarding={onboarding}
             darkMode={darkMode}
+            isOffline={isOffline}
+            isLoading={isLoading}
+            loadingKey={loadingKey}
+            isError={isError}
+            showOfflineBanner={showOfflineBanner}
             onOpenShortcutsSheet={() => setShortcutsSheetOpen(true)}
             onOpenReorderSheet={() => setReorderSheetOpen(true)}
             onQuickActionTap={(actionId) => {
@@ -156,7 +251,8 @@ const ThemedPhoneScreen: React.FC<ThemedPhoneScreenProps> = ({
         {activeItem?.id === 'activity' && <ActivityScreen />}
         {activeItem?.id === 'find' && <FindView />}
         {activeItem?.id === 'chat' && <ChatView />}
-      </ContentArea>
+        </ContentArea>
+      </ContentSlideWrapper>
 
       {!hasPushedScreen && (
         <BottomNavigation
