@@ -94,7 +94,7 @@ const SSOStrip = styled.div`
 `;
 
 const SSOLabel = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
   font-weight: 600;
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   white-space: nowrap;
@@ -487,6 +487,16 @@ const ShortcutsRowMeta = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   white-space: nowrap;
+`;
+
+const ShortcutsRowDismiss = styled.span`
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+
+  ${ShortcutsColumnRow}:hover & {
+    opacity: 1;
+  }
 `;
 
 const ShortcutsRowContext = styled.span`
@@ -1527,8 +1537,7 @@ const AnalyticsSection = styled.div`
 
 const AnalyticsTitleAndTabs = styled.div`
   background: ${({ theme }) => (theme as StyledTheme).colorSurface};
-  padding: 32px;
-  padding-bottom: 12px;
+  padding: ${({ theme }) => `${(theme as StyledTheme).space600} ${(theme as StyledTheme).space800} ${(theme as StyledTheme).space200} ${(theme as StyledTheme).space800}`};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -2886,6 +2895,7 @@ const DesktopHome422Shippable: React.FC = () => {
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [cardMenu, setCardMenu] = useState<string | null>(null);
   const [recentCardSort, setRecentCardSort] = useState<'recent' | 'visited'>('recent');
+  const [dismissedRecents, setDismissedRecents] = useState<Set<string>>(new Set());
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [qaDrawerOpen, setQaDrawerOpen] = useState(false);
   const [qaSearch, setQaSearch] = useState('');
@@ -3431,15 +3441,27 @@ const DesktopHome422Shippable: React.FC = () => {
                 Recents
               </Button>
             </ShortcutsColumnHeader>
-            {isEmptyState ? (
+            {isEmptyState || RECENT_ITEMS.every(item => dismissedRecents.has(item.name)) ? (
               <ShortcutsEmptyLabel>No recent activity</ShortcutsEmptyLabel>
-            ) : RECENT_ITEMS.map(item => (
+            ) : RECENT_ITEMS.filter(item => !dismissedRecents.has(item.name)).map(item => (
               <ShortcutsColumnRow key={item.name} href="#" onClick={(e: React.MouseEvent) => e.preventDefault()}>
                 <Icon type={item.icon} size={16} color={(theme as any).colorOnSurface} />
                 <ShortcutsRowLabel>
                   {item.name}{item.context ? <ShortcutsRowContext> in {item.context}</ShortcutsRowContext> : ''}
                 </ShortcutsRowLabel>
-                <ShortcutsRowMeta>{item.meta}</ShortcutsRowMeta>
+                <ShortcutsRowDismiss>
+                  <Button.Icon
+                    icon={Icon.TYPES.CLOSE}
+                    aria-label={`Remove ${item.name}`}
+                    appearance={Button.APPEARANCES.GHOST}
+                    size={Button.SIZES.XS}
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setDismissedRecents(prev => new Set(prev).add(item.name));
+                    }}
+                  />
+                </ShortcutsRowDismiss>
               </ShortcutsColumnRow>
             ))}
           </ShortcutsColumn>
