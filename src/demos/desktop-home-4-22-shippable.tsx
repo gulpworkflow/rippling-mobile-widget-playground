@@ -469,7 +469,13 @@ const ShortcutsColumnRow = styled.a`
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  transition: background 0.15s ease;
+  opacity: 1;
+  transition: background 0.15s ease,
+    opacity 120ms cubic-bezier(0.25, 1, 0.5, 1);
+
+  &[data-dismissing='true'] {
+    opacity: 0;
+  }
 
   &:hover {
     background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
@@ -507,6 +513,12 @@ const ShortcutsEmptyLabel = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   padding: ${({ theme }) => (theme as StyledTheme).space200} 0;
+
+  @keyframes emptyFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  animation: emptyFadeIn 200ms cubic-bezier(0.25, 1, 0.5, 1);
 `;
 
 const ShortcutsDropdownToggle = styled.button`
@@ -3444,7 +3456,7 @@ const DesktopHome422Shippable: React.FC = () => {
             {isEmptyState || RECENT_ITEMS.every(item => dismissedRecents.has(item.name)) ? (
               <ShortcutsEmptyLabel>No recent activity</ShortcutsEmptyLabel>
             ) : RECENT_ITEMS.filter(item => !dismissedRecents.has(item.name)).map(item => (
-              <ShortcutsColumnRow key={item.name} href="#" onClick={(e: React.MouseEvent) => e.preventDefault()}>
+              <ShortcutsColumnRow key={item.name} href="#" onClick={(e: React.MouseEvent) => e.preventDefault()} data-dismissing="false">
                 <Icon type={item.icon} size={16} color={(theme as any).colorOnSurface} />
                 <ShortcutsRowLabel>
                   {item.name}{item.context ? <ShortcutsRowContext> in {item.context}</ShortcutsRowContext> : ''}
@@ -3458,7 +3470,37 @@ const DesktopHome422Shippable: React.FC = () => {
                     onClick={(e: React.MouseEvent) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setDismissedRecents(prev => new Set(prev).add(item.name));
+                      const row = (e.currentTarget as HTMLElement).closest('[data-dismissing]') as HTMLElement;
+                      if (!row) return;
+                      const siblings: HTMLElement[] = [];
+                      const rects = new Map<HTMLElement, number>();
+                      let el = row.nextElementSibling as HTMLElement | null;
+                      while (el) {
+                        siblings.push(el);
+                        rects.set(el, el.getBoundingClientRect().top);
+                        el = el.nextElementSibling as HTMLElement | null;
+                      }
+                      requestAnimationFrame(() => {
+                        row.setAttribute('data-dismissing', 'true');
+                        setTimeout(() => {
+                          setDismissedRecents(prev => new Set(prev).add(item.name));
+                          requestAnimationFrame(() => {
+                            siblings.forEach(sib => {
+                              if (!sib.isConnected) return;
+                              const oldTop = rects.get(sib)!;
+                              const newTop = sib.getBoundingClientRect().top;
+                              const delta = oldTop - newTop;
+                              if (delta === 0) return;
+                              sib.style.transform = `translateY(${delta}px)`;
+                              sib.style.transition = 'none';
+                              requestAnimationFrame(() => {
+                                sib.style.transition = 'transform 150ms cubic-bezier(0.25, 1, 0.5, 1)';
+                                sib.style.transform = '';
+                              });
+                            });
+                          });
+                        }, 120);
+                      });
                     }}
                   />
                 </ShortcutsRowDismiss>
