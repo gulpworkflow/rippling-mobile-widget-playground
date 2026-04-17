@@ -456,15 +456,15 @@ const ShortcutsColumnHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-left: -12px;
+  margin-left: -16px;
 `;
 
 const ShortcutsColumnRow = styled.a`
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: ${({ theme }) => (theme as StyledTheme).space200};
-  margin: 0 -${({ theme }) => (theme as StyledTheme).space200};
+  padding: ${({ theme }) => (theme as StyledTheme).space150};
+  margin: 0 -${({ theme }) => (theme as StyledTheme).space150};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerMd};
   text-decoration: none;
   color: inherit;
@@ -477,7 +477,7 @@ const ShortcutsColumnRow = styled.a`
 `;
 
 const ShortcutsRowLabel = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   flex: 1;
   min-width: 0;
@@ -3424,7 +3424,7 @@ const DesktopHome422Shippable: React.FC = () => {
             <ShortcutsColumnHeader>
               <Button
                 appearance={Button.APPEARANCES.GHOST}
-                size={Button.SIZES.S}
+                size={Button.SIZES.M}
                 icon={{ alignment: Button.ICON_ALIGNMENTS.RIGHT, type: Icon.TYPES.CHEVRON_RIGHT }}
                 onClick={() => {}}
               >
@@ -3448,7 +3448,7 @@ const DesktopHome422Shippable: React.FC = () => {
             <ShortcutsColumnHeader>
               <Button
                 appearance={Button.APPEARANCES.GHOST}
-                size={Button.SIZES.S}
+                size={Button.SIZES.M}
                 icon={{ alignment: Button.ICON_ALIGNMENTS.RIGHT, type: Icon.TYPES.CHEVRON_RIGHT }}
                 onClick={() => {}}
               >
