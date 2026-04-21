@@ -45,10 +45,10 @@ interface AppShellLayoutProps {
 
 const AppContainer = styled.div`
   display: flex;
+  position: relative;
   /* Use the dynamic viewport so the shell resizes as iOS Safari's toolbar
-     expands/contracts. 100vh on iOS resolves to the "large" viewport, which
-     combined with the fixed-positioned MainContent below gets clipped by
-     Safari's visual viewport. 100dvh avoids that clipping entirely. */
+     expands/contracts. Combined with position: absolute on MainContent,
+     this avoids iOS Safari's fixed-positioning visual-viewport quirks. */
   height: 100dvh;
   background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
   overflow: hidden;
@@ -61,15 +61,17 @@ const MainContent = styled.main<{
   expansionPanelWidth: number;
   isResizing: boolean;
 }>`
-  position: fixed;
+  /* position: absolute (not fixed) so the scroll area is bounded by the
+     AppContainer's 100dvh box rather than iOS Safari's visual viewport.
+     This is what actually stops the bottom row of content from being
+     clipped behind Safari's translucent controls — fixed-positioned
+     elements get their own iOS-specific anchoring rules that ignore dvh. */
+  position: absolute;
   left: ${({ sidebarCollapsed }) => (sidebarCollapsed ? '60px' : '266px')};
   top: 56px;
   right: ${({ expansionPanelWidth }) =>
     expansionPanelWidth > OVERLAY_THRESHOLD ? 0 : expansionPanelWidth}px;
-  /* Size against the dynamic viewport so the scroll area grows/shrinks in
-     lockstep with iOS Safari's toolbar. This keeps the last row of content
-     visible instead of getting clipped behind Safari's bottom controls. */
-  height: calc(100dvh - 56px);
+  bottom: 0;
   transition: ${({ isResizing }) =>
     isResizing ? 'left 200ms ease' : 'left 200ms ease, right 250ms ease-out'};
   overflow-y: auto;
