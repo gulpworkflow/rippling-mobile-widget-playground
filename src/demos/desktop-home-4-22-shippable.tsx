@@ -473,11 +473,13 @@ const ShortcutsSection = styled.div`
 
   /* Below tablet: stack Recents and Your tasks so labels and counts no
      longer get squeezed into broken two-line wraps on narrow widths.
-     Adds a small inline inset so rows don't kiss the screen edge. */
+     Adds a small inline inset so rows don't kiss the screen edge, and
+     tightens top/bottom rhythm from 24px to 16px. */
   @media screen and (max-width: 1025px) {
     grid-template-columns: 1fr;
-    gap: ${({ theme }) => (theme as StyledTheme).space800};
-    padding: 0 ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space800};
+    gap: ${({ theme }) => (theme as StyledTheme).space600};
+    margin: ${({ theme }) => (theme as StyledTheme).space400} 0;
+    padding: 0 ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space400};
   }
 `;
 
@@ -1330,6 +1332,11 @@ const ResourcesFooter = styled.div`
   justify-content: center;
   gap: 0;
   box-sizing: border-box;
+
+  /* Tighten top padding from 24px to 16px to match mobile vertical rhythm. */
+  @media screen and (max-width: 1025px) {
+    padding-top: ${({ theme }) => (theme as StyledTheme).space400};
+  }
 `;
 
 const ResourcesLabel = styled.span`
@@ -1369,6 +1376,11 @@ const InlineAd = styled.div`
   max-width: 960px;
   margin: 0 auto;
   box-sizing: border-box;
+
+  /* Tighten bottom padding from 24px to 16px on mobile. */
+  @media screen and (max-width: 1025px) {
+    padding-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+  }
 `;
 
 const InlineAdText = styled.span`
@@ -1593,10 +1605,23 @@ const AnalyticsTitleAndTabs = styled.div`
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+
+  /* Tighten top padding from 24px to 16px and side padding from 32px to
+     16px on mobile so the tabs line up with the page gutter. */
+  @media screen and (max-width: 1025px) {
+    padding: ${({ theme }) => (theme as StyledTheme).space400}
+      ${({ theme }) => (theme as StyledTheme).space400}
+      ${({ theme }) => (theme as StyledTheme).space200};
+  }
 `;
 
 const DashboardContentWrap = styled.div`
   padding: 32px;
+
+  /* Tighten padding from 32px to 16px on mobile. */
+  @media screen and (max-width: 1025px) {
+    padding: ${({ theme }) => (theme as StyledTheme).space400};
+  }
 `;
 
 const AnalyticsSectionHeader = styled.div`
@@ -1982,24 +2007,15 @@ const PromptHeading = styled.h1`
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space200};
 
-  /* Below tablet: split the difference between desktop (TitleLarge, 22px)
-     and something too compact — land on TitleMedium (16px) with a sparkle
-     sized to match. The inline AI sparkle has a hard-coded 26px size, so we
-     scale it via CSS here. */
+  /* Below tablet: use TitleSmall and scale the hard-coded 26px AI sparkle
+     down to match. */
   @media screen and (max-width: 1025px) {
-    ${({ theme }) => (theme as StyledTheme).typestyleV2TitleMedium};
+    ${({ theme }) => (theme as StyledTheme).typestyleV2TitleSmall};
     gap: ${({ theme }) => (theme as StyledTheme).space150};
 
     svg {
-      width: 22px;
-      height: 22px;
-    }
-  }
-
-  @media screen and (max-width: 769px) {
-    svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
     }
   }
 `;
@@ -2017,15 +2033,15 @@ const GreetingRow = styled.div<{ $sso?: boolean; $trial?: boolean }>`
   }};
   margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
 
-  /* Tighten the breathing room above the greeting on mobile — the smaller
-     headline + scrollable quick sign-in strip don't need the full 96px+ gap. */
+  /* Mobile lands on a fixed 104px (space2400 + space200) above the greeting,
+     regardless of SSO/trial state — the smaller headline doesn't need the
+     dynamic desktop spacing. Bottom margin tightens from 24px to 16px. */
   @media screen and (max-width: 1025px) {
-    margin-top: ${({ $sso, $trial }) => {
-      let base = 96 - 24;
-      if ($sso) base += 48;
-      if ($trial) base += 44;
-      return `${base}px`;
-    }};
+    margin-top: calc(
+      ${({ theme }) => (theme as StyledTheme).space2400} +
+      ${({ theme }) => (theme as StyledTheme).space200}
+    );
+    margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
   }
 `;
 

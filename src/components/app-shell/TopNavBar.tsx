@@ -190,6 +190,21 @@ const DesktopSearch = styled.div`
   }
 `;
 
+// Mobile-only triggers (search / overflow / hamburger) are always rendered
+// on a dark top bar per the screenshot mock, so their icons are hard-coded
+// white regardless of adminMode.
+const forceWhiteIcons = `
+  button svg,
+  button i,
+  button [class*="Icon"] {
+    color: white !important;
+    fill: white !important;
+  }
+  button img {
+    filter: brightness(0) invert(1) !important;
+  }
+`;
+
 // Icon-only search trigger shown below the small tablet breakpoint.
 const MobileSearchTrigger = styled.div`
   display: none;
@@ -197,6 +212,8 @@ const MobileSearchTrigger = styled.div`
   ${BELOW_SMALL_TABLET} {
     display: flex;
   }
+
+  ${forceWhiteIcons}
 `;
 
 const ActionsContainer = styled.div`
@@ -236,6 +253,8 @@ const OverflowTrigger = styled.div`
   ${BELOW_SMALL_TABLET} {
     display: flex;
   }
+
+  ${forceWhiteIcons}
 `;
 
 // Hamburger (nav drawer toggle) — only visible below the tablet breakpoint,
@@ -247,6 +266,8 @@ const HamburgerTrigger = styled.div`
   ${BELOW_TABLET} {
     display: flex;
   }
+
+  ${forceWhiteIcons}
 `;
 
 const NotificationBadge = styled.div`
