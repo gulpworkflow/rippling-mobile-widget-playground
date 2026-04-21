@@ -473,13 +473,14 @@ const ShortcutsSection = styled.div`
 
   /* Below tablet: stack Recents and Your tasks so labels and counts no
      longer get squeezed into broken two-line wraps on narrow widths.
-     Adds a small inline inset so rows don't kiss the screen edge, and
-     tightens top/bottom rhythm from 24px to 16px. */
+     Rhythm: 20px column gap (space500), 20px top margin (space500),
+     24px bottom padding (space600). Inline inset is 12px so rows don't
+     kiss the screen edge. */
   @media screen and (max-width: 1025px) {
     grid-template-columns: 1fr;
-    gap: ${({ theme }) => (theme as StyledTheme).space600};
-    margin: ${({ theme }) => (theme as StyledTheme).space400} 0;
-    padding: 0 ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space400};
+    gap: ${({ theme }) => (theme as StyledTheme).space500};
+    margin: ${({ theme }) => (theme as StyledTheme).space500} 0 0;
+    padding: 0 ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space600};
   }
 `;
 
@@ -2035,13 +2036,13 @@ const GreetingRow = styled.div<{ $sso?: boolean; $trial?: boolean }>`
 
   /* Mobile lands on a fixed 104px (space2400 + space200) above the greeting,
      regardless of SSO/trial state — the smaller headline doesn't need the
-     dynamic desktop spacing. Bottom margin tightens from 24px to 16px. */
+     dynamic desktop spacing. Bottom margin sits at 20px (space500). */
   @media screen and (max-width: 1025px) {
     margin-top: calc(
       ${({ theme }) => (theme as StyledTheme).space2400} +
       ${({ theme }) => (theme as StyledTheme).space200}
     );
-    margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+    margin-bottom: ${({ theme }) => (theme as StyledTheme).space500};
   }
 `;
 
