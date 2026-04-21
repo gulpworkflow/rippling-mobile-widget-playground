@@ -59,10 +59,10 @@ const TopNav = styled.nav<{ adminMode: boolean }>`
   }
 
   /* Admin-mode icon tint applied at the root so every icon across the bar
-     turns white. Pebble's Icon renders as <span data-icon="…"> with the
-     glyph painted via a ::before pseudo from an icon font, so `color` on
-     the span is the only property that actually tints the icon. We
-     deliberately target [data-icon] because the emotion hashed class
+     turns white. Pebble's Icon renders as <span data-icon="..."> with the
+     glyph painted via a ::before pseudo from an icon font, so the color
+     property on the span is the only thing that actually tints the icon.
+     We deliberately target [data-icon] because the emotion hashed class
      (StyledIcon) is stripped in production builds. */
   ${({ adminMode }) =>
     adminMode &&
@@ -195,10 +195,11 @@ const DesktopSearch = styled.div`
 // on a dark top bar per the screenshot mock, so their icons are hard-coded
 // white regardless of adminMode or Pebble theme swaps.
 //
-// Pebble icons render as `<span data-icon="…"><::before glyph /></span>`
-// using the RipplingIconsKit icon font — NOT as an <svg>. So the only
-// property that actually paints the glyph is `color`, applied to the span.
-// Targeting `[data-icon]` beats Pebble's styled-components class rule.
+// Pebble icons render as <span data-icon="..."> with a ::before glyph from
+// the RipplingIconsKit icon font — NOT as an <svg>. So the only property
+// that actually paints the glyph is color, applied to the span. Targeting
+// [data-icon] beats Pebble's styled-components class rule in both dev and
+// production builds (the StyledIcon emotion label is stripped in prod).
 const forceWhiteIcons = `
   [data-icon],
   [data-icon]::before,
