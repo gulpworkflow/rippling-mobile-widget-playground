@@ -192,16 +192,25 @@ const DesktopSearch = styled.div`
 
 // Mobile-only triggers (search / overflow / hamburger) are always rendered
 // on a dark top bar per the screenshot mock, so their icons are hard-coded
-// white regardless of adminMode.
+// white regardless of adminMode or Pebble theme swaps.
+//
+// We intentionally go nuclear here: Pebble's icons ship with explicit
+// per-path fills generated from the theme's colorOnSurface, which means a
+// simple `color: white` cascade can lose depending on how the SVG was
+// serialized. `filter: brightness(0) invert(1)` forces every pixel inside
+// the svg/img to solid white, which is exactly what this admin header
+// wants without needing to untangle Pebble theme swaps.
 const forceWhiteIcons = `
   button svg,
-  button i,
-  button [class*="Icon"] {
-    color: white !important;
-    fill: white !important;
-  }
-  button img {
+  button img,
+  button i {
     filter: brightness(0) invert(1) !important;
+  }
+  button svg,
+  button svg * {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
   }
 `;
 
