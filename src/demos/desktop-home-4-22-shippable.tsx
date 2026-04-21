@@ -97,10 +97,12 @@ const SSOStrip = styled.div`
 
   /* Below tablet: left-align the row with the page gutter and let the user
      swipe horizontally through the apps with their thumb. Matches Pebble's
-     responsiveness guidance for dense horizontal content on small screens. */
+     responsiveness guidance for dense horizontal content on small screens.
+     Vertical padding drops from 12px to 8px (space200) on mobile so the
+     strip sits tighter against the nav. */
   @media screen and (max-width: 768px) {
     justify-content: flex-start;
-    padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space800};
+    padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space800};
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -113,7 +115,7 @@ const SSOStrip = styled.div`
   }
 
   @media screen and (max-width: 576px) {
-    padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space400};
+    padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
   }
 `;
 
@@ -125,6 +127,13 @@ const SSOLabel = styled.span`
   white-space: nowrap;
   padding-right: ${({ theme }) => (theme as StyledTheme).space200};
   flex-shrink: 0;
+
+  /* Mobile: step down to 14px semibold so the meta-label doesn't compete
+     with content-level text. LabelMedium is the right semantic token for
+     a non-content label sitting next to an action strip. */
+  @media screen and (max-width: 576px) {
+    ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  }
 `;
 
 const SSODivider = styled.div`
@@ -476,14 +485,14 @@ const ShortcutsSection = styled.div`
 
   /* Below tablet: stack Recents and Your tasks so labels and counts no
      longer get squeezed into broken two-line wraps on narrow widths.
-     Rhythm: 20px column gap (space500), 20px top margin (space500),
-     24px bottom padding (space600). Inline inset is 12px so rows don't
+     Rhythm: 16px column gap (space400), 20px top margin (space500),
+     32px bottom padding (space800). Inline inset is 12px so rows don't
      kiss the screen edge. */
   @media screen and (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: ${({ theme }) => (theme as StyledTheme).space500};
+    gap: ${({ theme }) => (theme as StyledTheme).space400};
     margin: ${({ theme }) => (theme as StyledTheme).space500} 0 0;
-    padding: 0 ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space600};
+    padding: 0 ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space800};
   }
 `;
 
@@ -1659,7 +1668,31 @@ const AnalyticsTabRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: ${({ theme }) => (theme as StyledTheme).space300};
   margin-bottom: ${({ theme }) => (theme as StyledTheme).space400};
+  /* min-width:0 on the row lets its flex children (pebble Tabs) shrink
+     below their intrinsic width and use their internal horizontal scroll
+     instead of pushing the whole row wider than the viewport. */
+  min-width: 0;
+
+  & > :first-of-type {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+
+  /* Below Medium: stack tabs on top and actions below so the tabs get
+     the full content width for their native scroll UX and the action
+     cluster never competes for horizontal room. */
+  @media screen and (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: ${({ theme }) => (theme as StyledTheme).space300};
+
+    & > :first-of-type {
+      width: 100%;
+    }
+  }
 `;
 
 const AnalyticsTabActions = styled.div`
@@ -1782,6 +1815,12 @@ const DashboardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: ${({ theme }) => (theme as StyledTheme).space400};
+
+  /* Stack charts on mobile so they get the full content width and don't
+     compress into illegible slivers. */
+  @media screen and (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const ChartCard = styled.div<{ $span?: number }>`
@@ -2013,14 +2052,16 @@ const PromptHeading = styled.h1`
 
   /* Only collapse the greeting at the Small breakpoint (576px). At Medium
      (768px) there's still enough room for TitleLarge, and dropping it too
-     early made the hero feel undersized on tablets. */
+     early made the hero feel undersized on tablets. On Small the hero
+     steps from 26px → 22px (TitleMedium) — still earns its place as the
+     page lead without overpowering narrow iPhone widths. */
   @media screen and (max-width: 576px) {
-    ${({ theme }) => (theme as StyledTheme).typestyleV2TitleSmall};
+    ${({ theme }) => (theme as StyledTheme).typestyleV2TitleMedium};
     gap: ${({ theme }) => (theme as StyledTheme).space150};
 
     svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
     }
   }
 `;

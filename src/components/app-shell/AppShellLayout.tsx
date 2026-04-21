@@ -78,6 +78,11 @@ const AppContainer = styled.div<{
     isResizing
       ? 'padding-left 200ms ease'
       : 'padding-left 200ms ease, padding-right 250ms ease-out'};
+  /* The shell should never scroll horizontally. If any descendant
+     overflows its column on narrow widths, clip here rather than let it
+     bleed out into a document-level horizontal scroll. Vertical scroll
+     stays on the body as normal. */
+  overflow-x: hidden;
 
   ${BELOW_MEDIUM} {
     padding-left: 0;
