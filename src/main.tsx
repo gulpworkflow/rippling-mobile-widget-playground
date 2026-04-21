@@ -61,22 +61,21 @@ init().then(() => {
         <ThemeProvider themeConfigs={THEME_CONFIGS} defaultTheme="berry" defaultColorMode="light">
           <GlobalStyle />
           <Global styles={css`
-  /* Baseline reset so the shell can rely on the document exactly filling
-     the viewport. Pebble's GlobalStyle intentionally leaves html/body
-     margins alone, which historically caused an 8px gap around the app
-     shell and on iOS Safari made the shell's bottom sit 8px below the
-     visible viewport (clipping the last row of content). */
+  /* Reset default html/body/root margins so the shell starts flush with
+     the viewport edges. We intentionally do NOT set height:100% here —
+     the shell is a normal document-flow layout, so letting the body grow
+     with its content is what lets iOS Safari shrink/expand its toolbar
+     correctly as the user scrolls. */
   html,
   body,
   #root {
     margin: 0;
     padding: 0;
-    height: 100%;
-    width: 100%;
-    /* Let iOS Safari manage overscroll without bouncing the whole page. */
-    overscroll-behavior: none;
   }
-  body { letter-spacing: normal; }
+  body {
+    letter-spacing: normal;
+    overscroll-behavior-y: none;
+  }
   /* Native feel: remove tap flash, reduce 300ms delay */
   button, a, [role="button"], [tabindex]:not([tabindex="-1"]) {
     -webkit-tap-highlight-color: transparent;

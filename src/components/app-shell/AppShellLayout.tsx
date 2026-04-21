@@ -42,49 +42,52 @@ interface AppShellLayoutProps {
   hideAI?: boolean;
 }
 
-const AppContainer = styled.div`
-  display: flex;
-  position: relative;
-  /* Fills the viewport exactly. This relies on html/body/#root being reset
-     to margin:0; height:100% in main.tsx — without that reset the default
-     8px body margin pushes the shell down so its bottom sits below the
-     visible viewport and gets clipped by Safari's toolbar. Use 100dvh
-     (dynamic viewport) so we also resize correctly as iOS Safari's
-     toolbar expands/contracts. */
-  height: 100dvh;
-  width: 100%;
-  background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
-  overflow: hidden;
-`;
-
 const OVERLAY_THRESHOLD = 650;
 
-const MainContent = styled.main<{
+/*
+ * Layout model: the document is the scroll container.
+ *
+ * Rather than build a fixed-height app shell with an absolutely-positioned
+ * scroll area inside it (which constantly fights iOS Safari's dynamic
+ * toolbar and causes the bottom-row clipping we kept chasing), we use
+ * the natural document flow:
+ *
+ *   - TopNavBar, Sidebar, and ExpansionPanel are each position: fixed
+ *     and live in their own layer. They don't participate in the flow.
+ *   - AppContainer is just a block. It reserves room for those fixed
+ *     chrome elements via padding:
+ *         padding-top:    56px           (TopNavBar height)
+ *         padding-left:   sidebar width  (0 at Medium and below)
+ *         padding-right:  panel width    (0 when panel is in overlay mode)
+ *   - The page content lives inside in normal flow and scrolls with
+ *     the document. iOS Safari handles its toolbar show/hide natively
+ *     in this model, so there is no clipping to work around.
+ */
+const AppContainer = styled.div<{
   sidebarCollapsed: boolean;
   expansionPanelWidth: number;
   isResizing: boolean;
 }>`
-  /* Absolutely positioned inside AppContainer (not fixed to the viewport)
-     so the scroll box is bounded by AppContainer's height. With the
-     document reset in place, AppContainer === visible viewport, so
-     bottom: 0 here lands at the true viewport bottom on every device. */
-  position: absolute;
-  left: ${({ sidebarCollapsed }) => (sidebarCollapsed ? '60px' : '266px')};
-  top: 56px;
-  right: ${({ expansionPanelWidth }) =>
+  min-height: 100dvh;
+  background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
+  padding-top: 56px;
+  padding-left: ${({ sidebarCollapsed }) => (sidebarCollapsed ? '60px' : '266px')};
+  padding-right: ${({ expansionPanelWidth }) =>
     expansionPanelWidth > OVERLAY_THRESHOLD ? 0 : expansionPanelWidth}px;
-  bottom: 0;
   transition: ${({ isResizing }) =>
-    isResizing ? 'left 200ms ease' : 'left 200ms ease, right 250ms ease-out'};
-  overflow-y: auto;
-  overflow-x: hidden;
-  /* Pad the scroll area by the home-indicator inset so the final row can
-     always scroll above the iOS home bar. */
-  padding-bottom: env(safe-area-inset-bottom, 0);
+    isResizing
+      ? 'padding-left 200ms ease'
+      : 'padding-left 200ms ease, padding-right 250ms ease-out'};
 
   ${BELOW_MEDIUM} {
-    left: 0;
+    padding-left: 0;
   }
+`;
+
+const MainContent = styled.main`
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 56px);
 `;
 
 const Scrim = styled.div<{ $visible: boolean }>`
@@ -188,18 +191,31 @@ const TabsWrapper = styled.div`
 
 const PageContent = styled.div<{ $flush?: boolean }>`
   background-color: ${({ $flush }) => $flush ? 'transparent' : ({ theme }) => (theme as StyledTheme).colorSurface};
-  padding: ${({ $flush, theme }) =>
-    $flush ? '0' : `${(theme as StyledTheme).space800} ${(theme as StyledTheme).space1400}`};
   display: flex;
   flex-direction: column;
   gap: ${({ $flush }) => $flush ? '0' : ({ theme }) => (theme as StyledTheme).space600};
   flex: 1;
 
+  /* 56px horizontal gutter above Small (576px) to match Rippling's main
+     app. Vertical padding still honors $flush: pages that manage their
+     own top/bottom spacing (hidePageHeader) opt out with 0 vertical. */
+  padding: ${({ $flush, theme }) =>
+    $flush
+      ? `0 ${(theme as StyledTheme).space1400}`
+      : `${(theme as StyledTheme).space800} ${(theme as StyledTheme).space1400}`};
+
+  /* Between Small (576px) and Medium (768px), step the horizontal gutter
+     down from 56px to 32px so tablets and landscape phones get a more
+     comfortable content width without feeling cramped. */
   ${BELOW_MEDIUM} {
     padding: ${({ $flush, theme }) =>
-      $flush ? '0' : `${(theme as StyledTheme).space600} ${(theme as StyledTheme).space800}`};
+      $flush
+        ? `0 ${(theme as StyledTheme).space800}`
+        : `${(theme as StyledTheme).space600} ${(theme as StyledTheme).space800}`};
   }
 
+  /* Mobile drops the gutter entirely — pages handle their own edge-to-edge
+     layout below Small. */
   ${BELOW_SMALL} {
     padding: ${({ $flush, theme }) =>
       $flush ? '0' : `${(theme as StyledTheme).space400}`};
@@ -279,7 +295,12 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   };
 
   return (
-    <AppContainer theme={theme}>
+    <AppContainer
+      theme={theme}
+      sidebarCollapsed={sidebarCollapsed}
+      expansionPanelWidth={expansionPanelWidth}
+      isResizing={isExpansionPanelResizing}
+    >
       {/* Top Navigation */}
       <TopNavBar
         companyName={companyName}
@@ -315,13 +336,9 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
         onClick={() => setMobileNavOpen(false)}
       />
 
-      {/* Main Content Area */}
-      <MainContent
-        theme={theme}
-        sidebarCollapsed={sidebarCollapsed}
-        expansionPanelWidth={expansionPanelWidth}
-        isResizing={isExpansionPanelResizing}
-      >
+      {/* Main Content Area — plain document-flow block; the document
+          itself is the scroll container. */}
+      <MainContent theme={theme}>
         <PageContentContainer theme={theme}>
           {/* Page Header with Actions and Tabs */}
           {!hidePageHeader && (

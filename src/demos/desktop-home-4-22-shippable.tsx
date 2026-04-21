@@ -79,8 +79,11 @@ const OVERFLOW_COUNT = ALL_SSO_APPS.length - PINNED_APPS.length;
 // ── SSO Strip ───────────────────────────────────────────────────────────────
 
 const SSOStrip = styled.div`
+  /* Offset by the fixed TopNavBar height so the strip sits flush against
+     the underside of the nav rather than hiding behind it. The shell's
+     top nav is 56px tall. */
   position: absolute;
-  top: 0;
+  top: 56px;
   left: 0;
   right: 0;
   display: flex;
@@ -466,7 +469,7 @@ const ShortcutsSection = styled.div`
   width: 100%;
   max-width: 744px;
   margin: ${({ theme }) => (theme as StyledTheme).space600} 0 ${({ theme }) => (theme as StyledTheme).space600} 0;
-  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space1200} 0;
+  padding: 0 0 ${({ theme }) => (theme as StyledTheme).space1000} 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: ${({ theme }) => (theme as StyledTheme).space2400};
