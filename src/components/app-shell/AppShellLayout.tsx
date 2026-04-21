@@ -45,10 +45,14 @@ interface AppShellLayoutProps {
 const AppContainer = styled.div`
   display: flex;
   position: relative;
-  /* Use the dynamic viewport so the shell resizes as iOS Safari's toolbar
-     expands/contracts. Combined with position: absolute on MainContent,
-     this avoids iOS Safari's fixed-positioning visual-viewport quirks. */
+  /* Fills the viewport exactly. This relies on html/body/#root being reset
+     to margin:0; height:100% in main.tsx — without that reset the default
+     8px body margin pushes the shell down so its bottom sits below the
+     visible viewport and gets clipped by Safari's toolbar. Use 100dvh
+     (dynamic viewport) so we also resize correctly as iOS Safari's
+     toolbar expands/contracts. */
   height: 100dvh;
+  width: 100%;
   background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
   overflow: hidden;
 `;
@@ -60,11 +64,10 @@ const MainContent = styled.main<{
   expansionPanelWidth: number;
   isResizing: boolean;
 }>`
-  /* position: absolute (not fixed) so the scroll area is bounded by the
-     AppContainer's 100dvh box rather than iOS Safari's visual viewport.
-     This is what actually stops the bottom row of content from being
-     clipped behind Safari's translucent controls — fixed-positioned
-     elements get their own iOS-specific anchoring rules that ignore dvh. */
+  /* Absolutely positioned inside AppContainer (not fixed to the viewport)
+     so the scroll box is bounded by AppContainer's height. With the
+     document reset in place, AppContainer === visible viewport, so
+     bottom: 0 here lands at the true viewport bottom on every device. */
   position: absolute;
   left: ${({ sidebarCollapsed }) => (sidebarCollapsed ? '60px' : '266px')};
   top: 56px;
