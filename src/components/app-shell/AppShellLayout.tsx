@@ -3,17 +3,16 @@ import styled from '@emotion/styled';
 import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import Page from '@rippling/pebble/Page';
 import Tabs from '@rippling/pebble/Tabs';
-import breakpoints from '@rippling/pebble/Constants/Breakpoints';
 import { TopNavBar } from './TopNavBar';
 import { Sidebar } from './Sidebar';
 import { ExpansionPanel, ExpansionPanelType } from './ExpansionPanel';
 import { NavSectionData } from './types';
+import { BELOW_MEDIUM, BELOW_SMALL, BREAKPOINT_MEDIUM } from './responsive';
 
-// Pebble responsive breakpoints
-// Below tablet (1025px): persistent sidebar hidden, content goes full-width,
-// sidebar becomes a drawer toggled via top-nav hamburger.
-const BELOW_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_TABLET})`;
-const BELOW_SMALL_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_SMALL_TABLET})`;
+// Pebble responsive design-system breakpoints:
+// - Medium (768px) is where the persistent sidebar converts to a drawer and
+//   content goes full-width.
+// - Small (576px) is where the compact nav + tightest mobile rhythm kicks in.
 
 interface AppShellLayoutProps {
   children: React.ReactNode;
@@ -80,7 +79,7 @@ const MainContent = styled.main<{
      always scroll above the iOS home bar. */
   padding-bottom: env(safe-area-inset-bottom, 0);
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     left: 0;
   }
 `;
@@ -103,7 +102,7 @@ const Scrim = styled.div<{ $visible: boolean }>`
 const MobileNavScrim = styled.div<{ $visible: boolean }>`
   display: none;
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     display: block;
     position: fixed;
     top: 56px;
@@ -137,12 +136,12 @@ const PageHeaderWrapper = styled.div`
   padding-left: ${({ theme }) => (theme as StyledTheme).space1400};
   padding-right: ${({ theme }) => (theme as StyledTheme).space1400};
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     padding-left: ${({ theme }) => (theme as StyledTheme).space800};
     padding-right: ${({ theme }) => (theme as StyledTheme).space800};
   }
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     padding-left: ${({ theme }) => (theme as StyledTheme).space400};
     padding-right: ${({ theme }) => (theme as StyledTheme).space400};
   }
@@ -168,11 +167,11 @@ const PageHeaderActions = styled.div`
 const TabsWrapper = styled.div`
   padding: 0 ${({ theme }) => (theme as StyledTheme).space1400};
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     padding: 0 ${({ theme }) => (theme as StyledTheme).space800};
   }
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     padding: 0 ${({ theme }) => (theme as StyledTheme).space400};
   }
 
@@ -193,12 +192,12 @@ const PageContent = styled.div<{ $flush?: boolean }>`
   gap: ${({ $flush }) => $flush ? '0' : ({ theme }) => (theme as StyledTheme).space600};
   flex: 1;
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     padding: ${({ $flush, theme }) =>
       $flush ? '0' : `${(theme as StyledTheme).space600} ${(theme as StyledTheme).space800}`};
   }
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     padding: ${({ $flush, theme }) =>
       $flush ? '0' : `${(theme as StyledTheme).space400}`};
   }
@@ -235,10 +234,10 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   const [expansionPanelWidth, setExpansionPanelWidth] = useState(0);
   const [isExpansionPanelResizing, setIsExpansionPanelResizing] = useState(false);
 
-  // Close the mobile nav drawer whenever the viewport grows past the tablet
+  // Close the mobile nav drawer whenever the viewport grows past the Medium
   // breakpoint so we don't leave an orphaned scrim visible on desktop.
   useEffect(() => {
-    const mql = window.matchMedia(`(min-width: ${breakpoints.BREAKPOINT_TABLET})`);
+    const mql = window.matchMedia(`(min-width: ${BREAKPOINT_MEDIUM})`);
     const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
       if (e.matches) setMobileNavOpen(false);
     };

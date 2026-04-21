@@ -4,10 +4,10 @@ import { getStateColor, useThemeSettings } from '@rippling/pebble/theme';
 import { StyledTheme } from '@/utils/theme';
 import Icon from '@rippling/pebble/Icon';
 import Dropdown from '@rippling/pebble/Dropdown';
-import breakpoints from '@rippling/pebble/Constants/Breakpoints';
+import { BELOW_SMALL } from './responsive';
 
-// Hide the company label and chevron below small-tablet — only avatar shows.
-const BELOW_SMALL_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_SMALL_TABLET})`;
+// Hide the company label and chevron below the Small breakpoint — only
+// the avatar shows at that width.
 
 interface ProfileDropdownProps {
   companyName: string;
@@ -46,7 +46,7 @@ const CompanyName = styled.div<{ adminMode?: boolean }>`
   white-space: nowrap;
   transition: color 200ms ease;
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     display: none;
   }
 `;
@@ -55,7 +55,7 @@ const ProfileChevron = styled.div`
   display: flex;
   align-items: center;
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     display: none;
   }
 `;

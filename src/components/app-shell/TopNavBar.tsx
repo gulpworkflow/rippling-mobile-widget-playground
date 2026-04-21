@@ -5,7 +5,6 @@ import { StyledTheme } from '@/utils/theme';
 import Icon from '@rippling/pebble/Icon';
 import Button from '@rippling/pebble/Button';
 import Dropdown from '@rippling/pebble/Dropdown';
-import breakpoints from '@rippling/pebble/Constants/Breakpoints';
 import RipplingLogoBlack from '@/assets/rippling-logo-black.svg';
 import RipplingLogoWhite from '@/assets/rippling-logo-white.svg';
 import RipplingMonogramBlack from '@/assets/rippling-monogram-black.svg';
@@ -13,12 +12,11 @@ import RipplingMonogramWhite from '@/assets/rippling-monogram-white.svg';
 import RipplingAiSpark from '@/assets/rippling-ai-spark.svg';
 import { SearchBar } from './SearchBar';
 import { ProfileDropdown } from './ProfileDropdown';
+import { BELOW_MEDIUM, BELOW_SMALL } from './responsive';
 
-// Pebble responsive breakpoints (from @rippling/pebble/Constants/Breakpoints):
-// - BREAKPOINT_SMALL_TABLET: 769px — below this = compact mobile nav
-// - BREAKPOINT_TABLET:       1025px — below this = sidebar hidden, content full-width
-const BELOW_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_TABLET})`;
-const BELOW_SMALL_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_SMALL_TABLET})`;
+// Pebble responsive design-system breakpoints:
+// - Medium (768px): sidebar → drawer, content full-width, hamburger shows
+// - Small  (576px): compact nav (monogram + icon triggers), tightest copy
 
 interface TopNavBarProps {
   companyName: string;
@@ -54,7 +52,7 @@ const TopNav = styled.nav<{ adminMode: boolean }>`
   gap: ${({ theme }) => (theme as StyledTheme).space500};
   transition: background-color 200ms ease;
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     gap: 0;
   }
 
@@ -82,7 +80,7 @@ const LeftSection = styled.div`
   align-items: center;
   width: 266px;
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     width: auto;
     flex-shrink: 0;
   }
@@ -117,7 +115,7 @@ const Logo = styled.img`
       getStateColor((theme as StyledTheme).colorSurfaceBright, 'active')};
   }
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     display: none;
   }
 `;
@@ -137,7 +135,7 @@ const MonogramLogo = styled.img`
       getStateColor((theme as StyledTheme).colorSurfaceBright, 'hover')};
   }
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     display: block;
   }
 `;
@@ -165,13 +163,13 @@ const SearchCenter = styled.div`
   position: relative;
   left: 60px;
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     left: 0;
     justify-content: flex-end;
     padding-right: ${({ theme }) => (theme as StyledTheme).space200};
   }
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     flex: 1;
     justify-content: flex-end;
     padding-right: 0;
@@ -186,7 +184,7 @@ const DesktopSearch = styled.div`
   justify-content: center;
   width: 100%;
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     display: none;
   }
 `;
@@ -213,7 +211,7 @@ const forceWhiteIcons = `
 const MobileSearchTrigger = styled.div`
   display: none;
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     display: flex;
   }
 
@@ -225,7 +223,7 @@ const ActionsContainer = styled.div`
   align-items: center;
   padding: 0 ${({ theme }) => (theme as StyledTheme).space400};
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     padding: 0 ${({ theme }) => (theme as StyledTheme).space200};
   }
 `;
@@ -245,7 +243,7 @@ const ExpandedActions = styled.div`
   display: flex;
   align-items: center;
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     display: none;
   }
 `;
@@ -254,7 +252,7 @@ const ExpandedActions = styled.div`
 const OverflowTrigger = styled.div`
   display: none;
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     display: flex;
   }
 
@@ -267,7 +265,7 @@ const HamburgerTrigger = styled.div`
   display: none;
   padding-left: ${({ theme }) => (theme as StyledTheme).space200};
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     display: flex;
   }
 
@@ -323,7 +321,7 @@ const ProfileDivider = styled.div`
   padding: ${({ theme }) =>
     `0 ${(theme as StyledTheme).space300} 0 ${(theme as StyledTheme).space400}`};
 
-  ${BELOW_SMALL_TABLET} {
+  ${BELOW_SMALL} {
     padding: ${({ theme }) =>
       `0 ${(theme as StyledTheme).space200}`};
   }

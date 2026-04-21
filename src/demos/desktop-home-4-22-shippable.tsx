@@ -95,7 +95,7 @@ const SSOStrip = styled.div`
   /* Below tablet: left-align the row with the page gutter and let the user
      swipe horizontally through the apps with their thumb. Matches Pebble's
      responsiveness guidance for dense horizontal content on small screens. */
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 768px) {
     justify-content: flex-start;
     padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space800};
     overflow-x: auto;
@@ -109,7 +109,7 @@ const SSOStrip = styled.div`
     }
   }
 
-  @media screen and (max-width: 769px) {
+  @media screen and (max-width: 576px) {
     padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space400};
   }
 `;
@@ -476,7 +476,7 @@ const ShortcutsSection = styled.div`
      Rhythm: 20px column gap (space500), 20px top margin (space500),
      24px bottom padding (space600). Inline inset is 12px so rows don't
      kiss the screen edge. */
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: ${({ theme }) => (theme as StyledTheme).space500};
     margin: ${({ theme }) => (theme as StyledTheme).space500} 0 0;
@@ -1335,7 +1335,7 @@ const ResourcesFooter = styled.div`
   box-sizing: border-box;
 
   /* Tighten top padding from 24px to 16px to match mobile vertical rhythm. */
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 768px) {
     padding-top: ${({ theme }) => (theme as StyledTheme).space400};
   }
 `;
@@ -1379,7 +1379,7 @@ const InlineAd = styled.div`
   box-sizing: border-box;
 
   /* Tighten bottom padding from 24px to 16px on mobile. */
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 768px) {
     padding-bottom: ${({ theme }) => (theme as StyledTheme).space400};
   }
 `;
@@ -1584,7 +1584,7 @@ const HomeContent = styled.div`
 
   /* Match the page gutter on mobile (16px) so content lines up with the
      quick sign-in strip and page header padding. */
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 768px) {
     padding: 0 ${({ theme }) => (theme as StyledTheme).space400};
   }
 `;
@@ -1609,7 +1609,7 @@ const AnalyticsTitleAndTabs = styled.div`
 
   /* Tighten top padding from 24px to 16px and side padding from 32px to
      16px on mobile so the tabs line up with the page gutter. */
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 768px) {
     padding: ${({ theme }) => (theme as StyledTheme).space400}
       ${({ theme }) => (theme as StyledTheme).space400}
       ${({ theme }) => (theme as StyledTheme).space200};
@@ -1620,7 +1620,7 @@ const DashboardContentWrap = styled.div`
   padding: 32px;
 
   /* Tighten padding from 32px to 16px on mobile. */
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 768px) {
     padding: ${({ theme }) => (theme as StyledTheme).space400};
   }
 `;
@@ -2008,9 +2008,10 @@ const PromptHeading = styled.h1`
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space200};
 
-  /* Below tablet: use TitleSmall and scale the hard-coded 26px AI sparkle
-     down to match. */
-  @media screen and (max-width: 1025px) {
+  /* Only collapse the greeting at the Small breakpoint (576px). At Medium
+     (768px) there's still enough room for TitleLarge, and dropping it too
+     early made the hero feel undersized on tablets. */
+  @media screen and (max-width: 576px) {
     ${({ theme }) => (theme as StyledTheme).typestyleV2TitleSmall};
     gap: ${({ theme }) => (theme as StyledTheme).space150};
 
@@ -2037,7 +2038,7 @@ const GreetingRow = styled.div<{ $sso?: boolean; $trial?: boolean }>`
   /* Mobile lands on a fixed 104px (space2400 + space200) above the greeting,
      regardless of SSO/trial state — the smaller headline doesn't need the
      dynamic desktop spacing. Bottom margin sits at 20px (space500). */
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 768px) {
     margin-top: calc(
       ${({ theme }) => (theme as StyledTheme).space2400} +
       ${({ theme }) => (theme as StyledTheme).space200}

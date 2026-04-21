@@ -3,13 +3,9 @@ import styled from '@emotion/styled';
 import { getStateColor } from '@rippling/pebble/theme';
 import { StyledTheme } from '@/utils/theme';
 import Icon from '@rippling/pebble/Icon';
-import breakpoints from '@rippling/pebble/Constants/Breakpoints';
+import { BELOW_MEDIUM } from './responsive';
 import { NavSection } from './NavSection';
 import { NavSectionData } from './types';
-
-// Below this breakpoint the persistent sidebar is hidden and only shown as a
-// slide-in drawer triggered by the top-nav hamburger.
-const BELOW_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_TABLET})`;
 
 interface SidebarProps {
   mainSections: NavSectionData[];
@@ -39,7 +35,7 @@ const StyledSidebar = styled.aside<{ isCollapsed: boolean; mobileOpen: boolean }
   overflow-x: hidden;
   transition: width 200ms ease, transform 220ms ease;
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     width: 266px;
     transform: translateX(${({ mobileOpen }) => (mobileOpen ? '0' : '-100%')});
     box-shadow: ${({ mobileOpen }) =>
@@ -110,7 +106,7 @@ const CollapseButton = styled.button<{ isCollapsed: boolean }>`
       getStateColor((theme as StyledTheme).colorSurfaceBright, 'active')};
   }
 
-  ${BELOW_TABLET} {
+  ${BELOW_MEDIUM} {
     display: none;
   }
 `;
