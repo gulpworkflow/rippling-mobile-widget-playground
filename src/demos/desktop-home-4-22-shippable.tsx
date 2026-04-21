@@ -91,7 +91,29 @@ const SSOStrip = styled.div`
   border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   background: transparent;
   z-index: 1;
+
+  /* Below tablet: left-align the row with the page gutter and let the user
+     swipe horizontally through the apps with their thumb. Matches Pebble's
+     responsiveness guidance for dense horizontal content on small screens. */
+  @media screen and (max-width: 1025px) {
+    justify-content: flex-start;
+    padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space800};
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 769px) {
+    padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space400};
+  }
 `;
+
 
 const SSOLabel = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
@@ -99,6 +121,7 @@ const SSOLabel = styled.span`
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   white-space: nowrap;
   padding-right: ${({ theme }) => (theme as StyledTheme).space200};
+  flex-shrink: 0;
 `;
 
 const SSODivider = styled.div`
@@ -111,6 +134,7 @@ const SSODivider = styled.div`
 
 const SSOItemWrap = styled.div`
   position: relative;
+  flex-shrink: 0;
 
   &:hover > div:last-child {
     opacity: 1;
@@ -226,6 +250,7 @@ const SSOMoreWrap = styled.button`
   border: none;
   white-space: nowrap;
   transition: background 0.1s, color 0.1s;
+  flex-shrink: 0;
 
   &:hover {
     background: ${({ theme }) => (theme as StyledTheme).colorSurfaceContainerLow};
@@ -445,6 +470,15 @@ const ShortcutsSection = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: ${({ theme }) => (theme as StyledTheme).space2400};
+
+  /* Below tablet: stack Recents and Your tasks so labels and counts no
+     longer get squeezed into broken two-line wraps on narrow widths.
+     Adds a small inline inset so rows don't kiss the screen edge. */
+  @media screen and (max-width: 1025px) {
+    grid-template-columns: 1fr;
+    gap: ${({ theme }) => (theme as StyledTheme).space800};
+    padding: 0 ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space800};
+  }
 `;
 
 const ShortcutsColumn = styled.div`
@@ -1534,6 +1568,12 @@ const HomeContent = styled.div`
   max-width: 960px;
   margin: 0 auto;
   box-sizing: border-box;
+
+  /* Match the page gutter on mobile (16px) so content lines up with the
+     quick sign-in strip and page header padding. */
+  @media screen and (max-width: 1025px) {
+    padding: 0 ${({ theme }) => (theme as StyledTheme).space400};
+  }
 `;
 
 const AnalyticsSection = styled.div`
@@ -1941,6 +1981,27 @@ const PromptHeading = styled.h1`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => (theme as StyledTheme).space200};
+
+  /* Below tablet: split the difference between desktop (TitleLarge, 22px)
+     and something too compact — land on TitleMedium (16px) with a sparkle
+     sized to match. The inline AI sparkle has a hard-coded 26px size, so we
+     scale it via CSS here. */
+  @media screen and (max-width: 1025px) {
+    ${({ theme }) => (theme as StyledTheme).typestyleV2TitleMedium};
+    gap: ${({ theme }) => (theme as StyledTheme).space150};
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  @media screen and (max-width: 769px) {
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
 `;
 
 const GreetingRow = styled.div<{ $sso?: boolean; $trial?: boolean }>`
@@ -1955,6 +2016,17 @@ const GreetingRow = styled.div<{ $sso?: boolean; $trial?: boolean }>`
     return `${base}px`;
   }};
   margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
+
+  /* Tighten the breathing room above the greeting on mobile — the smaller
+     headline + scrollable quick sign-in strip don't need the full 96px+ gap. */
+  @media screen and (max-width: 1025px) {
+    margin-top: ${({ $sso, $trial }) => {
+      let base = 96 - 24;
+      if ($sso) base += 48;
+      if ($trial) base += 44;
+      return `${base}px`;
+    }};
+  }
 `;
 
 const TodoAboveInput = styled.div`

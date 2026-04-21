@@ -3,10 +3,17 @@ import styled from '@emotion/styled';
 import { usePebbleTheme, StyledTheme } from '@/utils/theme';
 import Page from '@rippling/pebble/Page';
 import Tabs from '@rippling/pebble/Tabs';
+import breakpoints from '@rippling/pebble/Constants/Breakpoints';
 import { TopNavBar } from './TopNavBar';
 import { Sidebar } from './Sidebar';
 import { ExpansionPanel, ExpansionPanelType } from './ExpansionPanel';
 import { NavSectionData } from './types';
+
+// Pebble responsive breakpoints
+// Below tablet (1025px): persistent sidebar hidden, content goes full-width,
+// sidebar becomes a drawer toggled via top-nav hamburger.
+const BELOW_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_TABLET})`;
+const BELOW_SMALL_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_SMALL_TABLET})`;
 
 interface AppShellLayoutProps {
   children: React.ReactNode;
@@ -60,6 +67,10 @@ const MainContent = styled.main<{
     isResizing ? 'left 200ms ease' : 'left 200ms ease, right 250ms ease-out'};
   overflow-y: auto;
   overflow-x: hidden;
+
+  ${BELOW_TABLET} {
+    left: 0;
+  }
 `;
 
 const Scrim = styled.div<{ $visible: boolean }>`
@@ -73,6 +84,26 @@ const Scrim = styled.div<{ $visible: boolean }>`
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   pointer-events: ${({ $visible }) => ($visible ? 'auto' : 'none')};
   transition: opacity 200ms ease;
+`;
+
+// Scrim for the mobile nav drawer — slightly higher z-index so it sits above
+// page content but below the drawer and top bar.
+const MobileNavScrim = styled.div<{ $visible: boolean }>`
+  display: none;
+
+  ${BELOW_TABLET} {
+    display: block;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 90;
+    opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+    pointer-events: ${({ $visible }) => ($visible ? 'auto' : 'none')};
+    transition: opacity 200ms ease;
+  }
 `;
 
 const PageContentContainer = styled.div`
@@ -93,6 +124,16 @@ const PageHeaderContainer = styled.div`
 const PageHeaderWrapper = styled.div`
   padding-left: ${({ theme }) => (theme as StyledTheme).space1400};
   padding-right: ${({ theme }) => (theme as StyledTheme).space1400};
+
+  ${BELOW_TABLET} {
+    padding-left: ${({ theme }) => (theme as StyledTheme).space800};
+    padding-right: ${({ theme }) => (theme as StyledTheme).space800};
+  }
+
+  ${BELOW_SMALL_TABLET} {
+    padding-left: ${({ theme }) => (theme as StyledTheme).space400};
+    padding-right: ${({ theme }) => (theme as StyledTheme).space400};
+  }
 
   /* Adjust spacing on Page.Header content */
   & > div {
@@ -115,6 +156,14 @@ const PageHeaderActions = styled.div`
 const TabsWrapper = styled.div`
   padding: 0 ${({ theme }) => (theme as StyledTheme).space1400};
 
+  ${BELOW_TABLET} {
+    padding: 0 ${({ theme }) => (theme as StyledTheme).space800};
+  }
+
+  ${BELOW_SMALL_TABLET} {
+    padding: 0 ${({ theme }) => (theme as StyledTheme).space400};
+  }
+
   /* Remove box shadow from tabs */
   & > div,
   & div[class*='StyledScroll'],
@@ -131,6 +180,16 @@ const PageContent = styled.div<{ $flush?: boolean }>`
   flex-direction: column;
   gap: ${({ $flush }) => $flush ? '0' : ({ theme }) => (theme as StyledTheme).space600};
   flex: 1;
+
+  ${BELOW_TABLET} {
+    padding: ${({ $flush, theme }) =>
+      $flush ? '0' : `${(theme as StyledTheme).space600} ${(theme as StyledTheme).space800}`};
+  }
+
+  ${BELOW_SMALL_TABLET} {
+    padding: ${({ $flush, theme }) =>
+      $flush ? '0' : `${(theme as StyledTheme).space400}`};
+  }
 `;
 
 export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
@@ -158,10 +217,25 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
   const [adminMode, setAdminMode] = useState(true);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const [expansionPanelType, setExpansionPanelType] = useState<ExpansionPanelType>(null);
   const [expansionPanelWidth, setExpansionPanelWidth] = useState(0);
   const [isExpansionPanelResizing, setIsExpansionPanelResizing] = useState(false);
+
+  // Close the mobile nav drawer whenever the viewport grows past the tablet
+  // breakpoint so we don't leave an orphaned scrim visible on desktop.
+  useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${breakpoints.BREAKPOINT_TABLET})`);
+    const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches) setMobileNavOpen(false);
+    };
+    handleChange(mql);
+    mql.addEventListener?.('change', handleChange as (e: MediaQueryListEvent) => void);
+    return () => {
+      mql.removeEventListener?.('change', handleChange as (e: MediaQueryListEvent) => void);
+    };
+  }, []);
 
   const handleToggleExpansionPanel = (type: ExpansionPanelType) => {
     if (expansionPanelType === type) {
@@ -207,16 +281,24 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
         personaLabel={personaLabel}
         onAiToggle={hideAI ? undefined : () => handleToggleExpansionPanel('ai')}
         aiPanelOpen={expansionPanelType === 'ai'}
+        onMenuToggle={() => setMobileNavOpen(open => !open)}
         theme={theme}
       />
 
-      {/* Left Sidebar */}
+      {/* Left Sidebar (persistent on desktop, drawer on mobile) */}
       <Sidebar
         mainSections={mainNavSections}
         platformSection={platformNavSection}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        mobileOpen={mobileNavOpen}
+        onMobileNavigate={() => setMobileNavOpen(false)}
         theme={theme}
+      />
+
+      <MobileNavScrim
+        $visible={mobileNavOpen}
+        onClick={() => setMobileNavOpen(false)}
       />
 
       {/* Main Content Area */}

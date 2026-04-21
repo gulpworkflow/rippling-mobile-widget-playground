@@ -3,18 +3,27 @@ import styled from '@emotion/styled';
 import { getStateColor } from '@rippling/pebble/theme';
 import { StyledTheme } from '@/utils/theme';
 import Icon from '@rippling/pebble/Icon';
+import breakpoints from '@rippling/pebble/Constants/Breakpoints';
 import { NavSection } from './NavSection';
 import { NavSectionData } from './types';
+
+// Below this breakpoint the persistent sidebar is hidden and only shown as a
+// slide-in drawer triggered by the top-nav hamburger.
+const BELOW_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_TABLET})`;
 
 interface SidebarProps {
   mainSections: NavSectionData[];
   platformSection?: NavSectionData;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  /** Whether the sidebar is shown as an overlay at mobile widths */
+  mobileOpen?: boolean;
+  /** Called when the user clicks a nav item at mobile widths (to close the drawer) */
+  onMobileNavigate?: () => void;
   theme: StyledTheme;
 }
 
-const StyledSidebar = styled.aside<{ isCollapsed: boolean }>`
+const StyledSidebar = styled.aside<{ isCollapsed: boolean; mobileOpen: boolean }>`
   position: fixed;
   left: 0;
   top: 56px;
@@ -25,10 +34,17 @@ const StyledSidebar = styled.aside<{ isCollapsed: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  z-index: 50;
+  z-index: 95;
   overflow-y: auto;
   overflow-x: hidden;
-  transition: width 200ms ease;
+  transition: width 200ms ease, transform 220ms ease;
+
+  ${BELOW_TABLET} {
+    width: 266px;
+    transform: translateX(${({ mobileOpen }) => (mobileOpen ? '0' : '-100%')});
+    box-shadow: ${({ mobileOpen }) =>
+      mobileOpen ? '0 8px 24px rgba(0, 0, 0, 0.18)' : 'none'};
+  }
 
   /* Hide scrollbar for Webkit browsers */
   &::-webkit-scrollbar {
@@ -93,6 +109,10 @@ const CollapseButton = styled.button<{ isCollapsed: boolean }>`
     background-color: ${({ theme }) =>
       getStateColor((theme as StyledTheme).colorSurfaceBright, 'active')};
   }
+
+  ${BELOW_TABLET} {
+    display: none;
+  }
 `;
 
 const NavItemIcon = styled.div`
@@ -125,18 +145,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
   platformSection,
   isCollapsed,
   onToggleCollapse,
+  mobileOpen = false,
+  onMobileNavigate,
   theme,
 }) => {
+  // At mobile widths the sidebar is a drawer: always show the expanded
+  // layout (labels visible) while open, and close on item tap.
+  const effectiveCollapsed = mobileOpen ? false : isCollapsed;
+
+  const handleNavClick: React.MouseEventHandler<HTMLDivElement> = () => {
+    onMobileNavigate?.();
+  };
+
   return (
-    <StyledSidebar theme={theme} isCollapsed={isCollapsed}>
+    <StyledSidebar
+      theme={theme}
+      isCollapsed={isCollapsed}
+      mobileOpen={mobileOpen}
+      onClick={handleNavClick}
+    >
       <div>
         {/* Main Navigation Sections */}
         {mainSections.map((section, index) => (
           <React.Fragment key={`main-section-${index}`}>
-            <NavSection 
-              section={section} 
-              isCollapsed={isCollapsed} 
-              theme={theme} 
+            <NavSection
+              section={section}
+              isCollapsed={effectiveCollapsed}
+              theme={theme}
             />
             {/* Add divider after first section if it has no label */}
             {index === 0 && !section.label && mainSections.length > 1 && (
@@ -151,10 +186,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Platform Section */}
         {platformSection && (
-          <NavSection 
-            section={platformSection} 
-            isCollapsed={isCollapsed} 
-            theme={theme} 
+          <NavSection
+            section={platformSection}
+            isCollapsed={effectiveCollapsed}
+            theme={theme}
           />
         )}
       </div>
@@ -163,7 +198,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <CollapseButton
           theme={theme}
           isCollapsed={isCollapsed}
-          onClick={onToggleCollapse}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleCollapse();
+          }}
         >
           <NavItemIcon theme={theme}>
             <Icon type={Icon.TYPES.THUMBTACK_OUTLINE} size={20} color={theme.colorOnSurface} />

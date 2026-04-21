@@ -4,6 +4,10 @@ import { getStateColor, useThemeSettings } from '@rippling/pebble/theme';
 import { StyledTheme } from '@/utils/theme';
 import Icon from '@rippling/pebble/Icon';
 import Dropdown from '@rippling/pebble/Dropdown';
+import breakpoints from '@rippling/pebble/Constants/Breakpoints';
+
+// Hide the company label and chevron below small-tablet — only avatar shows.
+const BELOW_SMALL_TABLET = `@media screen and (max-width: ${breakpoints.BREAKPOINT_SMALL_TABLET})`;
 
 interface ProfileDropdownProps {
   companyName: string;
@@ -41,6 +45,19 @@ const CompanyName = styled.div<{ adminMode?: boolean }>`
   color: ${({ theme, adminMode }) => (adminMode ? 'white' : (theme as StyledTheme).colorOnSurface)};
   white-space: nowrap;
   transition: color 200ms ease;
+
+  ${BELOW_SMALL_TABLET} {
+    display: none;
+  }
+`;
+
+const ProfileChevron = styled.div`
+  display: flex;
+  align-items: center;
+
+  ${BELOW_SMALL_TABLET} {
+    display: none;
+  }
 `;
 
 const UserAvatar = styled.div<{ adminMode?: boolean }>`
@@ -133,11 +150,13 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         <UserAvatar theme={theme} adminMode={adminMode}>
           {userInitial}
         </UserAvatar>
-        <Icon
-          type={Icon.TYPES.CHEVRON_DOWN}
-          size={16}
-          color={adminMode ? 'white' : theme.colorOnSurface}
-        />
+        <ProfileChevron theme={theme}>
+          <Icon
+            type={Icon.TYPES.CHEVRON_DOWN}
+            size={16}
+            color={adminMode ? 'white' : theme.colorOnSurface}
+          />
+        </ProfileChevron>
       </ProfileSection>
     </Dropdown>
   );
