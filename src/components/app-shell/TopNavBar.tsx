@@ -58,17 +58,18 @@ const TopNav = styled.nav<{ adminMode: boolean }>`
     gap: 0;
   }
 
-  /* Admin-mode icon tint applied at the root so every icon across the bar —
-     including the mobile search trigger and hamburger (which live outside the
-     primary actions wrapper) — matches the other tokens. */
+  /* Admin-mode icon tint applied at the root so every icon across the bar
+     turns white. Pebble's Icon renders as <span data-icon="…"> with the
+     glyph painted via a ::before pseudo from an icon font, so `color` on
+     the span is the only property that actually tints the icon. We
+     deliberately target [data-icon] because the emotion hashed class
+     (StyledIcon) is stripped in production builds. */
   ${({ adminMode }) =>
     adminMode &&
     `
-    button svg,
-    button i,
-    button [class*="Icon"] {
-      color: white !important;
-      fill: white !important;
+    [data-icon],
+    [data-icon]::before {
+      color: #ffffff !important;
     }
     button img {
       filter: brightness(0) invert(1) !important;
@@ -194,23 +195,16 @@ const DesktopSearch = styled.div`
 // on a dark top bar per the screenshot mock, so their icons are hard-coded
 // white regardless of adminMode or Pebble theme swaps.
 //
-// We intentionally go nuclear here: Pebble's icons ship with explicit
-// per-path fills generated from the theme's colorOnSurface, which means a
-// simple `color: white` cascade can lose depending on how the SVG was
-// serialized. `filter: brightness(0) invert(1)` forces every pixel inside
-// the svg/img to solid white, which is exactly what this admin header
-// wants without needing to untangle Pebble theme swaps.
+// Pebble icons render as `<span data-icon="…"><::before glyph /></span>`
+// using the RipplingIconsKit icon font — NOT as an <svg>. So the only
+// property that actually paints the glyph is `color`, applied to the span.
+// Targeting `[data-icon]` beats Pebble's styled-components class rule.
 const forceWhiteIcons = `
-  button svg,
-  button img,
-  button i {
-    filter: brightness(0) invert(1) !important;
-  }
-  button svg,
-  button svg * {
+  [data-icon],
+  [data-icon]::before,
+  button,
+  button * {
     color: #ffffff !important;
-    fill: #ffffff !important;
-    stroke: #ffffff !important;
   }
 `;
 

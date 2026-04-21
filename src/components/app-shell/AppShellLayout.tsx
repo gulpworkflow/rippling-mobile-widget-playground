@@ -45,12 +45,11 @@ interface AppShellLayoutProps {
 
 const AppContainer = styled.div`
   display: flex;
-  height: 100vh;
-  /* On iOS Safari, 100vh is the "large" viewport (extends under the
-     translucent bottom toolbar). Using 100dvh here would snap the shell to
-     the visible area and cut off content when the toolbar expands/collapses
-     — we want the opposite: page content should extend under the floating
-     iOS controls so they overlay translucently. */
+  /* Use the dynamic viewport so the shell resizes as iOS Safari's toolbar
+     expands/contracts. 100vh on iOS resolves to the "large" viewport, which
+     combined with the fixed-positioned MainContent below gets clipped by
+     Safari's visual viewport. 100dvh avoids that clipping entirely. */
+  height: 100dvh;
   background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
   overflow: hidden;
 `;
@@ -67,19 +66,16 @@ const MainContent = styled.main<{
   top: 56px;
   right: ${({ expansionPanelWidth }) =>
     expansionPanelWidth > OVERLAY_THRESHOLD ? 0 : expansionPanelWidth}px;
-  /* Size with an explicit height off 100vh (the large iOS viewport) rather
-     than anchoring with bottom: 0. iOS Safari resolves bottom: 0 against the
-     *visual* viewport (above its translucent toolbar), which clips the last
-     rows of content. Using a calc'd height lets the scroll area extend
-     behind the toolbar so Safari's controls float over the page. */
-  height: calc(100vh - 56px);
+  /* Size against the dynamic viewport so the scroll area grows/shrinks in
+     lockstep with iOS Safari's toolbar. This keeps the last row of content
+     visible instead of getting clipped behind Safari's bottom controls. */
+  height: calc(100dvh - 56px);
   transition: ${({ isResizing }) =>
     isResizing ? 'left 200ms ease' : 'left 200ms ease, right 250ms ease-out'};
   overflow-y: auto;
   overflow-x: hidden;
-  /* Pad the scroll area by the home-indicator inset so the final row of
-     content can always scroll above the iOS home bar when the user reaches
-     the end of the page. */
+  /* Pad the scroll area by the home-indicator inset so the final row can
+     always scroll above the iOS home bar. */
   padding-bottom: env(safe-area-inset-bottom, 0);
 
   ${BELOW_TABLET} {
