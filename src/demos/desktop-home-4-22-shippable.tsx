@@ -12,6 +12,7 @@ import Modal from '@rippling/pebble/Modal';
 import Input from '@rippling/pebble/Inputs';
 import Tip from '@rippling/pebble/Tip';
 import Tabs from '@rippling/pebble/Tabs';
+import Notice from '@rippling/pebble/Notice';
 import SplitButton from '@rippling/pebble/Button/SplitButton/SplitButton';
 
 import Atoms from '@rippling/pebble/Atoms';
@@ -79,30 +80,34 @@ const OVERFLOW_COUNT = ALL_SSO_APPS.length - PINNED_APPS.length;
 // ── SSO Strip ───────────────────────────────────────────────────────────────
 
 const SSOStrip = styled.div`
-  /* Offset by the fixed TopNavBar height so the strip sits flush against
-     the underside of the nav rather than hiding behind it. The shell's
-     top nav is 56px tall. */
-  position: absolute;
-  top: 56px;
-  left: 0;
-  right: 0;
+  /* In document flow. On desktop (>768px) the strip full-bleeds via
+     negative horizontal margins matching PageContent's 56px gutter, then
+     re-applies the same inner padding so the apps still align with the
+     page gutter vertically while the strip's background/border extends
+     edge-to-edge. Below 768px we drop the negative margins — tablet and
+     mobile respect the page gutter normally, because the strip's scroll
+     container needs to stay within the content area on small screens.
+     Lives above the trial banner / notice / greeting in DOM order so
+     siblings below stack naturally with 16px top margins. */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
-  padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space600};
+  margin-left: ${({ theme }) => `calc(-1 * ${(theme as StyledTheme).space1400})`};
+  margin-right: ${({ theme }) => `calc(-1 * ${(theme as StyledTheme).space1400})`};
+  padding: ${({ theme }) => `${(theme as StyledTheme).space300} ${(theme as StyledTheme).space1400}`};
   border-bottom: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   background: transparent;
-  z-index: 1;
 
   /* Below tablet: left-align the row with the page gutter and let the user
      swipe horizontally through the apps with their thumb. Matches Pebble's
      responsiveness guidance for dense horizontal content on small screens.
-     Vertical padding drops from 12px to 8px (space200) on mobile so the
-     strip sits tighter against the nav. */
+     Vertical padding drops from 12px to 8px (space200). */
   @media screen and (max-width: 768px) {
     justify-content: flex-start;
-    padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space800};
+    margin-left: 0;
+    margin-right: 0;
+    padding: ${({ theme }) => `${(theme as StyledTheme).space200} ${(theme as StyledTheme).space800}`};
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -115,7 +120,7 @@ const SSOStrip = styled.div`
   }
 
   @media screen and (max-width: 576px) {
-    padding: ${({ theme }) => (theme as StyledTheme).space200} ${({ theme }) => (theme as StyledTheme).space400};
+    padding: ${({ theme }) => `${(theme as StyledTheme).space200} ${(theme as StyledTheme).space400}`};
   }
 `;
 
@@ -849,18 +854,18 @@ const HudDivider = styled.div`
 // ── Trial Banner ─────────────────────────────────────────────────────────────
 
 const TrialBanner = styled.div`
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  /* In document flow, centered at the top-block max-width (744px).
+     margin-top gives 16px to whatever is above (SSO strip or PageGradient
+     top); when nothing precedes it, this still reads as a clean top gap. */
   width: 100%;
   max-width: 744px;
+  margin: ${({ theme }) => (theme as StyledTheme).space400} auto 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: ${({ theme }) => (theme as StyledTheme).space300} ${({ theme }) => (theme as StyledTheme).space600};
   background: linear-gradient(90deg, rgba(180, 200, 255, 0.45) 0%, rgba(210, 160, 230, 0.55) 50%, rgba(230, 160, 220, 0.5) 100%);
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
-  z-index: 0;
   box-sizing: border-box;
 `;
 
@@ -901,6 +906,18 @@ const TrialBannerCTA = styled.button`
   &:hover {
     background: ${({ theme }) => (theme as StyledTheme).colorSurface};
   }
+`;
+
+// ── Notice ───────────────────────────────────────────────────────────────────
+// In document flow, sibling of TrialBanner / SSOStrip. 16px top gap sits
+// between it and whatever element precedes it (SSO strip, trial banner, or
+// the top of PageGradient).
+
+const NoticeWrap = styled.div`
+  width: 100%;
+  max-width: 744px;
+  margin: ${({ theme }) => (theme as StyledTheme).space400} auto 0 auto;
+  box-sizing: border-box;
 `;
 
 // ── Ad Banner ────────────────────────────────────────────────────────────────
@@ -2066,27 +2083,28 @@ const PromptHeading = styled.h1`
   }
 `;
 
-const GreetingRow = styled.div<{ $sso?: boolean; $trial?: boolean }>`
+const GreetingRow = styled.div<{ $stacked?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-top: ${({ $sso, $trial }) => {
-    let base = 96;
-    if ($sso) base += 48;
-    if ($trial) base += 44;
-    return `${base}px`;
-  }};
+  /* With sibling banners above (SSO / trial / notice), they own the top
+     spacing via natural flow + margin-top:16px, so the greeting just needs
+     a breathing gap below the last stacked item. When nothing is stacked,
+     the greeting owns the top spacing itself (original 96px base). */
+  margin-top: ${({ $stacked, theme }) => $stacked
+    ? (theme as StyledTheme).space1200
+    : '96px'};
+  padding-top: ${({ theme }) => (theme as StyledTheme).space600};
   margin-bottom: ${({ theme }) => (theme as StyledTheme).space600};
 
-  /* Mobile lands on a fixed 104px (space2400 + space200) above the greeting,
-     regardless of SSO/trial state — the smaller headline doesn't need the
-     dynamic desktop spacing. Bottom margin sits at 20px (space500). */
+  /* Mobile: when anything is stacked above, a smaller gap (space500 = 20px)
+     reads fine at the compact type scale. When the greeting stands alone,
+     keep the original 104px top margin. */
   @media screen and (max-width: 768px) {
-    margin-top: calc(
-      ${({ theme }) => (theme as StyledTheme).space2400} +
-      ${({ theme }) => (theme as StyledTheme).space200}
-    );
+    margin-top: ${({ $stacked, theme }) => $stacked
+      ? (theme as StyledTheme).space500
+      : `calc(${(theme as StyledTheme).space2400} + ${(theme as StyledTheme).space200})`};
     margin-bottom: ${({ theme }) => (theme as StyledTheme).space500};
   }
 `;
@@ -3020,8 +3038,10 @@ const DesktopHome422Shippable: React.FC = () => {
   const hasSSO = searchParams.get('sso') !== '0';
   const hasAI = searchParams.get('ai') !== '0';
   const hasTrial = searchParams.get('trial') === '1';
+  const hasNotice = searchParams.get('notice') === '1';
   const hasAds = searchParams.get('ads') === '1';
   const [adDismissed, setAdDismissed] = useState(false);
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
   const isEmptyState = searchParams.has('empty');
 
   const toggleParam = useCallback((key: string, currentlyOn: boolean, defaultOn: boolean) => {
@@ -3259,13 +3279,25 @@ const DesktopHome422Shippable: React.FC = () => {
       )}
 
       {hasTrial && (
-        <TrialBanner style={{ top: hasSSO ? '80px' : '16px' }}>
+        <TrialBanner>
           <TrialBannerText>Your Rippling AI 30-day free trial is active!</TrialBannerText>
           <TrialBannerActions>
             <Button appearance={Button.APPEARANCES.GHOST} size={Button.SIZES.S}>Learn more</Button>
             <Button appearance={Button.APPEARANCES.OUTLINE} size={Button.SIZES.S}>Talk to sales</Button>
           </TrialBannerActions>
         </TrialBanner>
+      )}
+
+      {hasNotice && !noticeDismissed && (
+        <NoticeWrap>
+          <Notice.Info
+            title="Submit updated bank information"
+            description="We are requesting information for a credit review related to your Rippling account(s). Submit your most recent 3 months' bank statements for all cash accounts or connect your accounts via Plaid. To avoid any disruption to your account, complete this request as soon as possible."
+            primaryAction={{ title: 'Submit now', onClick: () => {} }}
+            isCloseable
+            onClose={() => setNoticeDismissed(true)}
+          />
+        </NoticeWrap>
       )}
 
       <Drawer
@@ -3543,6 +3575,10 @@ const DesktopHome422Shippable: React.FC = () => {
               <HudToggle $on={hasTrial} onClick={() => toggleParam('trial', hasTrial, false)} />
             </HudRow>
             <HudRow>
+              <HudRowLabel>Notice</HudRowLabel>
+              <HudToggle $on={hasNotice} onClick={() => { toggleParam('notice', hasNotice, false); setNoticeDismissed(false); }} />
+            </HudRow>
+            <HudRow>
               <HudRowLabel>Ads</HudRowLabel>
               <HudToggle $on={hasAds} onClick={() => { toggleParam('ads', hasAds, false); setAdDismissed(false); }} />
             </HudRow>
@@ -3564,7 +3600,7 @@ const DesktopHome422Shippable: React.FC = () => {
       )}
 
       <HomeContent>
-        <GreetingRow $sso={hasSSO} $trial={hasTrial}>
+        <GreetingRow $stacked={hasSSO || hasTrial || (hasNotice && !noticeDismissed)}>
           <PromptHeading>
             {hasAI && (
               <svg width="26" height="26" viewBox="0 0 26 26" fill="none" style={{ flexShrink: 0 }}>
