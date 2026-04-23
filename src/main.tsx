@@ -14,11 +14,13 @@ import GettingStartedPage from './demos/getting-started-page';
 import DocViewerPage from './demos/doc-viewer-page';
 import PlaygroundArchivePage from './demos/playground-archive-page';
 import WidgetCardFrameworkPage from './demos/widget-card-framework-page';
+import WidgetCanvasPage from './demos/widget-canvas-page';
 import DesktopHomeDemo from './demos/desktop-home-demo';
 import DesktopHomeDemoV2 from './demos/desktop-home-demo-v2';
 import DesktopHomeDemo422 from './demos/desktop-home-demo-4-22';
 import DesktopHome422Shippable from './demos/desktop-home-4-22-shippable';
 import DesktopHomeB from './demos/desktop-home-b';
+import NoticeStackDemo from './demos/notice-stack-demo';
 
 // Initialize @rippling/ui package
 oneUiService.init({} as any);
@@ -97,11 +99,13 @@ init().then(() => {
             <Route path="/mobile-home-demo" element={<MobileHomeDemo />} />
             <Route path="/adaptive-home-architecture" element={<AdaptiveHomeArchitectureDemo />} />
             <Route path="/widget-card-framework" element={<WidgetCardFrameworkPage />} />
+            <Route path="/widget-canvas" element={<WidgetCanvasPage />} />
             <Route path="/desktop-home-demo" element={<DesktopHomeDemo />} />
             <Route path="/desktop-home-demo-v2" element={<DesktopHomeDemoV2 />} />
             <Route path="/desktop-home-demo-4-22" element={<DesktopHomeDemo422 />} />
             <Route path="/desktop-home-4-22-shippable" element={<DesktopHome422Shippable />} />
             <Route path="/desktop-home-b" element={<DesktopHomeB />} />
+            <Route path="/notice-stack-demo" element={<NoticeStackDemo />} />
             
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

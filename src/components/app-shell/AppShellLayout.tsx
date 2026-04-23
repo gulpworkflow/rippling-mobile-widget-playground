@@ -40,6 +40,39 @@ interface AppShellLayoutProps {
   personaLabel?: string;
   aiPanelRef?: React.MutableRefObject<{ open: () => void } | null>;
   hideAI?: boolean;
+
+  /**
+   * When true, the PageContent wrapper drops its horizontal gutter so the
+   * child can paint edge-to-edge (e.g. a full-bleed gradient background).
+   * Vertical padding still follows the `hidePageHeader` / $flush rules.
+   */
+  fullBleedContent?: boolean;
+
+  /**
+   * When true, the left sidebar mounts in its expanded (pinned-open) state
+   * instead of the default collapsed rail. The user can still toggle it
+   * after mount.
+   */
+  defaultSidebarExpanded?: boolean;
+
+  /**
+   * Optional slot rendered above the main nav sections in the sidebar.
+   * Hidden when the sidebar is in collapsed rail mode.
+   */
+  sidebarTopSlot?: React.ReactNode;
+
+  /**
+   * When true, suppresses all horizontal rules that appear below the top
+   * slot in the sidebar. Useful when the top slot already provides its
+   * own section-scoping divider (e.g. Tabs.LINK's underline).
+   */
+  hideSidebarDividers?: boolean;
+
+  /**
+   * Width (in pixels) of the sidebar in its expanded state. Defaults to
+   * 266. The collapsed-rail width (60px) is unchanged.
+   */
+  sidebarExpandedWidth?: number;
 }
 
 const OVERLAY_THRESHOLD = 650;
@@ -65,13 +98,15 @@ const OVERLAY_THRESHOLD = 650;
  */
 const AppContainer = styled.div<{
   sidebarCollapsed: boolean;
+  sidebarExpandedWidth: number;
   expansionPanelWidth: number;
   isResizing: boolean;
 }>`
   min-height: 100dvh;
   background-color: ${({ theme }) => (theme as StyledTheme).colorSurface};
   padding-top: 56px;
-  padding-left: ${({ sidebarCollapsed }) => (sidebarCollapsed ? '60px' : '266px')};
+  padding-left: ${({ sidebarCollapsed, sidebarExpandedWidth }) =>
+    sidebarCollapsed ? '60px' : `${sidebarExpandedWidth}px`};
   padding-right: ${({ expansionPanelWidth }) =>
     expansionPanelWidth > OVERLAY_THRESHOLD ? 0 : expansionPanelWidth}px;
   transition: ${({ isResizing }) =>
@@ -194,7 +229,7 @@ const TabsWrapper = styled.div`
   }
 `;
 
-const PageContent = styled.div<{ $flush?: boolean }>`
+const PageContent = styled.div<{ $flush?: boolean; $fullBleed?: boolean }>`
   background-color: ${({ $flush }) => $flush ? 'transparent' : ({ theme }) => (theme as StyledTheme).colorSurface};
   display: flex;
   flex-direction: column;
@@ -203,27 +238,31 @@ const PageContent = styled.div<{ $flush?: boolean }>`
 
   /* 56px horizontal gutter above Small (576px) to match Rippling's main
      app. Vertical padding still honors $flush: pages that manage their
-     own top/bottom spacing (hidePageHeader) opt out with 0 vertical. */
-  padding: ${({ $flush, theme }) =>
-    $flush
-      ? `0 ${(theme as StyledTheme).space1400}`
-      : `${(theme as StyledTheme).space800} ${(theme as StyledTheme).space1400}`};
+     own top/bottom spacing (hidePageHeader) opt out with 0 vertical.
+     $fullBleed drops the horizontal gutter entirely so children can paint
+     edge-to-edge. */
+  padding: ${({ $flush, $fullBleed, theme }) => {
+    const horizontal = $fullBleed ? '0' : (theme as StyledTheme).space1400;
+    const vertical = $flush ? '0' : (theme as StyledTheme).space800;
+    return `${vertical} ${horizontal}`;
+  }};
 
   /* Between Small (576px) and Medium (768px), step the horizontal gutter
      down from 56px to 32px so tablets and landscape phones get a more
      comfortable content width without feeling cramped. */
   ${BELOW_MEDIUM} {
-    padding: ${({ $flush, theme }) =>
-      $flush
-        ? `0 ${(theme as StyledTheme).space800}`
-        : `${(theme as StyledTheme).space600} ${(theme as StyledTheme).space800}`};
+    padding: ${({ $flush, $fullBleed, theme }) => {
+      const horizontal = $fullBleed ? '0' : (theme as StyledTheme).space800;
+      const vertical = $flush ? '0' : (theme as StyledTheme).space600;
+      return `${vertical} ${horizontal}`;
+    }};
   }
 
   /* Mobile drops the gutter entirely — pages handle their own edge-to-edge
      layout below Small. */
   ${BELOW_SMALL} {
-    padding: ${({ $flush, theme }) =>
-      $flush ? '0' : `${(theme as StyledTheme).space400}`};
+    padding: ${({ $flush, $fullBleed, theme }) =>
+      $flush || $fullBleed ? '0' : `${(theme as StyledTheme).space400}`};
   }
 `;
 
@@ -247,9 +286,14 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
   personaLabel,
   aiPanelRef,
   hideAI = false,
+  fullBleedContent = false,
+  defaultSidebarExpanded = false,
+  sidebarTopSlot,
+  hideSidebarDividers = false,
+  sidebarExpandedWidth = 266,
 }) => {
   const { theme, mode: currentMode } = usePebbleTheme();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(!defaultSidebarExpanded);
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
   const [adminMode, setAdminMode] = useState(true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -303,6 +347,7 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
     <AppContainer
       theme={theme}
       sidebarCollapsed={sidebarCollapsed}
+      sidebarExpandedWidth={sidebarExpandedWidth}
       expansionPanelWidth={expansionPanelWidth}
       isResizing={isExpansionPanelResizing}
     >
@@ -333,6 +378,9 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         mobileOpen={mobileNavOpen}
         onMobileNavigate={() => setMobileNavOpen(false)}
+        topSlot={sidebarTopSlot}
+        hideDividers={hideSidebarDividers}
+        expandedWidth={sidebarExpandedWidth}
         theme={theme}
       />
 
@@ -377,7 +425,7 @@ export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
           )}
 
           {/* Page Content */}
-          <PageContent theme={theme} $flush={hidePageHeader}>{children}</PageContent>
+          <PageContent theme={theme} $flush={hidePageHeader} $fullBleed={fullBleedContent}>{children}</PageContent>
         </PageContentContainer>
       </MainContent>
 

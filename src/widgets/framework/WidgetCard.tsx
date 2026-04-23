@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { keyframes, css } from '@emotion/react';
+import { useTheme } from '@rippling/pebble/theme';
 import Icon from '@rippling/pebble/Icon';
 import Skeleton, { SkeletonVariant } from '@rippling/pebble/Skeleton';
 import type { WidgetCardProps } from './types';
@@ -46,13 +47,14 @@ const WidgetCardTitleButton = styled.button`
   color: inherit;
 `;
 
-const WidgetCardTitle = styled.span<{ surfaceVariant?: string }>`
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: 0;
-  color: ${({ surfaceVariant }) => surfaceVariant || 'rgba(0, 0, 0, 0.45)'};
-  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  line-height: 1.3;
+const WidgetCardTitle = styled.span`
+  ${({ theme }) => {
+    const t = (theme as any).typestyleV2LabelMedium;
+    return t
+      ? `font-size: ${t.fontSize}; font-weight: ${t.fontWeight}; font-family: ${t.fontFamily}; line-height: ${t.lineHeight}; letter-spacing: ${t.letterSpacing};`
+      : 'font-size: 14px; font-weight: 600; font-family: Basel Grotesk; line-height: 20px; letter-spacing: 0;';
+  }}
+  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant || 'rgba(0, 0, 0, 0.6)'};
 `;
 
 const WidgetCardMeta = styled.div`
@@ -171,6 +173,8 @@ const ErrorOverlay = styled.div<{ $settled: boolean }>`
 `;
 
 const WidgetCard: React.FC<WidgetCardProps> = ({ title, meta, children, actions, footer, surfaceVariant, outlineVariant, primaryColor, onTitleClick, disabled, loading, skeleton, skeletonRows, skeletonColumns, skeletonHeight, error }) => {
+  const { theme } = useTheme();
+  const chevronColor = surfaceVariant || (theme as any).colorOnSurfaceVariant || 'rgba(0, 0, 0, 0.6)';
   const hasError = !!error;
 
   const [errorEntrance, setErrorEntrance] = useState<'skeleton' | 'crossfade' | 'settled' | null>(
@@ -261,8 +265,8 @@ const WidgetCard: React.FC<WidgetCardProps> = ({ title, meta, children, actions,
     <WidgetCardContainer outlineVariant={outlineVariant} $disabled={disabled}>
       <WidgetCardHeader>
         <TitleWrapper onClick={isInteractive ? onTitleClick : undefined}>
-          <WidgetCardTitle surfaceVariant={surfaceVariant}>{title}</WidgetCardTitle>
-          {onTitleClick && isInteractive && <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={surfaceVariant || 'rgba(0, 0, 0, 0.45)'} />}
+          <WidgetCardTitle>{title}</WidgetCardTitle>
+          {onTitleClick && isInteractive && <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={chevronColor} />}
         </TitleWrapper>
         {!showLoadingChrome && meta && (
           fadeIn ? <ContentFadeIn><WidgetCardMeta>{meta}</WidgetCardMeta></ContentFadeIn> : <WidgetCardMeta>{meta}</WidgetCardMeta>

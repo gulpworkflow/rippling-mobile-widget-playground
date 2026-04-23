@@ -3,112 +3,63 @@ import styled from '@emotion/styled';
 import Icon from '@rippling/pebble/Icon';
 import { usePebbleTheme } from '@/utils/theme';
 
-const VisitedRow = styled.div`
+interface RecentItem {
+  id: string;
+  name: string;
+  context?: string;
+  icon: string;
+}
+
+const RECENT_ITEMS: RecentItem[] = [
+  { id: '1', name: 'Bills', context: 'Finance', icon: Icon.TYPES.CREDIT_CARD_OUTLINE },
+  { id: '2', name: 'COBRA', context: 'Benefits', icon: Icon.TYPES.HEART_OUTLINE },
+  { id: '3', name: 'Payroll overview', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE },
+  { id: '4', name: 'Headcount planning', context: 'Reports', icon: Icon.TYPES.BAR_CHART_OUTLINE },
+  { id: '5', name: 'Time off balances', context: 'Time', icon: Icon.TYPES.CALENDAR_OUTLINE },
+];
+
+const Row = styled.a`
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 0;
-  border-bottom: 1px solid ${({ theme }) => (theme as any).colorOutlineVariant || 'rgba(0,0,0,0.08)'};
-  &:last-of-type {
-    border-bottom: none;
-  }
+  gap: 10px;
+  padding: 8px 0;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 `;
 
-const VisitedIcon = styled.div`
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: ${({ theme }) => (theme as any).colorSurfaceBright || '#fff'};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-`;
-
-const VisitedBody = styled.div`
-  flex: 1;
-  min-width: 0;
-`;
-
-const VisitedTitle = styled.div`
+const RowLabel = styled.span`
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
   color: ${({ theme }) => (theme as any).colorOnSurface || '#000'};
   font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
 `;
 
-const VisitedSubtitle = styled.div`
-  font-size: 12px;
-  font-weight: 400;
+const RowContext = styled.span`
   color: ${({ theme }) => (theme as any).colorOnSurfaceVariant || 'rgba(0,0,0,0.5)'};
-  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  line-height: 1.3;
-  margin-top: 1px;
 `;
-
-const ChevronWrap = styled.div`
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-`;
-
-interface RecentItem {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: string;
-}
-
-const RECENT_ITEMS: RecentItem[] = [
-  {
-    id: '1',
-    title: 'Headcount planning',
-    subtitle: 'Report · Updated 2d ago',
-    icon: Icon.TYPES.TABLE_OUTLINE,
-  },
-  {
-    id: '2',
-    title: 'Payroll summary — Oct',
-    subtitle: 'Dashboard · Updated 3d ago',
-    icon: Icon.TYPES.HOME_OUTLINE,
-  },
-  {
-    id: '3',
-    title: 'Benefits enrollment status',
-    subtitle: 'Report · Updated 5d ago',
-    icon: Icon.TYPES.CHECKBOX_WITHCHECK_OUTLINE,
-  },
-  {
-    id: '4',
-    title: 'Time off balances — all employees',
-    subtitle: 'Report · Updated 1w ago',
-    icon: Icon.TYPES.CALENDAR_OUTLINE,
-  },
-];
 
 const RecentlyVisitedContent: React.FC<{ disabled?: boolean }> = ({ disabled }) => {
   const { theme } = usePebbleTheme();
-  const variantColor = theme.colorOnSurfaceVariant;
+  const iconColor = theme.colorOnSurface;
   const dimStyle = disabled ? { opacity: 0.4 } as const : undefined;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', ...dimStyle }}>
       {RECENT_ITEMS.map(item => (
-        <VisitedRow key={item.id}>
-          <VisitedIcon style={dimStyle}>
-            <Icon type={item.icon} size={18} color={variantColor} />
-          </VisitedIcon>
-          <VisitedBody>
-            <VisitedTitle>{item.title}</VisitedTitle>
-            <VisitedSubtitle>{item.subtitle}</VisitedSubtitle>
-          </VisitedBody>
-          <ChevronWrap>
-            <Icon type={Icon.TYPES.CHEVRON_RIGHT} size={16} color={variantColor} />
-          </ChevronWrap>
-        </VisitedRow>
+        <Row key={item.id} href="#" onClick={(e) => e.preventDefault()}>
+          <Icon type={item.icon} size={16} color={iconColor} style={{ flexShrink: 0 }} />
+          <RowLabel>
+            {item.name}
+            {item.context && <RowContext> in {item.context}</RowContext>}
+          </RowLabel>
+        </Row>
       ))}
     </div>
   );

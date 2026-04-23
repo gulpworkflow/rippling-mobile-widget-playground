@@ -2,12 +2,14 @@ import React from 'react';
 import styled from '@emotion/styled';
 
 const ShiftTimeRow = styled.div`
-  font-size: 22px;
-  font-weight: 600;
+  ${({ theme }) => {
+    const t = (theme as any).typestyleV2TitleMedium;
+    return t
+      ? `font-size: ${t.fontSize}; font-weight: ${t.fontWeight}; font-family: ${t.fontFamily}; line-height: ${t.lineHeight};`
+      : 'font-size: 22px; font-weight: 600; font-family: Basel Grotesk; line-height: 26px;';
+  }}
   letter-spacing: 0;
-  line-height: 28px;
   color: ${({ theme }) => (theme as any).colorOnSurface || '#000'};
-  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
 `;
 
 const ShiftDetailGrid = styled.div`

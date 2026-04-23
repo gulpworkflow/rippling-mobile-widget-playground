@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { keyframes } from '@emotion/react';
 import { css } from '@emotion/css';
 import { StyledTheme } from '@/utils/theme';
-import { useTheme } from '@rippling/pebble/theme';
+import { useTheme, getStateColor } from '@rippling/pebble/theme';
 import Icon from '@rippling/pebble/Icon';
 import Button from '@rippling/pebble/Button';
 import Drawer from '@rippling/pebble/Drawer';
@@ -12,9 +12,10 @@ import Input from '@rippling/pebble/Inputs';
 import Tip from '@rippling/pebble/Tip';
 import Status from '@rippling/pebble/Status';
 import SplitButton from '@rippling/pebble/Button/SplitButton/SplitButton';
+import Tabs from '@rippling/pebble/Tabs';
 
 import Atoms from '@rippling/pebble/Atoms';
-import { AppShellLayout, NavSectionData } from '@/components/app-shell';
+import { AppShellLayout } from '@/components/app-shell';
 import RipplingAiSpark from '@/assets/rippling-ai-spark.svg';
 import { SAMPLE_USERS } from '@/data-models/sample-users';
 import { PERSONA_OPTIONS } from '@/data-models/personas';
@@ -1391,6 +1392,142 @@ const AnalyticsInsight = styled.div`
   white-space: nowrap;
 `;
 
+// ── Sidebar Tabs ────────────────────────────────────────────────────────────
+
+/* Link-style tabs (Home / Chats / Inbox) pinned to the top of the left
+   sidebar. `stretchH` on Tabs.LINK makes the internal StyledScroll span
+   the full width of this wrapper, so Pebble's built-in 1px underline
+   acts as the section divider beneath the tabs. Horizontal padding here
+   insets both the labels and the underline from the sidebar's edges for
+   some breathing room; the active-tab indicator still lives on the same
+   line as the neutral underline, so there's only ever one rule. */
+const SidebarTopBlock = styled.div`
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: ${({ theme }) => (theme as StyledTheme).space400};
+  margin-bottom: ${({ theme }) => (theme as StyledTheme).space300};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space500};
+`;
+
+// ── Sidebar Body (Starred / Recents / Apps / Utilities) ─────────────────────
+
+/* A flat, user-centric sidebar body that replaces the nested app tree.
+   All rows share the 40px NavItem density the team likes. Sections are
+   separated by vertical rhythm rather than horizontal rules — the only
+   divider in the sidebar is the built-in Tabs.LINK underline above. */
+
+const SidebarBody = styled.div`
+  padding: ${({ theme }) => (theme as StyledTheme).space250}
+    ${({ theme }) => (theme as StyledTheme).space300};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => (theme as StyledTheme).space600};
+`;
+
+const SidebarSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+`;
+
+const SidebarSectionHeading = styled.div`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space200}
+    ${({ theme }) => (theme as StyledTheme).space100};
+`;
+
+/* Tight button row: 32px tall, 14px BodyMedium, 20px icons. Matches the
+   density of the Recents reference — comfortable but compact so the full
+   Starred / Recents / Apps / Utilities stack fits above the fold. */
+const SidebarRow = styled.button<{ $active?: boolean }>`
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
+  padding: 0 ${({ theme }) => (theme as StyledTheme).space200};
+  background: ${({ $active, theme }) =>
+    $active
+      ? (theme as StyledTheme).colorSurfaceContainerHigh
+      : 'none'};
+  border: none;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+  font-weight: ${({ $active }) => ($active ? 600 : 'inherit')};
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out 0s;
+  overflow: hidden;
+  position: relative;
+
+  &:hover {
+    background-color: ${({ $active, theme }) =>
+      $active
+        ? (theme as StyledTheme).colorSurfaceContainerHigh
+        : getStateColor((theme as StyledTheme).colorSurfaceBright, 'hover')};
+  }
+
+  &:active {
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'active')};
+  }
+`;
+
+const SidebarRowIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+`;
+
+const SidebarRowText = styled.span`
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const SidebarRowMuted = styled.span`
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+`;
+
+const SidebarRowBadge = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelSmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  flex-shrink: 0;
+`;
+
+const SidebarInlineLink = styled.button`
+  all: unset;
+  align-self: flex-start;
+  margin-top: ${({ theme }) => (theme as StyledTheme).space50};
+  padding: ${({ theme }) => (theme as StyledTheme).space50}
+    ${({ theme }) => (theme as StyledTheme).space150};
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelSmall};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  cursor: pointer;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerSm};
+
+  &:hover {
+    color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
+    background-color: ${({ theme }) =>
+      getStateColor((theme as StyledTheme).colorSurfaceBright, 'hover')};
+  }
+`;
+
+const SidebarFooterGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: ${({ theme }) => (theme as StyledTheme).space200};
+  padding-top: ${({ theme }) => (theme as StyledTheme).space200};
+  border-top: 1px solid
+    ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+`;
+
 // ── Content ─────────────────────────────────────────────────────────────────
 
 const PageGradient = styled.div`
@@ -1620,23 +1757,98 @@ const ReportChip = styled.button`
   }
 `;
 
-const REPORT_SAMPLE_PROMPTS = [
-  'Create monthly marketing campaign performance report',
-  'Track headcount and attrition trends across all departments',
-  'Show payroll cost breakdown by department for Q1',
-  'Compare time-off usage across teams this quarter',
-];
+/* Unified Starter model. The previous design split entry points into two
+   species — "sample prompts" (one-liners) and "recipes" (curated templates
+   with metadata). From a customer standpoint both do the same thing: scope
+   a draft input, hit go. We merge them into one shelf with one card shape:
+   short scannable title (from the recipe pattern) + full editable prompt
+   sentence (from the sample-prompt pattern). Each starter is tagged with
+   the output formats it's a natural fit for; the grid reorders matches to
+   the top when the user picks a format above. */
+type Starter = {
+  id: string;
+  title: string;
+  prompt: string;
+  icon: string;
+  color: string;
+  formats?: string[];
+  outcomes?: string[];
+  permission?: string;
+};
 
-const REPORT_RECIPES = [
-  { title: 'Employee roster', desc: 'A quick and simple list of all the employees at your company with key details', icon: Icon.TYPES.PEO_OUTLINE, color: '#7B3E00' },
-  { title: 'Payroll report', desc: 'Track your employees\u2019 payroll data', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-  { title: 'Change history report', desc: 'Track all employee data changes that are made in Rippling', icon: Icon.TYPES.PEO_OUTLINE, color: '#7B3E00' },
-  { title: 'Time off requests report', desc: 'Track leave requests by employee and leave type', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#005A3A' },
-  { title: 'Upcoming Time Off by Employee', desc: 'Track total number of hours to be taken off by employees', icon: Icon.TYPES.PEO_OUTLINE, color: '#7B3E00' },
-  { title: 'Time off balances report', desc: 'Track the current leave balances by employee and leave type', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#005A3A' },
-  { title: 'Time off accruals report', desc: 'Track accrued leave hours by employee and leave type', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#005A3A' },
-  { title: 'Hours worked per department', desc: 'Track hourly employee timecards with their associated earnings', icon: Icon.TYPES.PEO_OUTLINE, color: '#7B3E00' },
-  { title: 'Hours worked by employee', desc: 'Track hourly employee timecards with their associated earnings', icon: Icon.TYPES.TIME_OUTLINE, color: '#005A3A' },
+const REPORT_STARTERS: Starter[] = [
+  {
+    id: 'payroll-by-dept',
+    title: 'Payroll by department',
+    prompt: 'Create a report of payroll cost broken down by department for the current quarter.',
+    icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
+    color: '#7B3E00',
+    formats: ['bar', 'pivot', 'stacked'],
+  },
+  {
+    id: 'headcount-attrition',
+    title: 'Headcount & attrition',
+    prompt: 'Track headcount and attrition trends across all departments over the last four quarters.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#005A3A',
+    formats: ['bar', 'stacked'],
+  },
+  {
+    id: 'marketing-campaigns',
+    title: 'Marketing campaigns',
+    prompt: 'Create a monthly marketing campaign performance report with spend, leads, and conversion.',
+    icon: Icon.TYPES.BAR_CHART_OUTLINE,
+    color: '#1E5A8E',
+    formats: ['grid', 'bar'],
+  },
+  {
+    id: 'time-off-by-team',
+    title: 'Time-off by team',
+    prompt: 'Compare time-off usage across teams this quarter.',
+    icon: Icon.TYPES.CALENDAR_OUTLINE,
+    color: '#005A3A',
+    formats: ['bar', 'pivot'],
+  },
+  {
+    id: 'employee-roster',
+    title: 'Employee roster',
+    prompt: 'Show a full employee roster with name, role, department, manager, and start date.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#7B3E00',
+    formats: ['grid'],
+  },
+  {
+    id: 'hours-by-dept',
+    title: 'Hours by department',
+    prompt: 'Show hours worked per department for the current pay period.',
+    icon: Icon.TYPES.TIME_OUTLINE,
+    color: '#005A3A',
+    formats: ['bar', 'pivot'],
+  },
+  {
+    id: 'hours-by-employee',
+    title: 'Hours by employee',
+    prompt: 'Show hourly timecards and associated earnings for each employee.',
+    icon: Icon.TYPES.TIME_OUTLINE,
+    color: '#005A3A',
+    formats: ['grid', 'pivot'],
+  },
+  {
+    id: 'time-off-balances',
+    title: 'Time-off balances',
+    prompt: 'Show current leave balances by employee and leave type.',
+    icon: Icon.TYPES.CALENDAR_OUTLINE,
+    color: '#005A3A',
+    formats: ['grid'],
+  },
+  {
+    id: 'change-history',
+    title: 'Employee change log',
+    prompt: 'Track all employee data changes made in Rippling over the last 30 days.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#7B3E00',
+    formats: ['grid'],
+  },
 ];
 
 const REPORT_OUTPUT_FORMATS = [
@@ -1664,49 +1876,13 @@ const ReportSectionTitle = styled.h3`
   margin: 0 0 ${({ theme }) => (theme as StyledTheme).space300} 0;
 `;
 
-const ReportPromptsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: ${({ theme }) => (theme as StyledTheme).space300};
-`;
-
-const ReportPromptCard = styled.button`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: ${({ theme }) => (theme as StyledTheme).space300};
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
-  border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
-  background: ${({ theme }) => (theme as StyledTheme).colorSurface};
-  cursor: pointer;
-  text-align: left;
-  min-height: 88px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-
-  &:hover {
-    border-color: ${({ theme }) => (theme as StyledTheme).colorOutline};
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-`;
-
-const ReportPromptText = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-`;
-
-const ReportPromptArrow = styled.span`
-  align-self: flex-end;
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
-  margin-top: ${({ theme }) => (theme as StyledTheme).space200};
-`;
-
-const ReportRecipesGrid = styled.div`
+const StarterGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: ${({ theme }) => (theme as StyledTheme).space300};
 `;
 
-const ReportRecipeCard = styled.button`
+const StarterCard = styled.button`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => (theme as StyledTheme).space200};
@@ -1716,51 +1892,84 @@ const ReportRecipeCard = styled.button`
   background: ${({ theme }) => (theme as StyledTheme).colorSurface};
   cursor: pointer;
   text-align: left;
+  position: relative;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
     border-color: ${({ theme }) => (theme as StyledTheme).colorOutline};
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
+
+  &:hover .starter-arrow {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
 `;
 
-const ReportRecipeHeader = styled.div`
+/* Header row now carries the title alongside the icon. Title becomes an
+   eyebrow — small, muted, scannable — while the prompt sentence below it
+   becomes the focal content the user actually reads and edits. */
+const StarterHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: ${({ theme }) => (theme as StyledTheme).space200};
   width: 100%;
 `;
 
-const ReportRecipeIconWrap = styled.div<{ $bg: string }>`
-  width: 28px;
-  height: 28px;
-  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerMd};
+const StarterIconWrap = styled.div<{ $bg: string }>`
+  width: 24px;
+  height: 24px;
+  border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerSm};
   background: ${({ $bg }) => $bg};
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 `;
 
-const ReportRecipeBadge = styled.span`
+const StarterPermChip = styled.span`
   ${({ theme }) => (theme as StyledTheme).typestyleV2LabelSmall};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
   border: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerFull};
   padding: 2px 8px;
+  white-space: nowrap;
+  margin-left: auto;
 `;
 
-const ReportRecipeTitle = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2TitleSmall};
-  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
-`;
-
-const ReportRecipeDesc = styled.span`
-  ${({ theme }) => (theme as StyledTheme).typestyleV2BodySmall};
+const StarterTitle = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2LabelMedium};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const StarterPrompt = styled.span`
+  ${({ theme }) => (theme as StyledTheme).typestyleV2BodyMedium};
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+`;
+
+const StarterArrow = styled.span`
+  position: absolute;
+  top: ${({ theme }) => (theme as StyledTheme).space300};
+  right: ${({ theme }) => (theme as StyledTheme).space300};
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  color: ${({ theme }) => (theme as StyledTheme).colorOnSurfaceVariant};
+  pointer-events: none;
+  background: ${({ theme }) => (theme as StyledTheme).colorSurface};
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const ReportFormatStrip = styled.div`
@@ -1791,13 +2000,6 @@ const ReportFormatCard = styled.button<{ $selected?: boolean }>`
 
 // ── Automation Mode ──────────────────────────────────────────────────────────
 
-const AUTOMATION_SAMPLE_PROMPTS = [
-  'Alert managers when an employee\u2019s PTO balance is running low',
-  'Auto-assign onboarding tasks when a new hire starts',
-  'Notify payroll admins before each pay run deadline',
-  'Escalate overdue compliance trainings to department heads',
-];
-
 const AUTOMATION_OUTCOMES = [
   { id: 'compliance', label: 'Compliance', icon: Icon.TYPES.SHIELD_OUTLINE },
   { id: 'retention', label: 'Retention', icon: Icon.TYPES.HEART_OUTLINE },
@@ -1805,40 +2007,106 @@ const AUTOMATION_OUTCOMES = [
   { id: 'cost', label: 'Cost savings', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE },
 ];
 
-const AUTOMATION_RECIPES: Record<string, { title: string; desc: string; icon: string; color: string; permission?: string }[]> = {
-  compliance: [
-    { title: 'Alert admins when a pay run auto-approval fails', desc: 'Avoid payroll delays from a failed auto-approval', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00', permission: 'No permission' },
-    { title: 'Alert when an employee is terminated involuntarily', desc: 'Avoid late payment penalties by alerting payroll admins of involuntary terminations', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-    { title: 'Alert admins when an employee changes countries', desc: 'Ensure compliance when employees change countries by notifying the right admins', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-    { title: 'Alert super admins if an employee requests leave while their manager is on leave', desc: 'Send a notification to admins to look into the leave request', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Ensure timely review of long-term leave requests', desc: 'Alert managers when their reports request extended leave', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Communicate manually approved pay runs', desc: 'Ensure coordination of different payroll admins by communicating approved pay runs', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-  ],
-  retention: [
-    { title: 'Assign a task to managers when an employee hits a tenure milestone', desc: 'Reduce attrition with regular salary discussions to evaluate if employees are eligible for a raise', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-    { title: 'Assign a task to managers to take their new hire to lunch on first day', desc: 'Ensure a proper welcome for new hires by organizing a welcome lunch', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Alert HR when an employee\u2019s engagement score drops', desc: 'Proactively address disengagement before it leads to turnover', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Notify managers when a direct report updates their resume', desc: 'Surface potential flight risk signals early so managers can have retention conversations', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Send a check-in survey at 30/60/90 days for new hires', desc: 'Catch onboarding friction early and improve new hire retention', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Alert HR when a high performer has not been promoted in 18 months', desc: 'Prevent losing top talent by surfacing overdue career progression', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-  ],
-  efficiency: [
-    { title: 'Auto-assign onboarding tasks when a new hire\u2019s start date is confirmed', desc: 'Eliminate manual task creation and ensure nothing is missed during onboarding', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Avoid understaffing during busy seasons', desc: 'Alert managers immediately after time off is requested during peak periods', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Alert when an off-cycle pay run occurs', desc: 'Ensure coordination of different payroll admins by communicating off-cycle pay runs', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00', permission: 'No permission' },
-    { title: 'Auto-route expense approvals based on amount', desc: 'Route expenses over $500 to finance and under $500 to direct managers', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-    { title: 'Auto-provision app access based on department and role', desc: 'Eliminate manual IT tickets by automatically granting the right tools on day one', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Alert when an employee\u2019s compensation changes', desc: 'Keep your payroll team informed of any employee compensation changes', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-  ],
-  cost: [
-    { title: 'Alert when an employee forfeits their sign-on bonus by leaving', desc: 'Ensure departing employees return their signing bonuses before the bonus period ends', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A', permission: 'No permission' },
-    { title: 'Flag duplicate expense submissions across employees', desc: 'Catch accidental or fraudulent duplicate reimbursement requests before they\u2019re paid out', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-    { title: 'Alert finance when a department exceeds its headcount budget', desc: 'Surface budget overruns early so finance can course-correct before quarter end', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-    { title: 'Notify admins when unused software licenses exceed threshold', desc: 'Reclaim spend on underutilized SaaS tools by alerting IT to unused seats', icon: Icon.TYPES.PEO_OUTLINE, color: '#005A3A' },
-    { title: 'Alert when overtime costs exceed department budget', desc: 'Surface overtime budget overruns so managers can adjust scheduling proactively', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-    { title: 'Flag contractor invoices that exceed approved rates', desc: 'Catch rate discrepancies before payment to protect against billing errors', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, color: '#7B3E00' },
-  ],
-};
+const AUTOMATION_STARTERS: Starter[] = [
+  {
+    id: 'auto-pay-run-failure',
+    title: 'Pay run failure alerts',
+    prompt: 'Alert admins when a pay run auto-approval fails so payroll delays are caught immediately.',
+    icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
+    color: '#7B3E00',
+    outcomes: ['compliance'],
+    permission: 'Needs admin',
+  },
+  {
+    id: 'auto-country-change',
+    title: 'Country change review',
+    prompt: 'Alert admins when an employee changes countries so compliance reviews start right away.',
+    icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
+    color: '#7B3E00',
+    outcomes: ['compliance'],
+  },
+  {
+    id: 'auto-long-leave',
+    title: 'Long-leave review',
+    prompt: 'Alert managers when a direct report requests extended leave so reviews happen on time.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#005A3A',
+    outcomes: ['compliance'],
+  },
+  {
+    id: 'auto-tenure-milestone',
+    title: 'Tenure milestones',
+    prompt: 'Assign a task to managers when an employee hits a tenure milestone to trigger a salary review.',
+    icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
+    color: '#7B3E00',
+    outcomes: ['retention'],
+  },
+  {
+    id: 'auto-new-hire-lunch',
+    title: 'New-hire lunch',
+    prompt: 'Assign a task to managers to take their new hire to lunch on their first day.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#005A3A',
+    outcomes: ['retention'],
+  },
+  {
+    id: 'auto-30-60-90',
+    title: '30 / 60 / 90 check-ins',
+    prompt: 'Send a check-in survey to new hires at 30, 60, and 90 days to catch onboarding friction early.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#005A3A',
+    outcomes: ['retention'],
+  },
+  {
+    id: 'auto-onboarding',
+    title: 'Onboarding autopilot',
+    prompt: 'Auto-assign onboarding tasks when a new hire\u2019s start date is confirmed.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#005A3A',
+    outcomes: ['efficiency'],
+  },
+  {
+    id: 'auto-expense-routing',
+    title: 'Expense routing',
+    prompt: 'Route expenses over $500 to finance and under $500 to direct managers for fast approvals.',
+    icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
+    color: '#7B3E00',
+    outcomes: ['efficiency'],
+  },
+  {
+    id: 'auto-app-provisioning',
+    title: 'Day-one app access',
+    prompt: 'Auto-provision app access based on department and role so new hires have the right tools on day one.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#005A3A',
+    outcomes: ['efficiency'],
+  },
+  {
+    id: 'auto-sign-on-bonus',
+    title: 'Sign-on bonus recovery',
+    prompt: 'Alert when an employee forfeits their sign-on bonus by leaving before the bonus period ends.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#005A3A',
+    outcomes: ['cost'],
+    permission: 'Needs admin',
+  },
+  {
+    id: 'auto-duplicate-expenses',
+    title: 'Duplicate expense flags',
+    prompt: 'Flag duplicate expense submissions across employees before reimbursements are paid out.',
+    icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE,
+    color: '#7B3E00',
+    outcomes: ['cost'],
+  },
+  {
+    id: 'auto-saas-licenses',
+    title: 'Unused SaaS licenses',
+    prompt: 'Notify admins when unused software licenses exceed a threshold so IT can reclaim spend.',
+    icon: Icon.TYPES.PEO_OUTLINE,
+    color: '#005A3A',
+    outcomes: ['cost'],
+  },
+];
 
 // ── Company Feed ─────────────────────────────────────────────────────────────
 
@@ -2096,13 +2364,27 @@ function getGreeting(): string {
 
 // ── Isolated Prompt (own state = no full-page re-render on keystroke) ────────
 
-const HomePrompt = React.memo(({ onSubmit, reportMode, onClearReport, automationMode, onClearAutomation }: { onSubmit?: () => void; reportMode?: boolean; onClearReport?: () => void; automationMode?: boolean; onClearAutomation?: () => void }) => {
+const HomePrompt = React.memo(({ onSubmit, reportMode, onClearReport, automationMode, onClearAutomation, promptSeed }: { onSubmit?: () => void; reportMode?: boolean; onClearReport?: () => void; automationMode?: boolean; onClearAutomation?: () => void; promptSeed?: { value: string; nonce: number } }) => {
   const { theme } = useTheme();
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const promptWrapRef = useRef<HTMLDivElement>(null);
   const [promptValue, setPromptValue] = useState('');
   const [mentionOpen, setMentionOpen] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
+
+  /* Watch the seed nonce so every starter tap re-seeds the textarea, even
+     when the user taps the same card twice after clearing. */
+  useEffect(() => {
+    if (!promptSeed || promptSeed.nonce === 0) return;
+    setPromptValue(promptSeed.value);
+    requestAnimationFrame(() => {
+      const el = promptRef.current;
+      if (!el) return;
+      el.focus();
+      const end = el.value.length;
+      el.setSelectionRange(end, end);
+    });
+  }, [promptSeed?.nonce]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredMentionEmployees = useMemo(() => {
     if (!mentionQuery) return MENTION_EMPLOYEES;
@@ -2266,8 +2548,17 @@ const DesktopHomeB: React.FC = () => {
   const [qaSearch, setQaSearch] = useState('');
   const [qaSortBy, setQaSortBy] = useState<'recent' | 'used' | 'alpha'>('recent');
   const [qaSortMenuOpen, setQaSortMenuOpen] = useState(false);
-  const [userIdx, setUserIdx] = useState(3);
+  const [userIdx, setUserIdx] = useState(
+    SAMPLE_USERS.findIndex(u => u.persona === 'executive_owner'),
+  );
   const [personaHudOpen, setPersonaHudOpen] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState(0);
+  const [starredExpanded, setStarredExpanded] = useState(false);
+  const [appsExpanded, setAppsExpanded] = useState(false);
+  /* Navigation always resolves to an active destination. 'new-chat' is the
+     default landing spot inside the Home tab so the sidebar is never in an
+     "orphaned" state with nothing selected. */
+  const [activeRowId, setActiveRowId] = useState<string>('new-chat');
 
   const [customShortcuts, setCustomShortcuts] = useState<CustomShortcut[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -2281,6 +2572,13 @@ const DesktopHomeB: React.FC = () => {
   const [reportFormat, setReportFormat] = useState('grid');
   const [automationMode, setAutomationMode] = useState(false);
   const [automationOutcome, setAutomationOutcome] = useState('compliance');
+  /* Prompt seeding. A nonce bumps on every tap so the same starter can reseed
+     the input if the user clears and retries. HomePrompt watches the nonce
+     via useEffect and syncs its internal textarea value. */
+  const [promptSeed, setPromptSeed] = useState<{ value: string; nonce: number }>({ value: '', nonce: 0 });
+  const seedPrompt = useCallback((value: string) => {
+    setPromptSeed(prev => ({ value, nonce: prev.nonce + 1 }));
+  }, []);
 
   const user = SAMPLE_USERS[userIdx];
   const enabledApps = useMemo(() => new Set(user.enabledApps ?? []), [user.enabledApps]);
@@ -2382,41 +2680,239 @@ const DesktopHomeB: React.FC = () => {
     return shortcuts;
   }, [customShortcuts, qaSearch, qaSortBy]);
 
-  const orgChartSection: NavSectionData = {
-    items: [
+  /* Starred — flattened from qaFavorites (quick actions + custom shortcuts
+     the user has pinned). Shown at the very top so it acts like Notion's
+     Favorites. Capped with inline expansion. */
+  const starredItems = useMemo(() => {
+    const fromActions = allQuickActionsRaw
+      .filter(a => qaFavorites.has(a.id))
+      .map(a => ({
+        id: a.id,
+        label: a.label,
+        icon: QUICK_ACTION_ICONS[a.id] || Icon.TYPES.LINK_OUTLET,
+      }));
+    const fromCustom = customShortcuts
+      .filter(s => qaFavorites.has(s.id))
+      .map(s => ({
+        id: s.id,
+        label: s.label,
+        icon: Icon.TYPES.LINK_OUTLET,
+      }));
+    return [...fromActions, ...fromCustom];
+  }, [allQuickActionsRaw, customShortcuts, qaFavorites]);
+
+  const STARRED_CAP = 5;
+  const visibleStarred = starredExpanded
+    ? starredItems
+    : starredItems.slice(0, STARRED_CAP);
+  const starredOverflow = Math.max(0, starredItems.length - STARRED_CAP);
+
+  /* Recents — pulled into the sidebar from the existing data source used
+     by the hub, filtered by dismissals. Capped at 3–5 rows; link opens a
+     fuller activity view. */
+  const visibleRecents = RECENT_ITEMS.filter(
+    item => !dismissedRecents.has(item.name),
+  ).slice(0, 5);
+
+  /* Apps — flat list of core app areas. Top 5 are surfaced directly; the
+     rest are accessed via "More". For the prototype we use a role-
+     default ordering; the long-term model is hybrid (user-pinned >
+     attention-promoted > role-default). Org Chart is treated like a
+     core app here so it stops floating above the main list. */
+  type AppRow = { id: string; label: string; icon: string; badge?: number };
+  const allApps: AppRow[] = useMemo(
+    () => [
+      { id: 'payroll', label: 'Payroll', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, badge: 3 },
+      { id: 'finance', label: 'Finance', icon: Icon.TYPES.CREDIT_CARD_OUTLINE },
+      { id: 'benefits', label: 'Benefits', icon: Icon.TYPES.HEART_OUTLINE },
+      { id: 'time', label: 'Time', icon: Icon.TYPES.TIME_OUTLINE },
       { id: 'org-chart', label: 'Org Chart', icon: Icon.TYPES.HIERARCHY_HORIZONTAL_OUTLINE },
+      { id: 'talent', label: 'Talent', icon: Icon.TYPES.TALENT_OUTLINE },
+      { id: 'it', label: 'IT', icon: Icon.TYPES.LAPTOP_OUTLINE },
+      { id: 'data', label: 'Data', icon: Icon.TYPES.BAR_CHART_OUTLINE },
+      { id: 'custom-apps', label: 'Custom Apps', icon: Icon.TYPES.CUSTOM_APPS_OUTLINE },
     ],
-  };
+    [],
+  );
 
-  const appsSection: NavSectionData = {
-    items: [
-      { id: 'favorites', label: 'Favorites', icon: Icon.TYPES.STAR_OUTLINE, hasSubmenu: true },
-      { id: 'time', label: 'Time', icon: Icon.TYPES.TIME_OUTLINE, hasSubmenu: true },
-      { id: 'benefits', label: 'Benefits', icon: Icon.TYPES.HEART_OUTLINE, hasSubmenu: true },
-      { id: 'payroll', label: 'Payroll', icon: Icon.TYPES.DOLLAR_CIRCLE_OUTLINE, hasSubmenu: true },
-      { id: 'finance', label: 'Finance', icon: Icon.TYPES.CREDIT_CARD_OUTLINE, hasSubmenu: true },
-      { id: 'talent', label: 'Talent', icon: Icon.TYPES.TALENT_OUTLINE, hasSubmenu: true },
-      { id: 'it', label: 'IT', icon: Icon.TYPES.LAPTOP_OUTLINE, hasSubmenu: true },
-      { id: 'data', label: 'Data', icon: Icon.TYPES.BAR_CHART_OUTLINE, hasSubmenu: true },
-      { id: 'custom-apps', label: 'Custom Apps', icon: Icon.TYPES.CUSTOM_APPS_OUTLINE, hasSubmenu: true },
-    ],
-  };
-
-  const platformSection: NavSectionData = {
-    label: 'Platform',
-    items: [
-      { id: 'tools', label: 'Tools', icon: Icon.TYPES.WRENCH_OUTLINE, hasSubmenu: true },
-      { id: 'company-settings', label: 'Company settings', icon: Icon.TYPES.SETTINGS_OUTLINE, hasSubmenu: true },
-      { id: 'app-shop', label: 'App Shop', icon: Icon.TYPES.INTEGRATED_APPS_OUTLINE },
-      { id: 'help', label: 'Help', icon: Icon.TYPES.QUESTION_CIRCLE_OUTLINE },
-    ],
-  };
+  const APPS_CAP = 5;
+  const visibleApps = appsExpanded ? allApps : allApps.slice(0, APPS_CAP);
+  const hiddenAppsCount = Math.max(0, allApps.length - APPS_CAP);
 
   return (
     <AppShellLayout
       hidePageHeader
-      mainNavSections={[orgChartSection, appsSection]}
-      platformNavSection={platformSection}
+      fullBleedContent
+      defaultSidebarExpanded
+      sidebarExpandedWidth={340}
+      hideSidebarDividers
+      sidebarTopSlot={
+        <>
+          <SidebarTopBlock>
+            <Tabs.LINK
+              stretchH
+              activeIndex={sidebarTab}
+              onChange={(idx: number | string) => setSidebarTab(Number(idx))}
+            >
+            <Tabs.Tab title="Home" icon={Icon.TYPES.HOME_OUTLINE} />
+            <Tabs.Tab title="Chats" icon={Icon.TYPES.FX_OUTLINE} />
+            <Tabs.Tab title="Inbox" icon={Icon.TYPES.INBOX_OUTLINE} />
+            </Tabs.LINK>
+          </SidebarTopBlock>
+          <SidebarBody>
+            {/* Default destination — always selected on first load so the
+                sidebar never renders with no active item. */}
+            <SidebarSection>
+              <SidebarRow
+                type="button"
+                $active={activeRowId === 'new-chat'}
+                onClick={() => setActiveRowId('new-chat')}
+              >
+                <SidebarRowIcon>
+                  <Icon type={Icon.TYPES.EDIT_OUTLINE} size={20} color={theme.colorOnSurface} />
+                </SidebarRowIcon>
+                <SidebarRowText>New chat</SidebarRowText>
+              </SidebarRow>
+            </SidebarSection>
+
+            {starredItems.length > 0 && (
+              <SidebarSection>
+                <SidebarSectionHeading>Starred</SidebarSectionHeading>
+                {visibleStarred.map(item => {
+                  const rowId = `starred:${item.id}`;
+                  return (
+                    <SidebarRow
+                      key={item.id}
+                      type="button"
+                      $active={activeRowId === rowId}
+                      onClick={() => setActiveRowId(rowId)}
+                    >
+                      <SidebarRowIcon>
+                        <Icon type={item.icon} size={20} color={theme.colorOnSurface} />
+                      </SidebarRowIcon>
+                      <SidebarRowText>{item.label}</SidebarRowText>
+                    </SidebarRow>
+                  );
+                })}
+                {starredOverflow > 0 && (
+                  <SidebarInlineLink
+                    type="button"
+                    onClick={() => setStarredExpanded(prev => !prev)}
+                  >
+                    {starredExpanded
+                      ? 'Show less'
+                      : `Show ${starredOverflow} more`}
+                  </SidebarInlineLink>
+                )}
+              </SidebarSection>
+            )}
+
+            {visibleRecents.length > 0 && (
+              <SidebarSection>
+                <SidebarSectionHeading>Recents</SidebarSectionHeading>
+                {visibleRecents.map(item => {
+                  const rowId = `recent:${item.name}`;
+                  return (
+                    <SidebarRow
+                      key={item.name}
+                      type="button"
+                      $active={activeRowId === rowId}
+                      onClick={() => setActiveRowId(rowId)}
+                    >
+                      <SidebarRowText>
+                        {item.name}
+                        {item.context && (
+                          <SidebarRowMuted> in {item.context}</SidebarRowMuted>
+                        )}
+                      </SidebarRowText>
+                    </SidebarRow>
+                  );
+                })}
+              </SidebarSection>
+            )}
+
+            <SidebarSection>
+              <SidebarSectionHeading>Apps</SidebarSectionHeading>
+              {visibleApps.map(app => {
+                const rowId = `app:${app.id}`;
+                return (
+                  <SidebarRow
+                    key={app.id}
+                    type="button"
+                    $active={activeRowId === rowId}
+                    onClick={() => setActiveRowId(rowId)}
+                  >
+                    <SidebarRowIcon>
+                      <Icon type={app.icon} size={20} color={theme.colorOnSurface} />
+                    </SidebarRowIcon>
+                    <SidebarRowText>{app.label}</SidebarRowText>
+                    {app.badge && (
+                      <SidebarRowBadge>{app.badge}</SidebarRowBadge>
+                    )}
+                  </SidebarRow>
+                );
+              })}
+              {hiddenAppsCount > 0 && (
+                <SidebarRow
+                  type="button"
+                  onClick={() => setAppsExpanded(prev => !prev)}
+                >
+                  <SidebarRowIcon>
+                    <Icon
+                      type={
+                        appsExpanded
+                          ? Icon.TYPES.CHEVRON_UP
+                          : Icon.TYPES.MORE_HORIZONTAL
+                      }
+                      size={20}
+                      color={theme.colorOnSurfaceVariant}
+                    />
+                  </SidebarRowIcon>
+                  <SidebarRowText>
+                    <SidebarRowMuted>
+                      {appsExpanded ? 'Show less' : `More (${hiddenAppsCount})`}
+                    </SidebarRowMuted>
+                  </SidebarRowText>
+                </SidebarRow>
+              )}
+            </SidebarSection>
+
+            <SidebarFooterGroup>
+              <SidebarRow
+                type="button"
+                $active={activeRowId === 'settings'}
+                onClick={() => setActiveRowId('settings')}
+              >
+                <SidebarRowIcon>
+                  <Icon type={Icon.TYPES.SETTINGS_OUTLINE} size={20} color={theme.colorOnSurface} />
+                </SidebarRowIcon>
+                <SidebarRowText>Settings</SidebarRowText>
+              </SidebarRow>
+              <SidebarRow
+                type="button"
+                $active={activeRowId === 'app-shop'}
+                onClick={() => setActiveRowId('app-shop')}
+              >
+                <SidebarRowIcon>
+                  <Icon type={Icon.TYPES.INTEGRATED_APPS_OUTLINE} size={20} color={theme.colorOnSurface} />
+                </SidebarRowIcon>
+                <SidebarRowText>App Shop</SidebarRowText>
+              </SidebarRow>
+              <SidebarRow
+                type="button"
+                $active={activeRowId === 'help'}
+                onClick={() => setActiveRowId('help')}
+              >
+                <SidebarRowIcon>
+                  <Icon type={Icon.TYPES.QUESTION_CIRCLE_OUTLINE} size={20} color={theme.colorOnSurface} />
+                </SidebarRowIcon>
+                <SidebarRowText>Help</SidebarRowText>
+              </SidebarRow>
+            </SidebarFooterGroup>
+          </SidebarBody>
+        </>
+      }
+      mainNavSections={[]}
       companyName={user.company}
       userInitial={user.name.charAt(0)}
       showNotificationBadge
@@ -2728,24 +3224,13 @@ const DesktopHomeB: React.FC = () => {
           onClearReport={() => setReportMode(false)}
           automationMode={automationMode}
           onClearAutomation={() => setAutomationMode(false)}
+          promptSeed={promptSeed}
         />
 
         {reportMode ? (
           <>
-            <ReportSection>
-              <ReportSectionTitle>Sample prompts</ReportSectionTitle>
-              <ReportPromptsGrid>
-                {REPORT_SAMPLE_PROMPTS.map(text => (
-                  <ReportPromptCard key={text}>
-                    <ReportPromptText>{text}</ReportPromptText>
-                    <ReportPromptArrow>
-                      <Icon type={Icon.TYPES.EXPAND_LESS} size={14} color="currentColor" style={{ transform: 'rotate(45deg)' }} />
-                    </ReportPromptArrow>
-                  </ReportPromptCard>
-                ))}
-              </ReportPromptsGrid>
-            </ReportSection>
-
+            {/* Scope picker first. The format constrains what a good starter
+                looks like, so we pick that before offering suggestions. */}
             <ReportSection>
               <ReportSectionTitle>Choose output format</ReportSectionTitle>
               <ReportFormatStrip>
@@ -2762,40 +3247,41 @@ const DesktopHomeB: React.FC = () => {
               </ReportFormatStrip>
             </ReportSection>
 
+            {/* Unified Starters shelf. Starters that fit the selected format
+                float to the top; the rest stay as discovery. */}
             <ReportSection>
-              <ReportSectionTitle>Report recipes</ReportSectionTitle>
-              <ReportRecipesGrid>
-                {REPORT_RECIPES.map(recipe => (
-                  <ReportRecipeCard key={recipe.title}>
-                    <ReportRecipeHeader>
-                      <ReportRecipeIconWrap $bg={recipe.color}>
-                        <Icon type={recipe.icon} size={14} color="white" />
-                      </ReportRecipeIconWrap>
-                      <ReportRecipeBadge>Recipe</ReportRecipeBadge>
-                    </ReportRecipeHeader>
-                    <ReportRecipeTitle>{recipe.title}</ReportRecipeTitle>
-                    <ReportRecipeDesc>{recipe.desc}</ReportRecipeDesc>
-                  </ReportRecipeCard>
-                ))}
-              </ReportRecipesGrid>
+              <ReportSectionTitle>
+                Starters for {REPORT_OUTPUT_FORMATS.find(f => f.id === reportFormat)?.label ?? 'this report'}
+              </ReportSectionTitle>
+              <StarterGrid>
+                {[...REPORT_STARTERS]
+                  .sort((a, b) => {
+                    const aMatch = a.formats?.includes(reportFormat) ? 0 : 1;
+                    const bMatch = b.formats?.includes(reportFormat) ? 0 : 1;
+                    return aMatch - bMatch;
+                  })
+                  .map(s => (
+                    <StarterCard key={s.id} onClick={() => seedPrompt(s.prompt)}>
+                      <StarterHeader>
+                        <StarterIconWrap $bg={s.color}>
+                          <Icon type={s.icon} size={12} color="white" />
+                        </StarterIconWrap>
+                        <StarterTitle>{s.title}</StarterTitle>
+                        {s.permission && <StarterPermChip>{s.permission}</StarterPermChip>}
+                      </StarterHeader>
+                      <StarterPrompt>{s.prompt}</StarterPrompt>
+                      <StarterArrow className="starter-arrow">
+                        <Icon type={Icon.TYPES.EXPAND_LESS} size={14} color="currentColor" style={{ transform: 'rotate(45deg)' }} />
+                      </StarterArrow>
+                    </StarterCard>
+                  ))}
+              </StarterGrid>
             </ReportSection>
           </>
         ) : automationMode ? (
           <>
-            <ReportSection>
-              <ReportSectionTitle>Sample prompts</ReportSectionTitle>
-              <ReportPromptsGrid>
-                {AUTOMATION_SAMPLE_PROMPTS.map(text => (
-                  <ReportPromptCard key={text}>
-                    <ReportPromptText>{text}</ReportPromptText>
-                    <ReportPromptArrow>
-                      <Icon type={Icon.TYPES.EXPAND_LESS} size={14} color="currentColor" style={{ transform: 'rotate(45deg)' }} />
-                    </ReportPromptArrow>
-                  </ReportPromptCard>
-                ))}
-              </ReportPromptsGrid>
-            </ReportSection>
-
+            {/* Scope picker first. The outcome shapes what "good" looks like,
+                so we anchor on intent before showing candidate workflows. */}
             <ReportSection>
               <ReportSectionTitle>What outcome are you optimizing for?</ReportSectionTitle>
               <ReportFormatStrip>
@@ -2813,21 +3299,28 @@ const DesktopHomeB: React.FC = () => {
             </ReportSection>
 
             <ReportSection>
-              <ReportSectionTitle>Workflow recipes</ReportSectionTitle>
-              <ReportRecipesGrid>
-                {(AUTOMATION_RECIPES[automationOutcome] ?? []).map(recipe => (
-                  <ReportRecipeCard key={recipe.title}>
-                    <ReportRecipeHeader>
-                      <ReportRecipeIconWrap $bg={recipe.color}>
-                        <Icon type={recipe.icon} size={14} color="white" />
-                      </ReportRecipeIconWrap>
-                      <ReportRecipeBadge>Recipe</ReportRecipeBadge>
-                    </ReportRecipeHeader>
-                    <ReportRecipeTitle>{recipe.title}</ReportRecipeTitle>
-                    <ReportRecipeDesc>{recipe.desc}</ReportRecipeDesc>
-                  </ReportRecipeCard>
-                ))}
-              </ReportRecipesGrid>
+              <ReportSectionTitle>
+                Starters for {AUTOMATION_OUTCOMES.find(o => o.id === automationOutcome)?.label ?? 'this automation'}
+              </ReportSectionTitle>
+              <StarterGrid>
+                {AUTOMATION_STARTERS
+                  .filter(s => s.outcomes?.includes(automationOutcome))
+                  .map(s => (
+                    <StarterCard key={s.id} onClick={() => seedPrompt(s.prompt)}>
+                      <StarterHeader>
+                        <StarterIconWrap $bg={s.color}>
+                          <Icon type={s.icon} size={12} color="white" />
+                        </StarterIconWrap>
+                        <StarterTitle>{s.title}</StarterTitle>
+                        {s.permission && <StarterPermChip>{s.permission}</StarterPermChip>}
+                      </StarterHeader>
+                      <StarterPrompt>{s.prompt}</StarterPrompt>
+                      <StarterArrow className="starter-arrow">
+                        <Icon type={Icon.TYPES.EXPAND_LESS} size={14} color="currentColor" style={{ transform: 'rotate(45deg)' }} />
+                      </StarterArrow>
+                    </StarterCard>
+                  ))}
+              </StarterGrid>
             </ReportSection>
           </>
         ) : (

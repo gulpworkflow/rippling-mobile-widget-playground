@@ -19,21 +19,28 @@ const Page = styled.div`
 
 const LeftPanel = styled.div`
   background: ${({ theme }: T) => theme.colorSurfaceBright};
-  padding: ${({ theme }: T) => theme.space1600} 5vw;
+  height: 100vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+`;
+
+const LeftPanelInner = styled.div`
+  padding: 5vw 5vw ${({ theme }: T) => theme.space1200};
+  display: flex;
+  flex-direction: column;
 `;
 
 const RightPanel = styled.div`
   position: relative;
+  height: 100vh;
   background: #F0D8EE;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${({ theme }: T) => theme.space1200};
-  gap: 20px;
+  padding: ${({ theme }: T) => theme.space800} ${({ theme }: T) => theme.space1200};
+  gap: 16px;
 `;
 
 const ModeToggle = styled.button<{ $isDark: boolean }>`
@@ -83,42 +90,94 @@ const TitleFaded = styled.span`
   opacity: 0.45;
 `;
 
-const Description = styled.p`
+const Description = styled.div`
   ${({ theme }: T) => theme.typestyleV2BodyLarge};
   line-height: 1.65;
   color: ${({ theme }: T) => theme.colorOnSurfaceVariant};
-  margin: 0 0 ${({ theme }: T) => theme.space800} 0;
+  margin: 0 0 ${({ theme }: T) => theme.space1200} 0;
   max-width: 660px;
 `;
 
-const LinksGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }: T) => theme.space200};
-  margin-bottom: ${({ theme }: T) => theme.space1200};
+const DescriptionLead = styled.p`
+  margin: 0 0 ${({ theme }: T) => theme.space400} 0;
 `;
 
-const ExternalLink = styled.a`
-  ${({ theme }: T) => theme.typestyleV2BodyMedium};
-  color: ${({ theme }: T) => theme.colorOnSurface};
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }: T) => theme.space100};
-  width: fit-content;
+const OutcomesList = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }: T) => theme.space400};
+`;
 
-  &:hover {
-    color: ${({ theme }: T) => theme.colorPrimary};
+const OutcomeItem = styled.li`
+  position: relative;
+  padding-left: ${({ theme }: T) => theme.space600};
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: ${({ theme }: T) => theme.colorOnSurface};
+  }
+
+  strong {
+    color: ${({ theme }: T) => theme.colorOnSurface};
+    font-weight: 600;
   }
 `;
 
-const ArrowIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0 }}>
-    <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4M9.5 2.5V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+const ChevronDownIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
+
+type ProposalCategory = {
+  id: string;
+  title: string;
+  description: string;
+  items: Array<{ label: string; path: string }>;
+};
+
+const PROPOSAL_CATEGORIES: ProposalCategory[] = [
+  {
+    id: 'mobile',
+    title: 'Mobile experience',
+    description: 'Adaptive home on the mobile app',
+    items: [
+      { label: 'Mobile home demo', path: '/mobile-home-demo' },
+      { label: 'Adaptive home architecture', path: '/adaptive-home-architecture' },
+    ],
+  },
+  {
+    id: 'web',
+    title: 'Web experience',
+    description: 'The same adaptive system, rendered for desktop web',
+    items: [
+      { label: 'Desktop web home 4/22, Shippable', path: '/desktop-home-4-22-shippable' },
+      { label: 'Desktop web home 4/22', path: '/desktop-home-demo-4-22' },
+      { label: 'Desktop web home v2', path: '/desktop-home-demo-v2' },
+      { label: 'Desktop web home', path: '/desktop-home-demo' },
+      { label: 'Desktop web home B', path: '/desktop-home-b' },
+      { label: 'Notice stack (severity-tiered)', path: '/notice-stack-demo' },
+    ],
+  },
+  {
+    id: 'widget',
+    title: 'Widget framework',
+    description: 'The reusable foundation any team can adopt',
+    items: [
+      { label: 'Reusable WidgetCard framework', path: '/widget-card-framework' },
+      { label: 'Widget canvas', path: '/widget-canvas' },
+    ],
+  },
+];
 
 const SectionLabel = styled.div`
   ${({ theme }: T) => theme.typestyleV2LabelMedium};
@@ -135,23 +194,39 @@ const ProposalList = styled.div`
   max-width: 700px;
 `;
 
-const ProposalCard = styled.div<{ $clickable?: boolean }>`
+const ProposalCard = styled.div`
   display: flex;
-  align-items: flex-start;
-  gap: ${({ theme }: T) => theme.space400};
-  padding: ${({ theme }: T) => theme.space600};
+  flex-direction: column;
   background: ${({ theme }: T) => theme.colorSurfaceBright};
   border-radius: ${({ theme }: T) => theme.shapeCorner2xl};
   border: 1px solid ${({ theme }: T) => theme.colorOutlineVariant};
-  cursor: ${({ $clickable }) => $clickable ? 'pointer' : 'default'};
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+`;
 
-  ${({ $clickable }) => $clickable && `
-    &:hover {
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-      transform: translateY(-1px);
-    }
-  `}
+const ProposalRow = styled.button`
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: ${({ theme }: T) => theme.space400};
+  padding: ${({ theme }: T) => theme.space600};
+  background: transparent;
+  border: none;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }: T) => theme.colorSurfaceContainerLow};
+  }
+`;
+
+const ProposalRowContent = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }: T) => theme.space400};
 `;
 
 const ProposalIcon = styled.div`
@@ -177,6 +252,48 @@ const ProposalTitle = styled.div`
 const ProposalDescription = styled.div`
   ${({ theme }: T) => theme.typestyleV2BodyMedium};
   color: ${({ theme }: T) => theme.colorOnSurfaceVariant};
+`;
+
+const ExpandIndicator = styled.span<{ $expanded: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }: T) => theme.colorOnSurfaceVariant};
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  transform: ${({ $expanded }) => $expanded ? 'rotate(180deg)' : 'rotate(0deg)'};
+`;
+
+const ExpandedList = styled.ul<{ $expanded: boolean }>`
+  list-style: disc;
+  margin: 0;
+  padding: 0 ${({ theme }: T) => theme.space600} ${({ theme }: T) => theme.space600} 76px;
+  display: ${({ $expanded }) => $expanded ? 'flex' : 'none'};
+  flex-direction: column;
+  gap: ${({ theme }: T) => theme.space200};
+  border-top: 1px solid ${({ theme }: T) => theme.colorOutlineVariant};
+  padding-top: ${({ theme }: T) => theme.space400};
+`;
+
+const ExpandedItem = styled.li`
+  ${({ theme }: T) => theme.typestyleV2BodyMedium};
+  color: ${({ theme }: T) => theme.colorOnSurfaceVariant};
+
+  button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: ${({ theme }: T) => theme.colorOnSurface};
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font: inherit;
+    text-align: left;
+
+    &:hover {
+      color: ${({ theme }: T) => theme.colorPrimary};
+    }
+  }
 `;
 
 const PhoneContainer = styled.div`
@@ -271,6 +388,7 @@ const IndexPage: React.FC = () => {
   const [displayedIndex, setDisplayedIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const autoPlayRef = useRef<ReturnType<typeof setInterval>>();
@@ -329,122 +447,66 @@ const IndexPage: React.FC = () => {
       <Global styles={css`body { margin: 0; overflow: hidden; }`} />
       <Page>
       <LeftPanel>
+        <LeftPanelInner>
         <Eyebrow>Project Hub</Eyebrow>
-        <Title>Creating composable surfaces: <TitleFaded>Mobile&nbsp;home</TitleFaded></Title>
+        <Title>
+          &ldquo;Snack-size&rdquo;&nbsp;UI:
+          <br />
+          <TitleFaded>Creating composable surfaces</TitleFaded>
+        </Title>
         <Description>
-          Today, our mobile home treats a shift worker, a manager, and a company
-          owner the same. That static foundation breaks unbundling — even if
-          we custom build standalone experiences that feel complete, when we
-          cross-sell into new logos, the experience fractures instead of
-          expanding seamlessly.
+          <DescriptionLead>Two business outcomes drive this work:</DescriptionLead>
+          <OutcomesList>
+            <OutcomeItem>
+              <strong>Unbundling.</strong> Rippling should feel equally complete
+              whether a customer buys one SKU or a hundred. Once a customer is on
+              Rippling, growing into new products should never require relearning
+              the product.
+            </OutcomeItem>
+            <OutcomeItem>
+              <strong>AI adoption.</strong> Pricing across the industry is
+              shifting from seat-based access to usage-based models, so sustained
+              usage is what now drives revenue. Composable, widget-sized surfaces
+              pair naturally with AI and scale down to the form factors AI lives in,
+              which is how we get people to actually use it.
+            </OutcomeItem>
+          </OutcomesList>
         </Description>
-
-        <LinksGroup>
-          <ExternalLink href="#">
-            Why do this now? <ArrowIcon />
-          </ExternalLink>
-          <ExternalLink href="#">
-            What is this/What is it not? <ArrowIcon />
-          </ExternalLink>
-          <ExternalLink href="#">
-            How could this scale? <ArrowIcon />
-          </ExternalLink>
-        </LinksGroup>
 
         <SectionLabel>Proposal</SectionLabel>
         <ProposalList>
-          <ProposalCard
-            $clickable
-            onClick={() => navigate('/widget-card-framework')}
-          >
-            <ProposalIcon />
-            <ProposalText>
-              <ProposalTitle>Reusable WidgetCard framework</ProposalTitle>
-              <ProposalDescription>
-                A foundational component that any team can adopt
-              </ProposalDescription>
-            </ProposalText>
-          </ProposalCard>
-
-          <ProposalCard
-            $clickable
-            onClick={() => navigate('/mobile-home-demo')}
-          >
-            <ProposalIcon />
-            <ProposalText>
-              <ProposalTitle>Adaptive home experience</ProposalTitle>
-              <ProposalDescription>
-                Tailored to who the user is, what products they have, and what they can do
-              </ProposalDescription>
-            </ProposalText>
-          </ProposalCard>
-
-          <ProposalCard
-            $clickable
-            onClick={() => navigate('/desktop-home-demo')}
-          >
-            <ProposalIcon />
-            <ProposalText>
-              <ProposalTitle>Desktop web home</ProposalTitle>
-              <ProposalDescription>
-                The same adaptive home system, rendered for the desktop web experience
-              </ProposalDescription>
-            </ProposalText>
-          </ProposalCard>
-
-          <ProposalCard
-            $clickable
-            onClick={() => navigate('/desktop-home-b')}
-          >
-            <ProposalIcon />
-            <ProposalText>
-              <ProposalTitle>Desktop web home B</ProposalTitle>
-              <ProposalDescription>
-                Copy of the desktop web home demo for experimentation
-              </ProposalDescription>
-            </ProposalText>
-          </ProposalCard>
-
-          <ProposalCard
-            $clickable
-            onClick={() => navigate('/desktop-home-demo-v2')}
-          >
-            <ProposalIcon />
-            <ProposalText>
-              <ProposalTitle>Desktop web home v2</ProposalTitle>
-              <ProposalDescription>
-                Next iteration of the desktop web home experience
-              </ProposalDescription>
-            </ProposalText>
-          </ProposalCard>
-
-          <ProposalCard
-            $clickable
-            onClick={() => navigate('/desktop-home-demo-4-22')}
-          >
-            <ProposalIcon />
-            <ProposalText>
-              <ProposalTitle>Desktop web home 4/22</ProposalTitle>
-              <ProposalDescription>
-                Latest iteration with AI assistant panel and inline widgets
-              </ProposalDescription>
-            </ProposalText>
-          </ProposalCard>
-
-          <ProposalCard
-            $clickable
-            onClick={() => navigate('/desktop-home-4-22-shippable')}
-          >
-            <ProposalIcon />
-            <ProposalText>
-              <ProposalTitle>Desktop web home 4/22 — Shippable</ProposalTitle>
-              <ProposalDescription>
-                Shippable iteration of the 4/22 desktop home
-              </ProposalDescription>
-            </ProposalText>
-          </ProposalCard>
-
+          {PROPOSAL_CATEGORIES.map((category) => {
+            const isExpanded = expandedCategory === category.id;
+            return (
+              <ProposalCard key={category.id}>
+                <ProposalRow
+                  onClick={() => setExpandedCategory(isExpanded ? null : category.id)}
+                  aria-label={isExpanded ? `Collapse ${category.title}` : `Expand ${category.title}`}
+                  aria-expanded={isExpanded}
+                >
+                  <ProposalRowContent>
+                    <ProposalIcon />
+                    <ProposalText>
+                      <ProposalTitle>{category.title}</ProposalTitle>
+                      <ProposalDescription>{category.description}</ProposalDescription>
+                    </ProposalText>
+                  </ProposalRowContent>
+                  <ExpandIndicator $expanded={isExpanded} aria-hidden="true">
+                    <ChevronDownIcon />
+                  </ExpandIndicator>
+                </ProposalRow>
+                <ExpandedList $expanded={isExpanded}>
+                  {category.items.map((item) => (
+                    <ExpandedItem key={item.path}>
+                      <button onClick={() => navigate(item.path)}>{item.label}</button>
+                    </ExpandedItem>
+                  ))}
+                </ExpandedList>
+              </ProposalCard>
+            );
+          })}
         </ProposalList>
+        </LeftPanelInner>
       </LeftPanel>
 
       <RightPanel>

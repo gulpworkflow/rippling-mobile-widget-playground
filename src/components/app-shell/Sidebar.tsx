@@ -16,15 +16,39 @@ interface SidebarProps {
   mobileOpen?: boolean;
   /** Called when the user clicks a nav item at mobile widths (to close the drawer) */
   onMobileNavigate?: () => void;
+  /**
+   * Optional slot rendered above the main nav sections. Only displayed
+   * when the sidebar is in its expanded state (including mobile drawer);
+   * hidden in the collapsed rail to avoid cramped layout.
+   */
+  topSlot?: React.ReactNode;
+  /**
+   * When true, suppresses all horizontal rules that appear below the top
+   * slot: the inter-section divider line, the border-top on section
+   * labels, and the border-top on the collapse button in the footer.
+   * Useful for variants whose top slot already supplies a section-
+   * scoping divider (e.g. Tabs.LINK's underline).
+   */
+  hideDividers?: boolean;
+  /**
+   * Width (in pixels) of the sidebar in its expanded state. Defaults to
+   * 266. Applied to the desktop rail width and the mobile drawer width.
+   */
+  expandedWidth?: number;
   theme: StyledTheme;
 }
 
-const StyledSidebar = styled.aside<{ isCollapsed: boolean; mobileOpen: boolean }>`
+const StyledSidebar = styled.aside<{
+  isCollapsed: boolean;
+  mobileOpen: boolean;
+  expandedWidth: number;
+}>`
   position: fixed;
   left: 0;
   top: 56px;
   bottom: 0;
-  width: ${({ isCollapsed }) => (isCollapsed ? '60px' : '266px')};
+  width: ${({ isCollapsed, expandedWidth }) =>
+    isCollapsed ? '60px' : `${expandedWidth}px`};
   background-color: ${({ theme }) => (theme as StyledTheme).colorSurfaceBright};
   border-right: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
   display: flex;
@@ -36,13 +60,25 @@ const StyledSidebar = styled.aside<{ isCollapsed: boolean; mobileOpen: boolean }
   transition: width 200ms ease, transform 220ms ease;
 
   ${BELOW_MEDIUM} {
-    width: 266px;
+    width: ${({ expandedWidth }) => `${expandedWidth}px`};
     transform: translateX(${({ mobileOpen }) => (mobileOpen ? '0' : '-100%')});
     box-shadow: ${({ mobileOpen }) =>
       mobileOpen ? '0 8px 24px rgba(0, 0, 0, 0.18)' : 'none'};
   }
 
-  /* Hide scrollbar for Webkit browsers */
+  /* Notion-style scrollbar: invisible at rest, reveals on hover or while
+     actively scrolling. Space for the thumb is reserved only where Webkit
+     naturally lays it over content, so no layout jumps between states. */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 200ms ease;
+
+  &:hover,
+  &:focus-within {
+    scrollbar-color: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant}
+      transparent;
+  }
+
   &::-webkit-scrollbar {
     width: 6px;
   }
@@ -52,8 +88,18 @@ const StyledSidebar = styled.aside<{ isCollapsed: boolean; mobileOpen: boolean }
   }
 
   &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+    background: transparent;
     border-radius: 3px;
+    transition: background-color 200ms ease;
+  }
+
+  &:hover::-webkit-scrollbar-thumb,
+  &:focus-within::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${({ theme }) => (theme as StyledTheme).colorOutline};
   }
 `;
 
@@ -78,7 +124,7 @@ const PlatformFooter = styled.div`
   padding: 0 0 ${({ theme }) => (theme as StyledTheme).space200};
 `;
 
-const CollapseButton = styled.button<{ isCollapsed: boolean }>`
+const CollapseButton = styled.button<{ isCollapsed: boolean; hideDivider: boolean }>`
   width: 100%;
   height: 40px;
   display: flex;
@@ -88,7 +134,8 @@ const CollapseButton = styled.button<{ isCollapsed: boolean }>`
   padding-left: 0;
   background: none;
   border: none;
-  border-top: 1px solid ${({ theme }) => (theme as StyledTheme).colorOutlineVariant};
+  border-top: ${({ hideDivider, theme }) =>
+    hideDivider ? 'none' : `1px solid ${(theme as StyledTheme).colorOutlineVariant}`};
   border-radius: ${({ theme }) => (theme as StyledTheme).shapeCornerLg};
   ${({ theme }) => (theme as StyledTheme).typestyleV2BodyLarge};
   color: ${({ theme }) => (theme as StyledTheme).colorOnSurface};
@@ -136,6 +183,11 @@ const NavSectionsWrapper = styled.div`
   gap: ${({ theme }) => (theme as StyledTheme).space50};
 `;
 
+const TopSlotWrapper = styled.div`
+  width: 100%;
+  flex-shrink: 0;
+`;
+
 export const Sidebar: React.FC<SidebarProps> = ({
   mainSections,
   platformSection,
@@ -143,6 +195,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onToggleCollapse,
   mobileOpen = false,
   onMobileNavigate,
+  topSlot,
+  hideDividers = false,
+  expandedWidth = 266,
   theme,
 }) => {
   // At mobile widths the sidebar is a drawer: always show the expanded
@@ -158,9 +213,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       theme={theme}
       isCollapsed={isCollapsed}
       mobileOpen={mobileOpen}
+      expandedWidth={expandedWidth}
       onClick={handleNavClick}
     >
       <div>
+        {topSlot && !effectiveCollapsed && (
+          <TopSlotWrapper>{topSlot}</TopSlotWrapper>
+        )}
         {/* Main Navigation Sections */}
         {mainSections.map((section, index) => (
           <React.Fragment key={`main-section-${index}`}>
@@ -168,9 +227,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               section={section}
               isCollapsed={effectiveCollapsed}
               theme={theme}
+              hideLabelDivider={hideDividers}
             />
             {/* Add divider after first section if it has no label */}
-            {index === 0 && !section.label && mainSections.length > 1 && (
+            {!hideDividers && index === 0 && !section.label && mainSections.length > 1 && (
               <NavSectionsWrapper theme={theme}>
                 <NavDivider theme={theme}>
                   <NavDividerLine theme={theme} />
@@ -186,6 +246,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             section={platformSection}
             isCollapsed={effectiveCollapsed}
             theme={theme}
+            hideLabelDivider={hideDividers}
           />
         )}
       </div>
@@ -194,6 +255,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <CollapseButton
           theme={theme}
           isCollapsed={isCollapsed}
+          hideDivider={hideDividers}
           onClick={(e) => {
             e.stopPropagation();
             onToggleCollapse();

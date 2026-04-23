@@ -4,15 +4,24 @@ import type { WidgetAction } from './types';
 
 export const WIDGET_LABEL_OVERRIDES: Record<string, string> = {
   shift_clock: 'Upcoming shift',
-  inbox_preview: 'Inbox queue (task/approvals)',
+  inbox_preview: 'Needs my review',
   quick_actions: 'Shortcuts',
   recently_visited: 'Recently visited',
+  schedule: 'Schedule',
+  benefits: 'Benefits',
+  onboarding_setup: 'Onboarding',
 };
 
 export const WIDGET_ACTIONS: Record<string, WidgetAction[]> = {
   shift_clock: [
     { label: 'My schedule', variant: 'secondary' },
     { label: 'Clock in', variant: 'primary' },
+  ],
+  schedule: [
+    { label: 'Full schedule', variant: 'secondary' },
+  ],
+  benefits: [
+    { label: 'View benefits', variant: 'secondary' },
   ],
 };
 
@@ -38,8 +47,7 @@ export const EARNINGS_TITLE_BY_PERSONA: Partial<Record<PersonaId, string>> = {
 };
 
 export function widgetIdToTitle(id: string, persona?: PersonaId): string {
-  if (id === 'inbox_preview' && persona === 'employee_self_service') return 'Priority tasks';
-  if (id === 'inbox_preview' && persona && ADMIN_PERSONAS.includes(persona)) return 'Needs my review';
+  if (id === 'inbox_preview') return 'Needs my review';
   if (id === 'earnings_summary' && persona && EARNINGS_TITLE_BY_PERSONA[persona]) return EARNINGS_TITLE_BY_PERSONA[persona]!;
   if (WIDGET_LABEL_OVERRIDES[id]) return WIDGET_LABEL_OVERRIDES[id];
   return id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
