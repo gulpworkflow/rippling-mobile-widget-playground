@@ -20,12 +20,13 @@ const ShiftDetailGrid = styled.div`
 `;
 
 const ShiftDetailLabel = styled.span`
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0;
+  ${({ theme }) => {
+    const t = (theme as any).typestyleV2LabelSmall;
+    return t
+      ? `font-size: ${t.fontSize}; font-weight: ${t.fontWeight}; font-family: ${t.fontFamily}; line-height: ${t.lineHeight}; letter-spacing: ${t.letterSpacing};`
+      : `font-size: 11px; font-weight: 600; font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.3; letter-spacing: 0;`;
+  }}
   color: ${({ theme }) => (theme as any).colorOnSurfaceVariant || 'rgba(0,0,0,0.5)'};
-  font-family: 'Basel Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  line-height: 1.3;
 `;
 
 const ShiftDetailValue = styled.span`

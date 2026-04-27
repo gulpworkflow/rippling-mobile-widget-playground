@@ -54,7 +54,7 @@ const WidgetCardTitle = styled.span`
       ? `font-size: ${t.fontSize}; font-weight: ${t.fontWeight}; font-family: ${t.fontFamily}; line-height: ${t.lineHeight}; letter-spacing: ${t.letterSpacing};`
       : 'font-size: 14px; font-weight: 600; font-family: Basel Grotesk; line-height: 20px; letter-spacing: 0;';
   }}
-  color: ${({ theme }) => (theme as any).colorOnSurfaceVariant || 'rgba(0, 0, 0, 0.6)'};
+  color: ${({ theme }) => (theme as any).colorOnSurface || 'rgba(0, 0, 0, 0.85)'};
 `;
 
 const WidgetCardMeta = styled.div`

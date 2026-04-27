@@ -412,7 +412,7 @@ const WidgetCanvasPage: React.FC = () => {
                   title={s.title}
                   actions={s.actions}
                   primaryColor={primaryColor}
-                  onTitleClick={() => {}}
+                  onTitleClick={s.key === 'shortcuts' ? undefined : () => {}}
                 >
                   {s.body}
                 </WidgetCard>
